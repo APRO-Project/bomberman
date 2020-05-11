@@ -1,9 +1,12 @@
 [submodule "lib"]
 	path = lib
 	url = git@github.com:APRO-Project/bomberman-lib.git
+	ignore = all
 [submodule "server"]
 	path = server
 	url = git@github.com:APRO-Project/bomberman-server.git
+	ignore = all
 [submodule "client"]
 	path = client
 	url = git@github.com:APRO-Project/bomberman-client.git
+	ignore = all
