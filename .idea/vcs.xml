@@ -3,7 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/client" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/core" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/server" vcs="Git" />
   </component>
 </project>

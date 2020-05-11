@@ -1,5 +1,5 @@
-rootProject.name = 'Bomberman'
-include 'lib'
+rootProject.name = 'bomberman'
+include 'core'
 include 'server'
 
 include 'client:core'
