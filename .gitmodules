@@ -1,9 +1,9 @@
-[submodule "core"]
-	path = core
-	url = git@github.com:APRO-Project/bomberman-core.git
 [submodule "server"]
 	path = server
 	url = git@github.com:APRO-Project/bomberman-server.git
 [submodule "client"]
 	path = client
 	url = git@github.com:APRO-Project/bomberman-client.git
+[submodule "core"]
+	path = core
+	url = git@github.com:APRO-Project/bomberman-core.git
