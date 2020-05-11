@@ -1,0 +1,5 @@
+rootProject.name = 'Bomberman'
+include 'lib'
+include 'client'
+include 'server'
+
