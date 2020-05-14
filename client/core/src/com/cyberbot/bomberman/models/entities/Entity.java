@@ -13,8 +13,10 @@ import static com.cyberbot.bomberman.utils.Constants.PPM;
 public abstract class Entity implements Drawable, Disposable {
     protected Body body;
     protected Sprite sprite;
+    private final World world;
 
     public Entity(World world) {
+        this.world = world;
         createBody(world);
     }
 
@@ -32,6 +34,8 @@ public abstract class Entity implements Drawable, Disposable {
 
     @Override
     public void dispose() {
+        world.destroyBody(body);
+
         if(sprite.getTexture() != null)
             sprite.getTexture().dispose();
     }
@@ -44,4 +48,9 @@ public abstract class Entity implements Drawable, Disposable {
         Vector2 position = body.getPosition();
         return new Vector2(position.x * PPM, position.y * PPM);
     }
+
+    public Vector2 getPositionRaw() {
+        return body.getPosition();
+    }
+
 }

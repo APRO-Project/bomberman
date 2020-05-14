@@ -1,15 +1,17 @@
 package com.cyberbot.bomberman.models.tiles;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class WallTile extends PhysicalTile {
-    public WallTile(World world, Vector2 position, Sprite sprite) {
+    private final Properties properties;
+
+    public WallTile(World world, Vector2 position, Sprite sprite, Properties properties) {
         super(world, position, sprite);
+        this.properties = properties;
     }
 
     @Override
@@ -20,5 +22,25 @@ public class WallTile extends PhysicalTile {
         body.createFixture(shape, 1);
 
         shape.dispose();
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public static class Properties {
+        static final String DURABILITY = "durability";
+
+        final float durability;
+
+        Properties(float durability) {
+            this.durability = durability;
+        }
+
+        static Properties fromMapProperties(MapProperties properties) {
+            return new Properties(
+                    properties.get(DURABILITY, -1F, float.class)
+            );
+        }
     }
 }

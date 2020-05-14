@@ -33,10 +33,6 @@ public class InputController {
             movementController.getPlayerEntity().setLookingDirection(PlayerEntity.LookingDirection.LEFT);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            movementController.getPlayerEntity().placeBomb();
-        }
-
         movementController.move(playerDirection);
     }
 }

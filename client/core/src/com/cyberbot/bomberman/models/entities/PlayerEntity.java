@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.models.entities;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -14,23 +13,7 @@ import com.cyberbot.bomberman.screens.GameScreen;
 import static com.cyberbot.bomberman.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
-
-    public enum PlayerState {
-        STANDING,
-        MOVING_BACK,
-        MOVING_FRONT,
-        MOVING_SIDE
-    }
-
-    public enum LookingDirection {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-
-    private PlayerState currentState;
-    private PlayerState previousState;
+    private static final float ANIMATION_DURATION = 0.2f;
 
     private final TextureRegion standingBack;
     private final TextureRegion standingFront;
@@ -39,16 +22,21 @@ public class PlayerEntity extends Entity {
     private final Animation<TextureRegion> movingFront;
     private final Animation<TextureRegion> movingBack;
     private final Animation<TextureRegion> movingSide;
+    private final TextureAtlas atlas;
+
+    private PlayerState currentState;
+    private PlayerState previousState;
 
     private LookingDirection verticalDirection;
     private LookingDirection horizontalDirection;
+
     private float stateTimer;
-
-    private static final float ANIMATION_DURATION = 0.2f;
-
-    private final TextureAtlas atlas;
     private GameScreen screen;
     private World world;
+
+    // TODO: Create PlayerDef to hold these and Inventory
+    private float dragModifier;
+    private float maxSpeedModifier;
 
     public PlayerEntity(World world, String atlasPath) {
         super(world);
@@ -72,16 +60,25 @@ public class PlayerEntity extends Entity {
         sprite = new Sprite(standingSide);
     }
 
+    public float getDragModifier() {
+        return dragModifier;
+    }
+
+    public void setDragModifier(float dragModifier) {
+        this.dragModifier = dragModifier;
+    }
+
+    public float getMaxSpeedModifier() {
+        return maxSpeedModifier;
+    }
+
+    public void setMaxSpeedModifier(float maxSpeedModifier) {
+        this.maxSpeedModifier = maxSpeedModifier;
+    }
+
     public void setGameScreenAndWorld(GameScreen gameScreen, World world) {
         screen = gameScreen;
         this.world = world;
-    }
-
-    public void placeBomb() {
-        BombEntity bomb = new BombEntity(world, "");
-        bomb.setPosition(getPosition());
-
-        screen.bombs.add(bomb);
     }
 
     @Override
@@ -95,7 +92,7 @@ public class PlayerEntity extends Entity {
         TextureRegion frameRegion;
 
         currentState = getState();
-        switch(currentState) {
+        switch (currentState) {
             case MOVING_BACK:
                 frameRegion = movingBack.getKeyFrame(stateTimer, true);
                 break;
@@ -107,16 +104,15 @@ public class PlayerEntity extends Entity {
                 break;
             case STANDING:
             default:
-                if(verticalDirection == null) {
-                    if(horizontalDirection == LookingDirection.UP) frameRegion = standingBack;
+                if (verticalDirection == null) {
+                    if (horizontalDirection == LookingDirection.UP) frameRegion = standingBack;
                     else frameRegion = standingFront;
-                }
-                else frameRegion = standingSide;
+                } else frameRegion = standingSide;
         }
 
-        if(verticalDirection == LookingDirection.LEFT && !frameRegion.isFlipX())
+        if (verticalDirection == LookingDirection.LEFT && !frameRegion.isFlipX())
             frameRegion.flip(true, false);
-        else if(verticalDirection == LookingDirection.RIGHT && frameRegion.isFlipX())
+        else if (verticalDirection == LookingDirection.RIGHT && frameRegion.isFlipX())
             frameRegion.flip(true, false);
 
         stateTimer = currentState == previousState ? stateTimer + delta : 0;
@@ -126,24 +122,23 @@ public class PlayerEntity extends Entity {
     }
 
     private PlayerState getState() {
-        if(getVelocity().x == 0 && getVelocity().y == 0)
+        if (getVelocity().x == 0 && getVelocity().y == 0)
             return PlayerState.STANDING;
 
-        if(getVelocity().x != 0 && verticalDirection != null)
+        if (getVelocity().x != 0 && verticalDirection != null)
             return PlayerState.MOVING_SIDE;
 
-        if(horizontalDirection == LookingDirection.UP)
+        if (horizontalDirection == LookingDirection.UP)
             return PlayerState.MOVING_BACK;
         else
             return PlayerState.MOVING_FRONT;
     }
 
     public void setLookingDirection(LookingDirection direction) {
-        if(direction == LookingDirection.UP || direction == LookingDirection.DOWN) {
+        if (direction == LookingDirection.UP || direction == LookingDirection.DOWN) {
             horizontalDirection = direction;
             verticalDirection = null;
-        }
-        else {
+        } else {
             horizontalDirection = null;
             verticalDirection = direction;
         }
@@ -156,6 +151,10 @@ public class PlayerEntity extends Entity {
     public Vector2 getVelocity() {
         Vector2 velocity = body.getLinearVelocity();
         return new Vector2(velocity.x * PPM, velocity.y * PPM);
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        body.setLinearVelocity(velocity.x / PPM, velocity.y / PPM);
     }
 
     public float getMass() {
@@ -183,5 +182,19 @@ public class PlayerEntity extends Entity {
     public void dispose() {
         super.dispose();
         atlas.dispose();
+    }
+
+    public enum PlayerState {
+        STANDING,
+        MOVING_BACK,
+        MOVING_FRONT,
+        MOVING_SIDE
+    }
+
+    public enum LookingDirection {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
     }
 }

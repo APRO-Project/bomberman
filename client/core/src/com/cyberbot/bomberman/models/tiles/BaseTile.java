@@ -12,6 +12,8 @@ import com.cyberbot.bomberman.utils.Atlas;
 
 import java.util.InvalidPropertiesFormatException;
 
+import static com.cyberbot.bomberman.utils.Constants.PPM;
+
 public class BaseTile implements Drawable, Disposable {
     private static final String PROPERTY_TILE_TYPE = "tile_type";
     private static final String PROPERTY_TEXTURE_NAME = "texture";
@@ -22,8 +24,9 @@ public class BaseTile implements Drawable, Disposable {
 
     protected final Sprite sprite;
 
-    public BaseTile(Sprite sprite) {
+    public BaseTile(Sprite sprite, Vector2 position) {
         this.sprite = sprite;
+        sprite.setPosition(position.x * PPM, position.y * PPM);
     }
 
     @Override
@@ -54,15 +57,17 @@ public class BaseTile implements Drawable, Disposable {
         switch (tileType) {
             case TILE_TYPE_FLOOR: {
                 return new FloorTile(
-                        world, position, sprite,
+                        sprite, position,
                         FloorTile.Properties.fromMapProperties(properties)
                 );
             }
             case TILE_TYPE_WALL: {
-                return new WallTile(world, position, sprite);
+                return new WallTile(world, position, sprite,
+                        WallTile.Properties.fromMapProperties(properties)
+                );
             }
             case TILE_TYPE_BASE: {
-                return new BaseTile(sprite);
+                return new BaseTile(sprite, position);
             }
         }
 
