@@ -1,8 +1,11 @@
 package com.cyberbot.bomberman.controllers;
 
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.models.Updatable;
+import com.cyberbot.bomberman.models.defs.BombDef;
 import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
@@ -14,13 +17,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class GameStateController implements Disposable, Updatable {
+public class GameStateController implements Disposable, Updatable, ActionController.Listener {
+    private final World world;
+
     private final TileMap map;
     private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
     private ChangeListener listener;
 
-    public GameStateController(TileMap map) {
+    public GameStateController(World world, TileMap map) {
+        this.world = world;
         this.map = map;
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
@@ -65,6 +71,19 @@ public class GameStateController implements Disposable, Updatable {
 
     public void setListener(ChangeListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void onBombPlaced(BombDef bombDef, PlayerEntity executor) {
+        BombEntity entity = new BombEntity(world, bombDef);
+        Vector2 position = executor.getPositionRaw();
+        float x = (float) Math.floor(position.x) + 0.5F;
+        float y = (float) Math.floor(position.y) + 0.5F;
+
+        entity.setPositionRaw(new Vector2(x, y));
+
+        listener.onBombAdded(entity);
+
     }
 
     public interface ChangeListener {

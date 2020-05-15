@@ -2,10 +2,16 @@ package com.cyberbot.bomberman.models.items;
 
 import com.cyberbot.bomberman.models.factories.ItemStackFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Inventory {
     private List<ItemStack> items;
+
+    public Inventory() {
+        this.items = new ArrayList<>();
+        addItem(ItemType.SMALL_BOMB);
+    }
 
     public ItemType getItem(int index) {
         return items.get(index).getType();

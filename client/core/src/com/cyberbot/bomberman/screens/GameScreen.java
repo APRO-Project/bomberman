@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.controllers.GameStateController;
 import com.cyberbot.bomberman.controllers.InputController;
-import com.cyberbot.bomberman.controllers.PlayerMovement;
+import com.cyberbot.bomberman.controllers.ActionController;
 import com.cyberbot.bomberman.controllers.TextureController;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.models.defs.PlayerDef;
@@ -56,19 +56,21 @@ public class GameScreen extends AbstractScreen {
         PlayerEntity player = new PlayerEntity(world, new PlayerDef());
         player.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
 
-        PlayerMovement movementController = new PlayerMovement(player);
-        inputController = new InputController(new KeyBinds(), movementController);
+        ActionController actionController = new ActionController(player);
+        inputController = new InputController(new KeyBinds(), actionController);
 
         batch = new SpriteBatch();
 
         map = new TileMap(world,"./map/bomberman_main.tmx");
 
-        gsc = new GameStateController(map);
+        gsc = new GameStateController(world, map);
 
         txc = new TextureController(map);
         gsc.setListener(txc);
 
         gsc.addPlayers(Arrays.asList(player));
+
+        actionController.addListener(gsc);
     }
 
     @Override

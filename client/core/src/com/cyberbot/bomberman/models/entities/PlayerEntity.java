@@ -1,15 +1,11 @@
 package com.cyberbot.bomberman.models.entities;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.models.defs.PlayerDef;
-import com.cyberbot.bomberman.screens.GameScreen;
+import com.cyberbot.bomberman.models.items.Inventory;
 
 import static com.cyberbot.bomberman.utils.Constants.PPM;
 
@@ -54,6 +50,9 @@ public class PlayerEntity extends Entity {
         return def.textureVariant;
     }
 
+    public Inventory getInventory() {
+        return def.inventory;
+    }
 
     private PlayerState getState() {
         if (getVelocity().x == 0 && getVelocity().y == 0)
