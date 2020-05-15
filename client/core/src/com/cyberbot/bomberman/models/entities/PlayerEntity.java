@@ -39,7 +39,7 @@ public class PlayerEntity extends Entity {
     }
 
     public float getMaxSpeedModifier() {
-        return def.maxSpeedModifier;
+        return def.maxSpeedModifier * def.inventory.getMovementSpeedMultiplier();
     }
 
     public void setMaxSpeedModifier(float maxSpeedModifier) {

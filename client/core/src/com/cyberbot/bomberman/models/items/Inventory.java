@@ -11,6 +11,11 @@ public class Inventory implements Updatable {
 
     public Inventory() {
         this.items = new ArrayList<>();
+
+        createEmptyStack(ItemType.UPGRADE_MOVEMENT_SPEED);
+        createEmptyStack(ItemType.UPGRADE_ARMOR);
+        createEmptyStack(ItemType.UPGRADE_REFILL_SPEED);
+
         addItem(ItemType.SMALL_BOMB);
     }
 
@@ -45,22 +50,45 @@ public class Inventory implements Updatable {
         return getStack(itemType).addItem();
     }
 
+    public int getItemCount(ItemType itemType) {
+        return getStack(itemType).getQuantity();
+    }
+
     @Override
     public void update(float delta) {
-        // TODO: Multiply by player's regen time upgrade to refill quicker
         items.stream()
-                .filter(i -> i instanceof Updatable)
-                .forEach(i -> ((Updatable) i).update(delta));
+            .filter(i -> i instanceof Updatable)
+            .forEach(i -> ((Updatable) i).update(delta * getRefillSpeedMultiplier()));
+    }
+
+    public float getMovementSpeedMultiplier() {
+        return (float) Math.pow(
+            Upgrade.MOVEMENT_SPEED_MULTIPLIER,
+            getItemCount(ItemType.UPGRADE_MOVEMENT_SPEED));
+    }
+
+    public float getArmorMultiplier() {
+        return (float) Math.pow(
+            Upgrade.ARMOR_MULTIPLIER,
+            getItemCount(ItemType.UPGRADE_ARMOR));
+    }
+
+    public float getRefillSpeedMultiplier() {
+        return (float) Math.pow(
+            Upgrade.REFILL_SPEED_MULTIPLIER,
+            getItemCount(ItemType.UPGRADE_REFILL_SPEED));
+    }
+
+    private ItemStack createEmptyStack(ItemType itemType) {
+        ItemStack s = ItemStackFactory.createStack(itemType);
+        items.add(s);
+        return s;
     }
 
     private ItemStack getStack(ItemType itemType) {
         return items.stream()
-                .filter(s -> s.getType() == itemType)
-                .findFirst()
-                .orElseGet(() -> {
-                    ItemStack s = ItemStackFactory.createStack(itemType);
-                    items.add(s);
-                    return s;
-                });
+            .filter(s -> s.getType() == itemType)
+            .findFirst()
+            .orElseGet(() -> createEmptyStack(itemType));
     }
 }
