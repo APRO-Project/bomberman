@@ -24,7 +24,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
     private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
     private final List<CollectibleEntity> collectibles;
-    private ChangeListener listener;
+    private List<ChangeListener> listeners;
 
     public GameStateController(World world, TileMap map) {
         this.world = world;
@@ -77,17 +77,19 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     public void addPlayers(Collection<PlayerEntity> players) {
         this.players.addAll(players);
-        if (listener != null) {
-            players.forEach(player -> listener.onEntityAdded(player));
-        }
+        players.forEach(player -> listeners.forEach(listener -> listener.onEntityAdded(player)));
     }
 
-    public Iterable<PlayerEntity> getPlayers() {
-        return players;
+    public void addListener(ChangeListener listener) {
+        listeners.add(listener);
     }
 
-    public void setListener(ChangeListener listener) {
-        this.listener = listener;
+    public void removeListener(ChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void clearListeners() {
+        listeners.clear();
     }
 
     @Override
@@ -100,12 +102,12 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         bomb.setPositionRaw(new Vector2(x, y));
 
         bombs.add(bomb);
-        listener.onEntityAdded(bomb);
+        listeners.forEach(listener -> listener.onEntityAdded(bomb));
 
     }
 
     private void onBombExploded(BombEntity bomb) {
-        listener.onEntityRemoved(bomb);
+        listeners.forEach(listener -> listener.onEntityRemoved(bomb));
         bomb.dispose();
 
         int range = (int) bomb.getRange();
@@ -184,14 +186,14 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         collectible.setPosition(tile.getPosition());
 
         collectibles.add(collectible);
-        listener.onEntityAdded(collectible);
+        listeners.forEach(listener -> listener.onEntityAdded(collectible));
     }
 
     private void handleContact(PlayerEntity player, Entity other) {
         if (other instanceof CollectibleEntity) {
             player.getInventory().collectItem(((CollectibleEntity) other).getItemType());
             other.markToRemove();
-            listener.onEntityRemoved(other);
+            listeners.forEach(listener -> listener.onEntityRemoved(other));
         }
     }
 
