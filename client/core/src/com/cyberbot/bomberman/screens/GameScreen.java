@@ -66,7 +66,7 @@ public class GameScreen extends AbstractScreen {
         gsc = new GameStateController(world, map);
 
         txc = new TextureController(map);
-        gsc.setListener(txc);
+        gsc.addListener(txc);
 
         gsc.addPlayers(Arrays.asList(player));
 
