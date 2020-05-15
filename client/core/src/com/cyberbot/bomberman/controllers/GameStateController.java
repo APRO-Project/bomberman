@@ -49,6 +49,16 @@ public class GameStateController implements Disposable, Updatable, ActionControl
                 player.setMaxSpeedModifier(1);
             }
         });
+
+        bombs.forEach(bomb -> {
+            bomb.update(delta);
+            if(bomb.isBlown()) {
+                listener.onBombRemoved(bomb);
+                bomb.dispose();
+            }
+        });
+
+        bombs.removeIf(BombEntity::isBlown);
     }
 
     @Override
@@ -75,14 +85,15 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     @Override
     public void onBombPlaced(BombDef bombDef, PlayerEntity executor) {
-        BombEntity entity = new BombEntity(world, bombDef);
+        BombEntity bomb = new BombEntity(world, bombDef);
         Vector2 position = executor.getPositionRaw();
         float x = (float) Math.floor(position.x) + 0.5F;
         float y = (float) Math.floor(position.y) + 0.5F;
 
-        entity.setPositionRaw(new Vector2(x, y));
+        bomb.setPositionRaw(new Vector2(x, y));
 
-        listener.onBombAdded(entity);
+        bombs.add(bomb);
+        listener.onBombAdded(bomb);
 
     }
 

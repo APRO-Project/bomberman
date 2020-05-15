@@ -1,5 +1,6 @@
 package com.cyberbot.bomberman.sprites;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -11,7 +12,7 @@ import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.factories.SpriteFactory;
 
-public abstract class EntitySprite<E extends Entity> implements Updatable, Drawable, Disposable {
+public abstract class EntitySprite<E extends Entity> implements Updatable, Drawable {
     protected final E entity;
     protected final Sprite sprite;
 
@@ -33,13 +34,5 @@ public abstract class EntitySprite<E extends Entity> implements Updatable, Drawa
     @Override
     public void draw(SpriteBatch batch) {
         sprite.draw(batch);
-    }
-
-    @Override
-    public void dispose() {
-        Texture texture = sprite.getTexture();
-        if (texture != null) {
-            texture.dispose();
-        }
     }
 }

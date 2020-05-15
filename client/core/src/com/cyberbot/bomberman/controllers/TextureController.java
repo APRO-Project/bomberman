@@ -54,7 +54,7 @@ public class TextureController implements Drawable, Updatable, GameStateControll
 
     @Override
     public void onBombRemoved(BombEntity bomb) {
-        removeEntity(bombs, bomb);
+        removeSprite(bombs, bomb);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TextureController implements Drawable, Updatable, GameStateControll
 
     @Override
     public void onPlayerRemoved(PlayerEntity player) {
-        removeEntity(players, player);
+        removeSprite(players, player);
     }
 
     @Override
@@ -82,12 +82,7 @@ public class TextureController implements Drawable, Updatable, GameStateControll
         walls.remove(sprite);
     }
 
-    private <E extends Entity> void removeEntity(List<? extends EntitySprite<E>> list, E entity) {
-        EntitySprite<E> sprite = list.stream()
-                .filter(p -> p.getEntity().equals(entity))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Entity not present in TextureController"));
-        sprite.dispose();
-        list.remove(sprite);
+    private <E extends Entity> void removeSprite(List<? extends EntitySprite<E>> list, E entity) {
+        list.removeIf(sprite -> sprite.getEntity().equals(entity));
     }
 }

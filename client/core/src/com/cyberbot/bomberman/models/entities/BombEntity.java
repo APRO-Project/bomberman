@@ -1,5 +1,6 @@
 package com.cyberbot.bomberman.models.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -7,7 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.models.defs.BombDef;
 
 public class BombEntity extends Entity {
-    private BombDef def;
+    private final BombDef def;
 
     private float timeLeft;
     private boolean blown;
