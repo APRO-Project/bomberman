@@ -35,6 +35,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
     @Override
     public void update(float delta) {
         players.forEach(player -> {
+            player.update(delta);
             Vector2 position = player.getPositionRaw();
             int x = (int) Math.floor(position.x);
             int y = (int) Math.floor(position.y);

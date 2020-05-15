@@ -1,11 +1,12 @@
 package com.cyberbot.bomberman.models.items;
 
+import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.factories.ItemStackFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Inventory {
+public class Inventory implements Updatable {
     private List<ItemStack> items;
 
     public Inventory() {
@@ -34,5 +35,11 @@ public class Inventory {
         }
 
         return stack.addItem();
+    }
+
+    @Override
+    public void update(float delta) {
+        // TODO: Multiply by player's regen time upgrade to refill quicker
+        items.forEach(i -> i.update(delta));
     }
 }

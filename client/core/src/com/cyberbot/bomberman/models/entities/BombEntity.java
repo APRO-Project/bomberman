@@ -1,13 +1,13 @@
 package com.cyberbot.bomberman.models.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.defs.BombDef;
 
-public class BombEntity extends Entity {
+public class BombEntity extends Entity implements Updatable {
     private final BombDef def;
 
     private float timeLeft;
@@ -42,6 +42,7 @@ public class BombEntity extends Entity {
         shape.dispose();
     }
 
+    @Override
     public void update(float delta) {
         if(timeLeft > 0) {
             timeLeft = Math.max(timeLeft - delta, 0);
