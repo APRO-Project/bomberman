@@ -34,4 +34,8 @@ public abstract class Entity implements Disposable {
         return body.getPosition();
     }
 
+    public void setPositionRaw(Vector2 position) {
+        body.setTransform(position, 0);
+    }
+
 }

@@ -18,11 +18,13 @@ public class Tile {
     private static final String TILE_TYPE_BASE = "base";
 
     private final String textureName;
-    private final Vector2 position;
+    private final int x;
+    private final int y;
 
     public Tile(String textureName, Vector2 position) {
         this.textureName = textureName;
-        this.position = new Vector2(position.x, position.y);
+        this.x = (int) position.x;
+        this.y = (int) position.y;
     }
 
     public static Tile fromMapTile(TiledMapTile tile, World world, Vector2 position)
@@ -60,11 +62,19 @@ public class Tile {
         throw new IllegalArgumentException("Invalid tile type: " + tileType);
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public String getTextureName() {
         return textureName;
     }
 
     public Vector2 getPosition() {
-        return new Vector2(position.x * PPM, position.y * PPM);
+        return new Vector2(x * PPM, y * PPM);
     }
 }

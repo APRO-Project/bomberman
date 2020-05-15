@@ -28,9 +28,12 @@ public class WallTile extends PhysicalTile {
     }
 
     public static class Properties {
+        public static final float DURABILITY_INFINITE = -1;
+        public static final float POWER_DROPOFF = 0.5F;
+
         static final String DURABILITY = "durability";
 
-        final float durability;
+        public final float durability;
 
         Properties(float durability) {
             this.durability = durability;
@@ -38,7 +41,7 @@ public class WallTile extends PhysicalTile {
 
         static Properties fromMapProperties(MapProperties properties) {
             return new Properties(
-                    properties.get(DURABILITY, -1F, float.class)
+                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
             );
         }
     }

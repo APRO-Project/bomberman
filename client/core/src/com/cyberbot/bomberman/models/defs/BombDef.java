@@ -1,5 +1,13 @@
 package com.cyberbot.bomberman.models.defs;
 
 public class BombDef {
-    public float detonationTime;
+    public final float power;
+    public final float range;
+    public final float detonationTime;
+
+    public BombDef(float power, float range, float detonationTime) {
+        this.power = power;
+        this.range = range;
+        this.detonationTime = detonationTime;
+    }
 }

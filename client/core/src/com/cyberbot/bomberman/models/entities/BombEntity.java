@@ -4,10 +4,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.defs.BombDef;
 
-public class BombEntity extends Entity {
-    private BombDef def;
+public class BombEntity extends Entity implements Updatable {
+    private final BombDef def;
 
     private float timeLeft;
     private boolean blown;
@@ -41,6 +42,7 @@ public class BombEntity extends Entity {
         shape.dispose();
     }
 
+    @Override
     public void update(float delta) {
         if(timeLeft > 0) {
             timeLeft = Math.max(timeLeft - delta, 0);
@@ -49,6 +51,18 @@ public class BombEntity extends Entity {
         if(!blown && timeLeft == 0) {
             blown = true;
         }
+    }
+
+    public float getRange() {
+        return def.range;
+    }
+
+    public float getPower() {
+        return def.power;
+    }
+
+    public float getLeftFraction() {
+        return timeLeft / def.detonationTime;
     }
 
     public boolean isBlown() {

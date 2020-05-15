@@ -1,38 +1,43 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.cyberbot.bomberman.models.KeyBinds;
-import com.cyberbot.bomberman.models.entities.PlayerEntity;
 
 public class InputController {
-    private KeyBinds keys;
-    private PlayerMovement movementController;
+    private final KeyBinds keys;
+    private final ActionController actionController;
 
-    public InputController(KeyBinds keys, PlayerMovement movementController) {
+    public InputController(KeyBinds keys, ActionController actionController) {
         this.keys = keys;
-        this.movementController = movementController;
+        this.actionController = actionController;
     }
 
     public void update() {
+       handleMove();
+       handleItem();
+    }
+
+    private void handleItem() {
+        if(Gdx.input.isKeyJustPressed(keys.useItem)) {
+            actionController.useItem(0);
+        }
+    }
+
+    private void handleMove() {
         int playerDirection = 0;
         if(Gdx.input.isKeyPressed(keys.up)) {
-            playerDirection |= PlayerMovement.UP;
-            movementController.getPlayerEntity().setLookingDirection(PlayerEntity.LookingDirection.UP);
+            playerDirection |= ActionController.MOVE_UP;
         }
         if(Gdx.input.isKeyPressed(keys.down)) {
-            playerDirection |= PlayerMovement.DOWN;
-            movementController.getPlayerEntity().setLookingDirection(PlayerEntity.LookingDirection.DOWN);
+            playerDirection |= ActionController.MOVE_DOWN;
         }
         if(Gdx.input.isKeyPressed(keys.right)) {
-            playerDirection |= PlayerMovement.RIGHT;
-            movementController.getPlayerEntity().setLookingDirection(PlayerEntity.LookingDirection.RIGHT);
+            playerDirection |= ActionController.MOVE_RIGHT;
         }
         if(Gdx.input.isKeyPressed(keys.left)) {
-            playerDirection |= PlayerMovement.LEFT;
-            movementController.getPlayerEntity().setLookingDirection(PlayerEntity.LookingDirection.LEFT);
+            playerDirection |= ActionController.MOVE_LEFT;
         }
 
-        movementController.move(playerDirection);
+        actionController.move(playerDirection);
     }
 }
