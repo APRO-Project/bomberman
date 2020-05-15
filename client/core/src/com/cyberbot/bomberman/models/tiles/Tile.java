@@ -75,6 +75,6 @@ public class Tile {
     }
 
     public Vector2 getPosition() {
-        return new Vector2(x * PPM, y * PPM);
+        return new Vector2((x + 0.5F) * PPM, (y + 0.5F) * PPM);
     }
 }

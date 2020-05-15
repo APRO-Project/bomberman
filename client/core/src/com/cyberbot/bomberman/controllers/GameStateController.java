@@ -9,6 +9,7 @@ import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.models.factories.CollectibleFactory;
 import com.cyberbot.bomberman.models.tiles.*;
 
 import java.util.ArrayList;
@@ -165,7 +166,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
             }
 
             if (power >= durability) {
-                map.removeWall(tile.getX(), tile.getY());
+                destroyTile(tile);
                 return power - durability;
             }
         }
@@ -173,7 +174,20 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         return power - WallTile.Properties.POWER_DROPOFF;
     }
 
-    public void handleContact(PlayerEntity player, Entity other) {
+    private void destroyTile(Tile tile) {
+        map.removeWall(tile.getX(), tile.getY());
+
+        CollectibleEntity collectible = CollectibleFactory.createRandom(world);
+        if (collectible == null) {
+            return;
+        }
+        collectible.setPosition(tile.getPosition());
+
+        collectibles.add(collectible);
+        listener.onEntityAdded(collectible);
+    }
+
+    private void handleContact(PlayerEntity player, Entity other) {
         if (other instanceof CollectibleEntity) {
             player.getInventory().collectItem(((CollectibleEntity) other).getItemType());
             other.markToRemove();

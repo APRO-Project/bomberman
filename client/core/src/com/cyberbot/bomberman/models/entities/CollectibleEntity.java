@@ -24,7 +24,7 @@ public class CollectibleEntity extends Entity {
         body = world.createBody(def);
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.4F);
+        shape.setRadius(0.325F);
 
         Fixture fixture = body.createFixture(shape, 1);
         fixture.setSensor(true);

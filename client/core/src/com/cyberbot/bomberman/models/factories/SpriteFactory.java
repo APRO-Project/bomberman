@@ -42,6 +42,13 @@ public class SpriteFactory {
         switch (collectible.getItemType()) {
             case SMALL_BOMB:
                 return Atlas.getInstance().createSprite("DynamiteStatic");
+            case UPGRADE_MOVEMENT_SPEED:
+                return Atlas.getInstance().createSprite("ArrowFast");
+            case UPGRADE_ARMOR:
+                return Atlas.getInstance().createSprite("Shield");
+            case UPGRADE_REFILL_SPEED:
+                // TODO: Replace when texture gets added
+                return Atlas.getInstance().createSprite("Player_bbb_idle_back");
 
         }
 

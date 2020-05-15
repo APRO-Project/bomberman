@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.cyberbot.bomberman.models.KeyBinds;
+import com.cyberbot.bomberman.models.items.ItemType;
 
 public class InputController {
     private final KeyBinds keys;
@@ -19,7 +20,8 @@ public class InputController {
 
     private void handleItem() {
         if (Gdx.input.isKeyJustPressed(keys.useItem)) {
-            actionController.useItem(0);
+            // TODO: Get selected item from HUD
+            actionController.useItem(ItemType.SMALL_BOMB);
         }
     }
 

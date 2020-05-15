@@ -53,7 +53,7 @@ public class TextureController implements Drawable, Updatable, GameStateControll
 
     @Override
     public void onEntityAdded(Entity entity) {
-        entities.add(SpriteFactory.createEntitySprite(entity));
+        entities.add(0, SpriteFactory.createEntitySprite(entity));
     }
 
     @Override

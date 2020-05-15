@@ -107,7 +107,7 @@ public class GameScreen extends AbstractScreen {
         txc.draw(batch);
         batch.end();
 
-        b2dr.render(world, camera.combined.cpy().scl(PPM));
+        //b2dr.render(world, camera.combined.cpy().scl(PPM));
     }
 
     @Override

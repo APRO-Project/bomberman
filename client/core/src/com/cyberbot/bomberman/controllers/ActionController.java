@@ -76,15 +76,14 @@ public class ActionController {
         playerEntity.applyForce(force);
     }
 
-    public void useItem(int index) {
-        ItemType item = playerEntity.getInventory().removeItem(index);
-        if (item == null) {
+    public void useItem(ItemType itemType) {
+        if (!playerEntity.getInventory().removeItem(itemType)) {
             return;
         }
 
-        switch (item) {
+        switch (itemType) {
             case SMALL_BOMB:
-                BombDef def = new BombDef(3, 3, 3);
+                BombDef def = new BombDef(1, 1, 3);
                 listeners.forEach(l -> l.onBombPlaced(def, playerEntity));
         }
     }

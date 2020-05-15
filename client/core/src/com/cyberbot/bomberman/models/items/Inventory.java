@@ -23,9 +23,17 @@ public class Inventory implements Updatable {
         return items.get(index).getType();
     }
 
-    public ItemType removeItem(int index) {
-        final ItemStack stack = items.get(index);
-        return stack.removeItem() ? stack.getType() : null;
+    public boolean removeItem(ItemType itemType) {
+        final ItemStack stack = items.stream()
+            .filter(s -> s.getType() == itemType)
+            .findFirst()
+            .orElse(null);
+
+        if (stack == null) {
+            return false;
+        }
+
+        return stack.removeItem();
     }
 
     public void collectItem(ItemType itemType) {

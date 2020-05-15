@@ -20,7 +20,7 @@ public class TileSprite implements Drawable {
         this.sprite = SpriteFactory.createSprite(tile);
 
         Vector2 position = tile.getPosition();
-        this.sprite.setPosition(position.x, position.y);
+        this.sprite.setPosition(position.x - sprite.getWidth() / 2, position.y - sprite.getHeight() / 2);
     }
 
 
