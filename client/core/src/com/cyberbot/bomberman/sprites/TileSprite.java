@@ -1,10 +1,11 @@
-package com.cyberbot.bomberman.models;
+package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.factories.SpriteFactory;
 import com.cyberbot.bomberman.models.tiles.Tile;
 import com.cyberbot.bomberman.models.tiles.TileMapLayer;
@@ -12,11 +13,11 @@ import com.cyberbot.bomberman.models.tiles.TileMapLayer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TileSpritePair implements Drawable, Disposable {
+public class TileSprite implements Drawable, Disposable {
     private final Tile tile;
     private final Sprite sprite;
 
-    public TileSpritePair(Tile tile) {
+    public TileSprite(Tile tile) {
         this.tile = tile;
         this.sprite = SpriteFactory.createSprite(tile);
 
@@ -38,8 +39,8 @@ public class TileSpritePair implements Drawable, Disposable {
         sprite.draw(batch);
     }
 
-    public static List<TileSpritePair> fromTileLayer(TileMapLayer layer) {
-        return layer.stream().map(TileSpritePair::new).collect(Collectors.toList());
+    public static List<TileSprite> fromTileLayer(TileMapLayer layer) {
+        return layer.stream().map(TileSprite::new).collect(Collectors.toList());
     }
 
     public Tile getTile() {

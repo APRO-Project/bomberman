@@ -55,7 +55,7 @@ public class GameStateController implements Disposable, Updatable {
     public void addPlayers(Collection<PlayerEntity> players) {
         this.players.addAll(players);
         if(listener != null) {
-            players.forEach(player -> listener.onEntityAdded(player));
+            players.forEach(player -> listener.onPlayerAdded(player));
         }
     }
 
@@ -68,8 +68,12 @@ public class GameStateController implements Disposable, Updatable {
     }
 
     public interface ChangeListener {
-        void onEntityAdded(Entity entity);
+        void onBombAdded(BombEntity bomb);
 
-        void onEntityRemoved(Entity entity);
+        void onBombRemoved(BombEntity bomb);
+
+        void onPlayerAdded(PlayerEntity player);
+
+        void onPlayerRemoved(PlayerEntity player);
     }
 }

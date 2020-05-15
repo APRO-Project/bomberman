@@ -1,27 +1,27 @@
-package com.cyberbot.bomberman.models;
+package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.cyberbot.bomberman.models.Drawable;
+import com.cyberbot.bomberman.models.Updatable;
+import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
+import com.cyberbot.bomberman.models.factories.SpriteFactory;
 
-public class EntitySpritePair implements Updatable, Drawable, Disposable {
-    private final Entity entity;
-    private final Sprite sprite;
+public abstract class EntitySprite<E extends Entity> implements Updatable, Drawable, Disposable {
+    protected final E entity;
+    protected final Sprite sprite;
 
-    public EntitySpritePair(Entity entity, Sprite sprite) {
+    public EntitySprite(E entity) {
         this.entity = entity;
-        this.sprite = sprite;
+        this.sprite = new Sprite();
     }
 
-    public Entity getEntity() {
+    public E getEntity() {
         return entity;
-    }
-
-    public Sprite getSprite() {
-        return sprite;
     }
 
     @Override

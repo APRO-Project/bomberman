@@ -1,5 +1,7 @@
 package com.cyberbot.bomberman.models.items;
 
+import com.cyberbot.bomberman.models.factories.ItemStackFactory;
+
 import java.util.List;
 
 public class Inventory {

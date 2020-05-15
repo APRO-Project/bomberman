@@ -51,6 +51,10 @@ public class BombEntity extends Entity {
         }
     }
 
+    public float getLeftFraction() {
+        return timeLeft / def.detonationTime;
+    }
+
     public boolean isBlown() {
         return blown;
     }
