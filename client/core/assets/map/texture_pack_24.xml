@@ -25,7 +25,7 @@
     <tile id="3">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -131,7 +131,7 @@
     <tile id="18">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice1"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -139,7 +139,7 @@
     <tile id="19">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice2"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -147,7 +147,7 @@
     <tile id="20">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice3"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -155,7 +155,7 @@
     <tile id="21">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice4"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -179,7 +179,7 @@
     <tile id="24">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice5"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -187,7 +187,7 @@
     <tile id="25">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice6"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -195,7 +195,7 @@
     <tile id="26">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1" type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice7"/>
             <property name="tile_type" value="floor"/>
         </properties>
@@ -203,7 +203,7 @@
     <tile id="27">
         <properties>
             <property name="max_speed" value="1.25" type="float"/>
-            <property name="drag" value="0.1"  type="float"/>
+            <property name="drag" value="0.075" type="float"/>
             <property name="texture" value="Ice8"/>
             <property name="tile_type" value="floor"/>
         </properties>

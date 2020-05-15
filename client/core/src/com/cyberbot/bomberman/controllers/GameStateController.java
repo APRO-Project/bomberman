@@ -1,45 +1,63 @@
 package com.cyberbot.bomberman.controllers;
 
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.defs.BombDef;
 import com.cyberbot.bomberman.models.entities.BombEntity;
+import com.cyberbot.bomberman.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.models.factories.CollectibleFactory;
 import com.cyberbot.bomberman.models.tiles.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
-public class GameStateController implements Disposable, Updatable, ActionController.Listener {
+public class GameStateController implements Disposable, Updatable, ActionController.Listener, ContactListener {
     private final World world;
 
     private final TileMap map;
     private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
-    private ChangeListener listener;
+    private final List<CollectibleEntity> collectibles;
+    private List<ChangeListener> listeners;
 
     public GameStateController(World world, TileMap map) {
         this.world = world;
         this.map = map;
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
+        this.collectibles = new ArrayList<>();
+
+        world.setContactListener(this);
     }
 
     @Override
     public void update(float delta) {
+        Stream.of(players, collectibles, bombs)
+            .flatMap(Collection::stream)
+            .forEach(entity -> entity.update(delta));
+
+        bombs.forEach(bomb -> {
+            if (bomb.isBlown()) {
+                onBombExploded(bomb);
+            }
+        });
+
+        Stream.of(players, collectibles, bombs)
+            .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
+
         players.forEach(player -> {
-            player.update(delta);
             Vector2 position = player.getPositionRaw();
             int x = (int) Math.floor(position.x);
             int y = (int) Math.floor(position.y);
 
             Tile tile = map.getFloor().getTile(x, y);
-            if(tile instanceof FloorTile) {
+            if (tile instanceof FloorTile) {
                 FloorTile.Properties properties = ((FloorTile) tile).getProperties();
                 player.setDragModifier(properties.dragMultiplier);
                 player.setMaxSpeedModifier(properties.maxSpeedMultiplier);
@@ -48,15 +66,6 @@ public class GameStateController implements Disposable, Updatable, ActionControl
                 player.setMaxSpeedModifier(1);
             }
         });
-
-        bombs.forEach(bomb -> {
-            bomb.update(delta);
-            if(bomb.isBlown()) {
-                onBombExploded(bomb);
-            }
-        });
-
-        bombs.removeIf(BombEntity::isBlown);
     }
 
     @Override
@@ -68,17 +77,19 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     public void addPlayers(Collection<PlayerEntity> players) {
         this.players.addAll(players);
-        if(listener != null) {
-            players.forEach(player -> listener.onPlayerAdded(player));
-        }
+        players.forEach(player -> listeners.forEach(listener -> listener.onEntityAdded(player)));
     }
 
-    public Iterable<PlayerEntity> getPlayers() {
-        return players;
+    public void addListener(ChangeListener listener) {
+        listeners.add(listener);
     }
 
-    public void setListener(ChangeListener listener) {
-        this.listener = listener;
+    public void removeListener(ChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void clearListeners() {
+        listeners.clear();
     }
 
     @Override
@@ -91,12 +102,12 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         bomb.setPositionRaw(new Vector2(x, y));
 
         bombs.add(bomb);
-        listener.onBombAdded(bomb);
+        listeners.forEach(listener -> listener.onEntityAdded(bomb));
 
     }
 
     private void onBombExploded(BombEntity bomb) {
-        listener.onBombRemoved(bomb);
+        listeners.forEach(listener -> listener.onEntityRemoved(bomb));
         bomb.dispose();
 
         int range = (int) bomb.getRange();
@@ -115,7 +126,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x + i, y);
             powerRight = damageTile(tile, powerRight);
-            if(powerRight == 0) {
+            if (powerRight == 0) {
                 break;
             }
         }
@@ -124,7 +135,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x - i, y);
             powerLeft = damageTile(tile, powerLeft);
-            if(powerLeft == 0) {
+            if (powerLeft == 0) {
                 break;
             }
         }
@@ -133,7 +144,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y + i);
             powerUp = damageTile(tile, powerUp);
-            if(powerUp == 0) {
+            if (powerUp == 0) {
                 break;
             }
         }
@@ -142,38 +153,97 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y - i);
             powerDown = damageTile(tile, powerDown);
-            if(powerDown == 0) {
+            if (powerDown == 0) {
                 break;
             }
         }
     }
 
     private float damageTile(Tile tile, float power) {
-        if(tile instanceof WallTile) {
+        if (tile instanceof WallTile) {
             WallTile.Properties props = ((WallTile) tile).getProperties();
             float durability = props.durability;
-            if(durability == WallTile.Properties.DURABILITY_INFINITE) {
+            if (durability == WallTile.Properties.DURABILITY_INFINITE) {
                 return 0;
             }
 
-            if(power >= durability) {
-                map.removeWall(tile.getX(), tile.getY());
+            if (power >= durability) {
+                destroyTile(tile);
                 return power - durability;
-            } else {
-                // TODO: Maybe implement wall durability decrease
             }
         }
 
         return power - WallTile.Properties.POWER_DROPOFF;
     }
 
+    private void destroyTile(Tile tile) {
+        map.removeWall(tile.getX(), tile.getY());
+
+        CollectibleEntity collectible = CollectibleFactory.createRandom(world);
+        if (collectible == null) {
+            return;
+        }
+        collectible.setPosition(tile.getPosition());
+
+        collectibles.add(collectible);
+        listeners.forEach(listener -> listener.onEntityAdded(collectible));
+    }
+
+    private void handleContact(PlayerEntity player, Entity other) {
+        if (other instanceof CollectibleEntity) {
+            player.getInventory().collectItem(((CollectibleEntity) other).getItemType());
+            other.markToRemove();
+            listeners.forEach(listener -> listener.onEntityRemoved(other));
+        }
+    }
+
+    @Override
+    public void beginContact(Contact contact) {
+        Object a = contact.getFixtureA().getBody().getUserData();
+        Object b = contact.getFixtureB().getBody().getUserData();
+
+        if (a instanceof PhysicalTile || b instanceof PhysicalTile) {
+            return;
+        }
+
+        PlayerEntity player;
+        Entity other;
+
+        if (a instanceof PlayerEntity && b instanceof Entity) {
+            player = (PlayerEntity) a;
+            other = (Entity) b;
+        } else if (b instanceof PlayerEntity && a instanceof Entity) {
+            player = (PlayerEntity) b;
+            other = (Entity) b;
+        } else {
+            throw new RuntimeException("Contact detected between non-player entities");
+        }
+
+        if (other instanceof PlayerEntity) {
+            throw new RuntimeException("Contact detected between two PlayerEntities");
+        }
+
+        handleContact(player, other);
+    }
+
+    @Override
+    public void endContact(Contact contact) {
+
+    }
+
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {
+
+    }
+
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
+    }
+
     public interface ChangeListener {
-        void onBombAdded(BombEntity bomb);
+        void onEntityAdded(Entity entity);
 
-        void onBombRemoved(BombEntity bomb);
-
-        void onPlayerAdded(PlayerEntity player);
-
-        void onPlayerRemoved(PlayerEntity player);
+        void onEntityRemoved(Entity entity);
     }
 }

@@ -28,13 +28,13 @@ public class Tile {
     }
 
     public static Tile fromMapTile(TiledMapTile tile, World world, Vector2 position)
-            throws InvalidPropertiesFormatException {
+        throws InvalidPropertiesFormatException {
         MapProperties properties = tile.getProperties();
         if (!properties.containsKey(PROPERTY_TILE_TYPE) || !properties.containsKey(PROPERTY_TEXTURE_NAME)) {
             throw new InvalidPropertiesFormatException(
-                    "Each tile in the tile map has to contain '" +
-                            PROPERTY_TILE_TYPE + "' and '" +
-                            PROPERTY_TEXTURE_NAME + "' properties"
+                "Each tile in the tile map has to contain '" +
+                    PROPERTY_TILE_TYPE + "' and '" +
+                    PROPERTY_TEXTURE_NAME + "' properties"
             );
         }
 
@@ -44,14 +44,14 @@ public class Tile {
         switch (tileType) {
             case TILE_TYPE_FLOOR: {
                 return new FloorTile(
-                        textureName, position,
-                        FloorTile.Properties.fromMapProperties(properties)
+                    textureName, position,
+                    FloorTile.Properties.fromMapProperties(properties)
                 );
             }
             case TILE_TYPE_WALL: {
                 return new WallTile(textureName, position,
-                        WallTile.Properties.fromMapProperties(properties),
-                        world
+                    WallTile.Properties.fromMapProperties(properties),
+                    world
                 );
             }
             case TILE_TYPE_BASE: {
@@ -75,6 +75,6 @@ public class Tile {
     }
 
     public Vector2 getPosition() {
-        return new Vector2(x * PPM, y * PPM);
+        return new Vector2((x + 0.5F) * PPM, (y + 0.5F) * PPM);
     }
 }

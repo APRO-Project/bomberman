@@ -4,10 +4,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.defs.BombDef;
 
-public class BombEntity extends Entity implements Updatable {
+public class BombEntity extends Entity {
     private final BombDef def;
 
     private float timeLeft;
@@ -44,12 +43,14 @@ public class BombEntity extends Entity implements Updatable {
 
     @Override
     public void update(float delta) {
-        if(timeLeft > 0) {
+        super.update(delta);
+        if (timeLeft > 0) {
             timeLeft = Math.max(timeLeft - delta, 0);
         }
 
-        if(!blown && timeLeft == 0) {
+        if (!blown && timeLeft == 0) {
             blown = true;
+            markToRemove();
         }
     }
 

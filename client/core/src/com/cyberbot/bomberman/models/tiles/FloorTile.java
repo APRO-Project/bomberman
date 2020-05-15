@@ -31,17 +31,17 @@ public class FloorTile extends Tile {
 
         static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
             if (!properties.containsKey(DRAG) ||
-                    !properties.containsKey(MAX_SPEED)) {
+                !properties.containsKey(MAX_SPEED)) {
                 throw new InvalidPropertiesFormatException(
-                        "Floor tiles have to contain '" +
-                                FloorTile.Properties.DRAG + "' and '" +
-                                FloorTile.Properties.MAX_SPEED + "' properties"
+                    "Floor tiles have to contain '" +
+                        FloorTile.Properties.DRAG + "' and '" +
+                        FloorTile.Properties.MAX_SPEED + "' properties"
                 );
             }
 
             return new Properties(
-                    properties.get(MAX_SPEED, float.class),
-                    properties.get(DRAG, float.class)
+                properties.get(MAX_SPEED, float.class),
+                properties.get(DRAG, float.class)
             );
         }
     }

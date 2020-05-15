@@ -1,38 +1,32 @@
 package com.cyberbot.bomberman.models.items;
 
-import com.cyberbot.bomberman.models.Updatable;
+public class ItemStack {
+    public static final int INFINITE_QUANTITY = -1;
 
-public class ItemStack implements Updatable {
-    private final ItemType type;
-    private float quantity;
-    private int maxQuantity;
-    private float refillTime;
+    protected final ItemType type;
+    protected int quantity;
+    protected int maxQuantity;
 
     public ItemStack(ItemType type) {
-        this(type, -1);
+        this(type, INFINITE_QUANTITY);
     }
 
     public ItemStack(ItemType type, int maxQuantity) {
-        this(type, 0, maxQuantity, 5);
+        this(type, 0, maxQuantity);
     }
 
-    public ItemStack(ItemType type, int quantity, int maxQuantity, float refillTime) {
+    public ItemStack(ItemType type, int quantity, int maxQuantity) {
         this.type = type;
         this.quantity = quantity;
         this.maxQuantity = maxQuantity;
-        this.refillTime = refillTime;
     }
 
-    public int getMaxQuantity() {
-        return maxQuantity;
-    }
-
-    public void setMaxQuantity(int maxQuantity) {
-        this.maxQuantity = maxQuantity;
+    public void incrementMaxQuantity() {
+        maxQuantity++;
     }
 
     public int getQuantity() {
-        return (int) quantity;
+        return quantity;
     }
 
     public boolean removeItem() {
@@ -59,16 +53,5 @@ public class ItemStack implements Updatable {
 
     public ItemType getType() {
         return type;
-    }
-
-    public float getRefillFraction() {
-        return quantity - getQuantity();
-    }
-
-    @Override
-    public void update(float delta) {
-        if (refillTime > 0 && quantity < maxQuantity) {
-            quantity = Math.min(quantity + delta / refillTime, maxQuantity);
-        }
     }
 }

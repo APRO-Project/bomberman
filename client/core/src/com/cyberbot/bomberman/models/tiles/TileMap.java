@@ -45,7 +45,7 @@ public class TileMap implements Disposable {
                         break;
                     default:
                         Gdx.app.error(TAG, "Unsupported tile layer found: '" +
-                                layer.getName() + "', will be ignored");
+                            layer.getName() + "', will be ignored");
                 }
 
             }

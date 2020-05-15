@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.managers;
 
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.screens.AbstractScreen;
 import com.cyberbot.bomberman.screens.GameScreen;

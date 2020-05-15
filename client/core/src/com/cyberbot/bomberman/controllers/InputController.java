@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.cyberbot.bomberman.models.KeyBinds;
+import com.cyberbot.bomberman.models.items.ItemType;
 
 public class InputController {
     private final KeyBinds keys;
@@ -13,28 +14,29 @@ public class InputController {
     }
 
     public void update() {
-       handleMove();
-       handleItem();
+        handleMove();
+        handleItem();
     }
 
     private void handleItem() {
-        if(Gdx.input.isKeyJustPressed(keys.useItem)) {
-            actionController.useItem(0);
+        if (Gdx.input.isKeyJustPressed(keys.useItem)) {
+            // TODO: Get selected item from HUD
+            actionController.useItem(ItemType.SMALL_BOMB);
         }
     }
 
     private void handleMove() {
         int playerDirection = 0;
-        if(Gdx.input.isKeyPressed(keys.up)) {
+        if (Gdx.input.isKeyPressed(keys.up)) {
             playerDirection |= ActionController.MOVE_UP;
         }
-        if(Gdx.input.isKeyPressed(keys.down)) {
+        if (Gdx.input.isKeyPressed(keys.down)) {
             playerDirection |= ActionController.MOVE_DOWN;
         }
-        if(Gdx.input.isKeyPressed(keys.right)) {
+        if (Gdx.input.isKeyPressed(keys.right)) {
             playerDirection |= ActionController.MOVE_RIGHT;
         }
-        if(Gdx.input.isKeyPressed(keys.left)) {
+        if (Gdx.input.isKeyPressed(keys.left)) {
             playerDirection |= ActionController.MOVE_LEFT;
         }
 

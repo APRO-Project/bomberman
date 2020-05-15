@@ -15,7 +15,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     private final Tile[][] tiles;
 
     public TileMapLayer(TiledMapTileLayer mapTileLayer, World world)
-            throws InvalidPropertiesFormatException {
+        throws InvalidPropertiesFormatException {
 
         width = mapTileLayer.getWidth();
         height = mapTileLayer.getHeight();
@@ -139,7 +139,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Tile tile = tiles[x][y];
-                if(!c.contains(tile)) {
+                if (!c.contains(tile)) {
                     if (tile instanceof Disposable) {
                         ((Disposable) tile).dispose();
                     }
@@ -172,9 +172,9 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     private List<Tile> getFlatList() {
         return Arrays.stream(tiles)
-                .map(Arrays::asList)
-                .flatMap(List::stream)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            .map(Arrays::asList)
+            .flatMap(List::stream)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 }

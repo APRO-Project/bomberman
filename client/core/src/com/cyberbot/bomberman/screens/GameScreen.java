@@ -10,9 +10,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.controllers.ActionController;
 import com.cyberbot.bomberman.controllers.GameStateController;
 import com.cyberbot.bomberman.controllers.InputController;
-import com.cyberbot.bomberman.controllers.ActionController;
 import com.cyberbot.bomberman.controllers.TextureController;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.models.defs.PlayerDef;
@@ -47,7 +47,7 @@ public class GameScreen extends AbstractScreen {
         super(app);
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false,VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
+        camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
         viewport = new FitViewport(VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
 
         world = new World(new Vector2(0, 0), false);
@@ -61,7 +61,7 @@ public class GameScreen extends AbstractScreen {
 
         batch = new SpriteBatch();
 
-        map = new TileMap(world,"./map/bomberman_main.tmx");
+        map = new TileMap(world, "./map/bomberman_main.tmx");
 
         gsc = new GameStateController(world, map);
 
@@ -82,11 +82,11 @@ public class GameScreen extends AbstractScreen {
     public void update(float delta) {
         world.step(1 / 60f, 6, 2);
 
-        if(Gdx.input.isKeyPressed(Input.Keys.O)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.O)) {
             camera.zoom -= 1 / PPM;
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
             camera.zoom += 1 / PPM;
         }
 
@@ -107,7 +107,7 @@ public class GameScreen extends AbstractScreen {
         txc.draw(batch);
         batch.end();
 
-        b2dr.render(world, camera.combined.cpy().scl(PPM));
+        //b2dr.render(world, camera.combined.cpy().scl(PPM));
     }
 
     @Override
