@@ -41,7 +41,7 @@ public class WallTile extends PhysicalTile {
 
         static Properties fromMapProperties(MapProperties properties) {
             return new Properties(
-                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
+                properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
             );
         }
     }

@@ -44,11 +44,11 @@ public class BombEntity extends Entity {
     @Override
     public void update(float delta) {
         super.update(delta);
-        if(timeLeft > 0) {
+        if (timeLeft > 0) {
             timeLeft = Math.max(timeLeft - delta, 0);
         }
 
-        if(!blown && timeLeft == 0) {
+        if (!blown && timeLeft == 0) {
             blown = true;
             markToRemove();
         }

@@ -20,7 +20,7 @@ public class ActionController {
     private static final float DRAG_BASE = 60f;
 
     private final PlayerEntity playerEntity;
-    
+
     private List<Listener> listeners;
 
     public ActionController(PlayerEntity playerEntity) {
@@ -41,12 +41,12 @@ public class ActionController {
     }
 
     public void move(int direction) {
-        float maxVelocity  = MAX_VELOCITY_BASE * playerEntity.getMaxSpeedModifier();
-        float drag  = DRAG_BASE * playerEntity.getDragModifier();
+        float maxVelocity = MAX_VELOCITY_BASE * playerEntity.getMaxSpeedModifier();
+        float drag = DRAG_BASE * playerEntity.getDragModifier();
 
         Vector2 velocity = playerEntity.getVelocity();
-        if(direction == 0 && velocity.len() < 1) {
-            playerEntity.setVelocity(new Vector2(0,0));
+        if (direction == 0 && velocity.len() < 1) {
+            playerEntity.setVelocity(new Vector2(0, 0));
         }
 
         float desiredVelocityX = 0;
@@ -71,17 +71,17 @@ public class ActionController {
         float forceX = playerEntity.getMass() * velocityChangeX * drag;
         float forceY = playerEntity.getMass() * velocityChangeY * drag;
 
-        Vector2 force = new Vector2(forceX,forceY);
+        Vector2 force = new Vector2(forceX, forceY);
 
         playerEntity.applyForce(force);
     }
-    
+
     public void useItem(int index) {
         ItemType item = playerEntity.getInventory().removeItem(index);
-        if(item == null) {
+        if (item == null) {
             return;
         }
-        
+
         switch (item) {
             case SMALL_BOMB:
                 BombDef def = new BombDef(3, 3, 3);

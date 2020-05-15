@@ -10,7 +10,7 @@ public abstract class PhysicalTile extends Tile implements Disposable {
     protected Body body;
     private World world;
 
-    public PhysicalTile( String textureName, Vector2 position, World world) {
+    public PhysicalTile(String textureName, Vector2 position, World world) {
         super(textureName, position);
         this.world = world;
 

@@ -38,8 +38,8 @@ public class GameStateController implements Disposable, Updatable, ActionControl
     @Override
     public void update(float delta) {
         Stream.of(players, collectibles, bombs)
-                .flatMap(Collection::stream)
-                .forEach(entity -> entity.update(delta));
+            .flatMap(Collection::stream)
+            .forEach(entity -> entity.update(delta));
 
         bombs.forEach(bomb -> {
             if (bomb.isBlown()) {
@@ -48,7 +48,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         });
 
         Stream.of(players, collectibles, bombs)
-                .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
+            .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
 
         players.forEach(player -> {
             Vector2 position = player.getPositionRaw();
