@@ -1,43 +1,24 @@
 package com.cyberbot.bomberman.models.entities;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import com.cyberbot.bomberman.models.Drawable;
 
 import static com.cyberbot.bomberman.utils.Constants.PPM;
 
-public abstract class Entity implements Drawable, Disposable {
+public abstract class Entity implements Disposable {
     protected Body body;
-    protected Sprite sprite;
-    private final World world;
 
     public Entity(World world) {
-        this.world = world;
         createBody(world);
     }
 
     public abstract void createBody(World world);
 
     @Override
-    public void draw(SpriteBatch batch) {
-        sprite.draw(batch);
-    }
-
-    public void update(float delta) {
-        Vector2 position = getPosition();
-        sprite.setPosition(position.x - sprite.getWidth() / 2, position.y - sprite.getHeight() / 2);
-    }
-
-    @Override
     public void dispose() {
-        world.destroyBody(body);
-
-        if(sprite.getTexture() != null)
-            sprite.getTexture().dispose();
+        body.getWorld().destroyBody(body);
     }
 
     public void setPosition(Vector2 position) {
