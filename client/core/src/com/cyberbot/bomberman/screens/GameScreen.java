@@ -13,14 +13,13 @@ import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.controllers.GameStateController;
 import com.cyberbot.bomberman.controllers.InputController;
 import com.cyberbot.bomberman.controllers.PlayerMovement;
+import com.cyberbot.bomberman.controllers.TextureController;
 import com.cyberbot.bomberman.models.KeyBinds;
-import com.cyberbot.bomberman.models.entities.BombEntity;
-import com.cyberbot.bomberman.models.entities.Entity;
+import com.cyberbot.bomberman.models.defs.PlayerDef;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.models.tiles.TileMap;
-import com.sun.tools.javac.util.List;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;
 
 import static com.cyberbot.bomberman.utils.Constants.PPM;
@@ -30,6 +29,7 @@ public class GameScreen extends AbstractScreen {
     private final static int VIEWPORT_HEIGHT = 15;
 
     GameStateController gsc;
+    TextureController txc;
 
     OrthographicCamera camera;
     Viewport viewport;
@@ -53,9 +53,8 @@ public class GameScreen extends AbstractScreen {
         world = new World(new Vector2(0, 0), false);
         b2dr = new Box2DDebugRenderer();
 
-        PlayerEntity player = new PlayerEntity(world, "./textures/player.png");
+        PlayerEntity player = new PlayerEntity(world, new PlayerDef());
         player.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
-        player.setGameScreenAndWorld(this, world);
 
         PlayerMovement movementController = new PlayerMovement(player);
         inputController = new InputController(new KeyBinds(), movementController);
@@ -64,7 +63,12 @@ public class GameScreen extends AbstractScreen {
 
         map = new TileMap(world,"./map/bomberman_main.tmx");
 
-        gsc = new GameStateController(map, List.of(player));
+        gsc = new GameStateController(map);
+
+        txc = new TextureController(map);
+        gsc.setListener(txc);
+
+        gsc.addPlayers(Arrays.asList(player));
     }
 
     @Override
@@ -88,6 +92,7 @@ public class GameScreen extends AbstractScreen {
         camera.update();
 
         gsc.update(delta);
+        txc.update(delta);
 
         batch.setProjectionMatrix(camera.combined);
     }
@@ -97,7 +102,7 @@ public class GameScreen extends AbstractScreen {
         super.render(delta);
 
         batch.begin();
-        gsc.draw(batch);
+        txc.draw(batch);
         batch.end();
 
         b2dr.render(world, camera.combined.cpy().scl(PPM));

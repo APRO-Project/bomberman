@@ -1,37 +1,39 @@
 package com.cyberbot.bomberman.controllers;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
-import com.cyberbot.bomberman.models.Drawable;
+import com.cyberbot.bomberman.models.Updatable;
+import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.models.tiles.BaseTile;
+import com.cyberbot.bomberman.models.tiles.Tile;
 import com.cyberbot.bomberman.models.tiles.FloorTile;
 import com.cyberbot.bomberman.models.tiles.TileMap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class GameStateController implements Drawable, Disposable {
+public class GameStateController implements Disposable, Updatable {
     private final TileMap map;
-    private final List<Entity> entities;
+    private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
+    private ChangeListener listener;
 
-    public GameStateController(TileMap map, List<PlayerEntity> players) {
+    public GameStateController(TileMap map) {
         this.map = map;
-        this.players = players;
-        entities = new ArrayList<>();
+        this.players = new ArrayList<>();
+        this.bombs = new ArrayList<>();
     }
 
+    @Override
     public void update(float delta) {
         players.forEach(player -> {
-            player.update(delta);
             Vector2 position = player.getPositionRaw();
             int x = (int) Math.floor(position.x);
             int y = (int) Math.floor(position.y);
 
-            BaseTile tile = map.getFloor().getTile(x, y);
+            Tile tile = map.getFloor().getTile(x, y);
             if(tile instanceof FloorTile) {
                 FloorTile.Properties properties = ((FloorTile) tile).getProperties();
                 player.setDragModifier(properties.dragMultiplier);
@@ -44,16 +46,30 @@ public class GameStateController implements Drawable, Disposable {
     }
 
     @Override
-    public void draw(SpriteBatch batch) {
-        map.draw(batch);
-        entities.forEach(entity -> entity.draw(batch));
-        players.forEach(player -> player.draw(batch));
-    }
-
-    @Override
     public void dispose() {
         map.dispose();
-        entities.forEach(Entity::dispose);
+        bombs.forEach(Entity::dispose);
         players.forEach(PlayerEntity::dispose);
+    }
+
+    public void addPlayers(Collection<PlayerEntity> players) {
+        this.players.addAll(players);
+        if(listener != null) {
+            players.forEach(player -> listener.onEntityAdded(player));
+        }
+    }
+
+    public Iterable<PlayerEntity> getPlayers() {
+        return players;
+    }
+
+    public void setListener(ChangeListener listener) {
+        this.listener = listener;
+    }
+
+    public interface ChangeListener {
+        void onEntityAdded(Entity entity);
+
+        void onEntityRemoved(Entity entity);
     }
 }

@@ -1,60 +1,23 @@
 package com.cyberbot.bomberman.models.entities;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.cyberbot.bomberman.models.defs.BombDef;
 
 public class BombEntity extends Entity {
+    private BombDef def;
 
-    private float detonationTime = 3;
-    private float range = 3;
-    private float power = 1;
-
+    private float timeLeft;
     private boolean blown;
 
-    public BombEntity(World world, String atlasPath) {
+    public BombEntity(World world, BombDef def) {
         super(world);
+        this.def = def;
 
-        sprite = new Sprite(new Texture("bomb.png"));
-        blown = false;
-    }
-
-    public float getDetonationTime() {
-        return detonationTime;
-    }
-
-    public float getRange() {
-        return range;
-    }
-
-    public float getPower() {
-        return power;
-    }
-
-    public void setDetonationTime(float detonationTime) {
-        if(detonationTime < 0) throw new IllegalArgumentException("Detonation time must be < 0");
-
-        this.detonationTime = detonationTime;
-    }
-
-    public void setRange(float range) {
-        if(range < 0) throw new IllegalArgumentException("Bomb range must be < 0");
-
-        this.range = range;
-    }
-
-    public void setPower(float power) {
-        if(power <= 0) throw new IllegalArgumentException("Bomb power must be <= 0");
-
-        this.power = power;
-    }
-
-    public boolean isBlown() {
-        return blown;
+        this.timeLeft = def.detonationTime;
+        this.blown = false;
     }
 
     @Override
@@ -78,12 +41,17 @@ public class BombEntity extends Entity {
         shape.dispose();
     }
 
-    @Override
     public void update(float delta) {
-        super.update(delta);
+        if(timeLeft > 0) {
+            timeLeft = Math.max(timeLeft - delta, 0);
+        }
 
-        detonationTime -= delta;
-        Gdx.app.log("bomberman", "Bomb time left: " + detonationTime + "s");
-        if(detonationTime <= 0) blown = true;
+        if(!blown && timeLeft == 0) {
+            blown = true;
+        }
+    }
+
+    public boolean isBlown() {
+        return blown;
     }
 }

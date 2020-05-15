@@ -1,16 +1,15 @@
 package com.cyberbot.bomberman.models.tiles;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.InvalidPropertiesFormatException;
 
-public class FloorTile extends BaseTile {
+public class FloorTile extends Tile {
     private final Properties properties;
 
-    public FloorTile(Sprite texture, Vector2 position, Properties properties) {
-        super(texture, position);
+    public FloorTile(String textureName, Vector2 position, Properties properties) {
+        super(textureName, position);
         this.properties = properties;
     }
 
