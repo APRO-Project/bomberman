@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Inventory implements Updatable {
-    private List<ItemStack> items;
+    private final List<ItemStack> items;
 
     public Inventory() {
         this.items = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Inventory implements Updatable {
                 .findFirst()
                 .orElse(null);
 
-        if(stack == null) {
+        if (stack == null) {
             stack = ItemStackFactory.createStack(itemType);
             items.add(stack);
         }
@@ -40,6 +40,8 @@ public class Inventory implements Updatable {
     @Override
     public void update(float delta) {
         // TODO: Multiply by player's regen time upgrade to refill quicker
-        items.forEach(i -> i.update(delta));
+        items.stream()
+                .filter(i -> i instanceof Updatable)
+                .forEach(i -> ((Updatable) i).update(delta));
     }
 }
