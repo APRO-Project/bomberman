@@ -21,6 +21,7 @@ public abstract class PhysicalTile extends Tile implements Disposable {
         def.fixedRotation = true;
 
         body = world.createBody(def);
+        body.setUserData(this);
 
         createFixture();
     }

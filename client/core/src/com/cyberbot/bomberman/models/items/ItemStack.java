@@ -21,12 +21,8 @@ public class ItemStack {
         this.maxQuantity = maxQuantity;
     }
 
-    public int getMaxQuantity() {
-        return maxQuantity;
-    }
-
-    public void setMaxQuantity(int maxQuantity) {
-        this.maxQuantity = maxQuantity;
+    public void incrementMaxQuantity() {
+        maxQuantity++;
     }
 
     public int getQuantity() {

@@ -23,18 +23,26 @@ public class Inventory implements Updatable {
         return stack.removeItem() ? stack.getType() : null;
     }
 
-    public boolean addItem(ItemType itemType) {
-        ItemStack stack = items.stream()
-                .filter(s -> s.getType() == itemType)
-                .findFirst()
-                .orElse(null);
-
-        if (stack == null) {
-            stack = ItemStackFactory.createStack(itemType);
-            items.add(stack);
+    public void collectItem(ItemType itemType) {
+        switch (itemType) {
+            case SMALL_BOMB:
+                incrementMaxQuantity(itemType, true);
+            default:
+                addItem(itemType);
         }
+    }
 
-        return stack.addItem();
+    public void incrementMaxQuantity(ItemType itemType, boolean addItem) {
+        ItemStack stack = getStack(itemType);
+        stack.incrementMaxQuantity();
+
+        if (addItem) {
+            stack.addItem();
+        }
+    }
+
+    public boolean addItem(ItemType itemType) {
+        return getStack(itemType).addItem();
     }
 
     @Override
@@ -43,5 +51,16 @@ public class Inventory implements Updatable {
         items.stream()
                 .filter(i -> i instanceof Updatable)
                 .forEach(i -> ((Updatable) i).update(delta));
+    }
+
+    private ItemStack getStack(ItemType itemType) {
+        return items.stream()
+                .filter(s -> s.getType() == itemType)
+                .findFirst()
+                .orElseGet(() -> {
+                    ItemStack s = ItemStackFactory.createStack(itemType);
+                    items.add(s);
+                    return s;
+                });
     }
 }

@@ -4,13 +4,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.cyberbot.bomberman.models.Updatable;
 import com.cyberbot.bomberman.models.defs.PlayerDef;
 import com.cyberbot.bomberman.models.items.Inventory;
 
 import static com.cyberbot.bomberman.utils.Constants.PPM;
 
-public class PlayerEntity extends Entity implements Updatable {
+public class PlayerEntity extends Entity {
     private static final float ANIMATION_DURATION = 0.2f;
 
     private PlayerState currentState;
@@ -114,6 +113,7 @@ public class PlayerEntity extends Entity implements Updatable {
 
     @Override
     public void update(float delta) {
+        super.update(delta);
         def.inventory.update(delta);
     }
 
