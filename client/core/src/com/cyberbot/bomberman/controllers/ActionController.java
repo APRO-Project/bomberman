@@ -84,7 +84,7 @@ public class ActionController {
         
         switch (item) {
             case SMALL_BOMB:
-                BombDef def = new BombDef(1, 2, 3);
+                BombDef def = new BombDef(3, 3, 3);
                 listeners.forEach(l -> l.onBombPlaced(def, playerEntity));
         }
     }

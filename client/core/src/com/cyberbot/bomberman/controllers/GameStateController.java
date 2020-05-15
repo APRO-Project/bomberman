@@ -9,9 +9,7 @@ import com.cyberbot.bomberman.models.defs.BombDef;
 import com.cyberbot.bomberman.models.entities.BombEntity;
 import com.cyberbot.bomberman.models.entities.Entity;
 import com.cyberbot.bomberman.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.models.tiles.Tile;
-import com.cyberbot.bomberman.models.tiles.FloorTile;
-import com.cyberbot.bomberman.models.tiles.TileMap;
+import com.cyberbot.bomberman.models.tiles.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,8 +52,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         bombs.forEach(bomb -> {
             bomb.update(delta);
             if(bomb.isBlown()) {
-                listener.onBombRemoved(bomb);
-                bomb.dispose();
+                onBombExploded(bomb);
             }
         });
 
@@ -96,6 +93,78 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         bombs.add(bomb);
         listener.onBombAdded(bomb);
 
+    }
+
+    private void onBombExploded(BombEntity bomb) {
+        listener.onBombRemoved(bomb);
+        bomb.dispose();
+
+        int range = (int) bomb.getRange();
+        Vector2 position = bomb.getPositionRaw();
+        int x = (int) position.x;
+        int y = (int) position.y;
+
+        float powerRight = bomb.getPower();
+        float powerLeft = bomb.getPower();
+        float powerUp = bomb.getPower();
+        float powerDown = bomb.getPower();
+
+        TileMapLayer walls = map.getWalls();
+
+        // Right
+        for (int i = 1; i <= range; i++) {
+            Tile tile = walls.getTile(x + i, y);
+            powerRight = damageTile(tile, powerRight);
+            if(powerRight == 0) {
+                break;
+            }
+        }
+
+        // Left
+        for (int i = 1; i <= range; i++) {
+            Tile tile = walls.getTile(x - i, y);
+            powerLeft = damageTile(tile, powerLeft);
+            if(powerLeft == 0) {
+                break;
+            }
+        }
+
+        // Up
+        for (int i = 1; i <= range; i++) {
+            Tile tile = walls.getTile(x, y + i);
+            powerUp = damageTile(tile, powerUp);
+            if(powerUp == 0) {
+                break;
+            }
+        }
+
+        // Down
+        for (int i = 1; i <= range; i++) {
+            Tile tile = walls.getTile(x, y - i);
+            powerDown = damageTile(tile, powerDown);
+            if(powerDown == 0) {
+                break;
+            }
+        }
+    }
+
+    private float damageTile(Tile tile, float power) {
+        if(tile instanceof WallTile) {
+            WallTile.Properties props = ((WallTile) tile).getProperties();
+            float durability = props.durability;
+            if(durability == WallTile.Properties.DURABILITY_INFINITE) {
+                return 0;
+            }
+
+            if(power >= durability) {
+                map.removeWall(tile.getX(), tile.getY());
+                return power - durability;
+            } else {
+                // TODO: Maybe implement wall durability decrease
+            }
+        }
+
+        return power - WallTile.Properties.POWER_DROPOFF;
     }
 
     public interface ChangeListener {

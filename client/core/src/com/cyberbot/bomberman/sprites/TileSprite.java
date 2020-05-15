@@ -13,7 +13,7 @@ import com.cyberbot.bomberman.models.tiles.TileMapLayer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TileSprite implements Drawable, Disposable {
+public class TileSprite implements Drawable {
     private final Tile tile;
     private final Sprite sprite;
 
@@ -25,14 +25,6 @@ public class TileSprite implements Drawable, Disposable {
         this.sprite.setPosition(position.x, position.y);
     }
 
-
-    @Override
-    public void dispose() {
-        Texture texture = sprite.getTexture();
-        if(texture != null) {
-            texture.dispose();
-        }
-    }
 
     @Override
     public void draw(SpriteBatch batch) {

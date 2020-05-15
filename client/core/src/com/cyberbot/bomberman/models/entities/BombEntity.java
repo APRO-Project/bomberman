@@ -53,6 +53,14 @@ public class BombEntity extends Entity implements Updatable {
         }
     }
 
+    public float getRange() {
+        return def.range;
+    }
+
+    public float getPower() {
+        return def.power;
+    }
+
     public float getLeftFraction() {
         return timeLeft / def.detonationTime;
     }

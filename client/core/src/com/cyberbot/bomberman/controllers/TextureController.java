@@ -74,12 +74,7 @@ public class TextureController implements Drawable, Updatable, GameStateControll
 
     @Override
     public void onWallRemoved(Tile tile) {
-        TileSprite sprite = walls.stream()
-                .filter(p -> p.getTile().equals(tile))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("WallTile not present in TextureController"));
-        sprite.dispose();
-        walls.remove(sprite);
+        walls.removeIf(sprite -> sprite.getTile().equals(tile));
     }
 
     private <E extends Entity> void removeSprite(List<? extends EntitySprite<E>> list, E entity) {
