@@ -3,9 +3,9 @@ package com.cyberbot.bomberman.sprites;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.models.Drawable;
-import com.cyberbot.bomberman.models.Updatable;
-import com.cyberbot.bomberman.models.entities.Entity;
 
 public abstract class EntitySprite<E extends Entity> implements Updatable, Drawable {
     protected final E entity;

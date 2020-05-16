@@ -1,8 +1,9 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
+import com.cyberbot.bomberman.core.controllers.ActionController;
+import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
-import com.cyberbot.bomberman.models.items.ItemType;
 
 public class InputController {
     private final KeyBinds keys;
