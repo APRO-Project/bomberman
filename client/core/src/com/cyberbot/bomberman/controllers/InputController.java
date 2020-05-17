@@ -1,10 +1,14 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
+import com.cyberbot.bomberman.core.controllers.ActionController;
+import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
-import com.cyberbot.bomberman.models.items.ItemType;
 
-public class InputController {
+/**
+ * Handles all input from the user and forwards the actions to the action controller.
+ */
+public final class InputController {
     private final KeyBinds keys;
     private final ActionController actionController;
 

@@ -1,4 +1,13 @@
 allprojects {
     group 'com.cyberbot.bomberman'
     version '1.0.0-alpha'
+
+    ext {
+        appName = "bomberman"
+        gdxVersion = '1.9.10'
+        roboVMVersion = '2.3.8'
+        box2DLightsVersion = '1.4'
+        ashleyVersion = '1.7.0'
+        aiVersion = '1.8.0'
+    }
 }

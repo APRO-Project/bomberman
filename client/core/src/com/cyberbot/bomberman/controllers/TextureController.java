@@ -1,19 +1,25 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.cyberbot.bomberman.core.controllers.GameStateController;
+import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.entities.BombEntity;
+import com.cyberbot.bomberman.core.models.entities.Entity;
+import com.cyberbot.bomberman.core.models.tiles.Tile;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.Drawable;
-import com.cyberbot.bomberman.models.Updatable;
-import com.cyberbot.bomberman.models.entities.Entity;
-import com.cyberbot.bomberman.models.factories.SpriteFactory;
-import com.cyberbot.bomberman.models.tiles.Tile;
-import com.cyberbot.bomberman.models.tiles.TileMap;
 import com.cyberbot.bomberman.sprites.EntitySprite;
+import com.cyberbot.bomberman.sprites.SpriteFactory;
 import com.cyberbot.bomberman.sprites.TileSprite;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TextureController implements Drawable, Updatable, GameStateController.ChangeListener, TileMap.ChangeListener {
+/**
+ * Used to draw the map and all entities present on the map.
+ * listens for map and game state changes and updates it's sprite's accordingly.
+ */
+public final class TextureController implements Drawable, Updatable, GameStateController.ChangeListener, TileMap.ChangeListener {
     private final List<EntitySprite<?>> entities;
     private final List<TileSprite> base;
     private final List<TileSprite> floor;
@@ -22,9 +28,9 @@ public class TextureController implements Drawable, Updatable, GameStateControll
     public TextureController(TileMap map) {
         map.addListener(this);
         this.entities = new ArrayList<>();
-        this.base = TileSprite.fromTileLayer(map.getBase());
-        this.floor = TileSprite.fromTileLayer(map.getFloor());
-        this.walls = TileSprite.fromTileLayer(map.getWalls());
+        this.base = SpriteFactory.createTilesFromMapLayer(map.getBase());
+        this.floor = SpriteFactory.createTilesFromMapLayer(map.getFloor());
+        this.walls = SpriteFactory.createTilesFromMapLayer(map.getWalls());
     }
 
     @Override
@@ -53,7 +59,13 @@ public class TextureController implements Drawable, Updatable, GameStateControll
 
     @Override
     public void onEntityAdded(Entity entity) {
-        entities.add(0, SpriteFactory.createEntitySprite(entity));
+        EntitySprite<?> sprite = SpriteFactory.createEntitySprite(entity);
+        if (entity instanceof BombEntity) {
+            // Add at the begging to draw under the previous entities (ex. players)
+            entities.add(0, sprite);
+        } else {
+            entities.add(sprite);
+        }
     }
 
     @Override

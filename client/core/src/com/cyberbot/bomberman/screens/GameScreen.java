@@ -10,19 +10,20 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.ActionController;
-import com.cyberbot.bomberman.controllers.GameStateController;
 import com.cyberbot.bomberman.controllers.InputController;
 import com.cyberbot.bomberman.controllers.TextureController;
+import com.cyberbot.bomberman.core.controllers.ActionController;
+import com.cyberbot.bomberman.core.controllers.GameStateController;
+import com.cyberbot.bomberman.core.models.defs.PlayerDef;
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.KeyBinds;
-import com.cyberbot.bomberman.models.defs.PlayerDef;
-import com.cyberbot.bomberman.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.models.tiles.TileMap;
 
 import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;
 
-import static com.cyberbot.bomberman.utils.Constants.PPM;
+import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class GameScreen extends AbstractScreen {
     private final static int VIEWPORT_WIDTH = 15;
@@ -43,7 +44,7 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws InvalidPropertiesFormatException {
+    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException {
         super(app);
 
         camera = new OrthographicCamera();

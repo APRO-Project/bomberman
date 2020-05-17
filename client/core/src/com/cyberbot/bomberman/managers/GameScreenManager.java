@@ -1,6 +1,7 @@
 package com.cyberbot.bomberman.managers;
 
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.screens.AbstractScreen;
 import com.cyberbot.bomberman.screens.GameScreen;
 
@@ -28,7 +29,7 @@ public final class GameScreenManager {
         screens = new HashMap<>();
         try {
             screens.put(ScreenState.GAME, new GameScreen(app));
-        } catch (InvalidPropertiesFormatException e) {
+        } catch (InvalidPropertiesFormatException | MissingLayersException e) {
             e.printStackTrace();
         }
     }
