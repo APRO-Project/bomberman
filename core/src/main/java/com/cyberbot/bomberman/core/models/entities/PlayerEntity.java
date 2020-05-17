@@ -12,9 +12,10 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 public class PlayerEntity extends Entity {
     private static final float ANIMATION_DURATION = 0.2f;
 
-    private final int textureVariant;
 
+    private final int textureVariant;
     private final Inventory inventory;
+
     private float dragModifier;
     private float maxSpeedModifier;
 
