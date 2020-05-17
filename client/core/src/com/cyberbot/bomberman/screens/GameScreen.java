@@ -16,6 +16,7 @@ import com.cyberbot.bomberman.core.controllers.ActionController;
 import com.cyberbot.bomberman.core.controllers.GameStateController;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.KeyBinds;
 
@@ -43,7 +44,7 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws InvalidPropertiesFormatException {
+    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException {
         super(app);
 
         camera = new OrthographicCamera();
