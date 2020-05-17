@@ -12,11 +12,11 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 public class PlayerEntity extends Entity {
     private static final float ANIMATION_DURATION = 0.2f;
 
+    private final int textureVariant;
 
     private final Inventory inventory;
     private float dragModifier;
     private float maxSpeedModifier;
-    private int textureVariant;
 
     private PlayerState currentState;
     private PlayerState previousState;
@@ -42,16 +42,16 @@ public class PlayerEntity extends Entity {
         return dragModifier;
     }
 
-    public void setDragModifier(float newDragModifier) {
-        dragModifier = newDragModifier;
+    public void setDragModifier(float dragModifier) {
+        this.dragModifier = dragModifier;
     }
 
     public float getMaxSpeedModifier() {
         return maxSpeedModifier * inventory.getMovementSpeedMultiplier();
     }
 
-    public void setMaxSpeedModifier(float newMaxSpeedModifier) {
-        maxSpeedModifier = newMaxSpeedModifier;
+    public void setMaxSpeedModifier(float maxSpeedModifier) {
+        this.maxSpeedModifier = maxSpeedModifier;
     }
 
     public int getTextureVariant() {
