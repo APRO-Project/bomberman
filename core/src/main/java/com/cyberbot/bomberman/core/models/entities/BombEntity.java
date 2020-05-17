@@ -10,14 +10,19 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
  * A bomb entity.
  */
 public class BombEntity extends Entity {
-    private final BombDef def;
+
+    private final float power;
+    private final float range;
+    private final float detonationTime;
 
     private float timeLeft;
     private boolean blown;
 
     public BombEntity(World world, BombDef def) {
         super(world);
-        this.def = def;
+        power = def.power;
+        range = def.range;
+        detonationTime = def.detonationTime;
 
         this.timeLeft = def.detonationTime;
         this.blown = false;
@@ -62,15 +67,15 @@ public class BombEntity extends Entity {
     }
 
     public float getRange() {
-        return def.range;
+        return range;
     }
 
     public float getPower() {
-        return def.power;
+        return power;
     }
 
     public float getLeftFraction() {
-        return timeLeft / def.detonationTime;
+        return timeLeft / detonationTime;
     }
 
     public boolean isBlown() {

@@ -12,13 +12,19 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 public class PlayerEntity extends Entity {
     private static final float ANIMATION_DURATION = 0.2f;
 
+
+    private final int textureVariant;
+    private final Inventory inventory;
+
+    private float dragModifier;
+    private float maxSpeedModifier;
+
     private PlayerState currentState;
     private PlayerState previousState;
 
     private LookingDirection verticalDirection;
     private LookingDirection horizontalDirection;
 
-    private PlayerDef def;
 
     public PlayerEntity(World world, PlayerDef def) {
         super(world);
@@ -27,31 +33,34 @@ public class PlayerEntity extends Entity {
         previousState = PlayerState.STANDING;
         verticalDirection = LookingDirection.RIGHT;
         horizontalDirection = null;
-        this.def = def;
+        inventory = def.inventory;
+        dragModifier = def.dragModifier;
+        maxSpeedModifier = def.maxSpeedModifier;
+        textureVariant = def.textureVariant;
     }
 
     public float getDragModifier() {
-        return def.dragModifier;
+        return dragModifier;
     }
 
     public void setDragModifier(float dragModifier) {
-        def.dragModifier = dragModifier;
+        this.dragModifier = dragModifier;
     }
 
     public float getMaxSpeedModifier() {
-        return def.maxSpeedModifier * def.inventory.getMovementSpeedMultiplier();
+        return maxSpeedModifier * inventory.getMovementSpeedMultiplier();
     }
 
     public void setMaxSpeedModifier(float maxSpeedModifier) {
-        def.maxSpeedModifier = maxSpeedModifier;
+        this.maxSpeedModifier = maxSpeedModifier;
     }
 
     public int getTextureVariant() {
-        return def.textureVariant;
+        return textureVariant;
     }
 
     public Inventory getInventory() {
-        return def.inventory;
+        return inventory;
     }
 
     private PlayerState getState() {
@@ -114,7 +123,7 @@ public class PlayerEntity extends Entity {
     @Override
     public void update(float delta) {
         super.update(delta);
-        def.inventory.update(delta);
+        inventory.update(delta);
     }
 
     public enum PlayerState {
