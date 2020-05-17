@@ -2,7 +2,6 @@ package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.math.Vector2;
 import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
-import com.cyberbot.bomberman.models.factories.SpriteFactory;
 
 public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
     private static final float ANIMATION_DURATION = 1f;

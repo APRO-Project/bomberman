@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.models.factories;
+package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -7,10 +7,6 @@ import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
-import com.cyberbot.bomberman.sprites.BombSprite;
-import com.cyberbot.bomberman.sprites.CollectibleSprite;
-import com.cyberbot.bomberman.sprites.EntitySprite;
-import com.cyberbot.bomberman.sprites.PlayerSprite;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class SpriteFactory {

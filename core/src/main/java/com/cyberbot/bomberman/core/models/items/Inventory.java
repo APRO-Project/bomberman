@@ -1,7 +1,6 @@
 package com.cyberbot.bomberman.core.models.items;
 
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.factories.ItemStackFactory;
 
 import java.util.ArrayList;
 import java.util.List;

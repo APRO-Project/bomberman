@@ -7,8 +7,8 @@ import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.Drawable;
-import com.cyberbot.bomberman.models.factories.SpriteFactory;
 import com.cyberbot.bomberman.sprites.EntitySprite;
+import com.cyberbot.bomberman.sprites.SpriteFactory;
 import com.cyberbot.bomberman.sprites.TileSprite;
 
 import java.util.ArrayList;

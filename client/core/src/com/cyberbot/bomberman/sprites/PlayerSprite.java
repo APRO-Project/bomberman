@@ -1,7 +1,6 @@
 package com.cyberbot.bomberman.sprites;
 
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.models.factories.SpriteFactory;
 
 public class PlayerSprite extends EntitySprite<PlayerEntity> {
     public PlayerSprite(PlayerEntity entity) {

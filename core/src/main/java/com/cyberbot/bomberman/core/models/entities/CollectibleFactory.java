@@ -1,7 +1,6 @@
-package com.cyberbot.bomberman.core.models.factories;
+package com.cyberbot.bomberman.core.models.entities;
 
 import com.badlogic.gdx.physics.box2d.World;
-import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 
 import java.util.HashMap;

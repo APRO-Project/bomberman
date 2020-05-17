@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
 import com.cyberbot.bomberman.models.Drawable;
-import com.cyberbot.bomberman.models.factories.SpriteFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;

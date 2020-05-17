@@ -5,11 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
-import com.cyberbot.bomberman.core.models.entities.BombEntity;
-import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
-import com.cyberbot.bomberman.core.models.entities.Entity;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.factories.CollectibleFactory;
+import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;

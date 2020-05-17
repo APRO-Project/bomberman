@@ -1,8 +1,4 @@
-package com.cyberbot.bomberman.core.models.factories;
-
-import com.cyberbot.bomberman.core.models.items.ItemStack;
-import com.cyberbot.bomberman.core.models.items.ItemType;
-import com.cyberbot.bomberman.core.models.items.RefilingItemStack;
+package com.cyberbot.bomberman.core.models.items;
 
 public class ItemStackFactory {
     public static ItemStack createStack(ItemType itemType) {

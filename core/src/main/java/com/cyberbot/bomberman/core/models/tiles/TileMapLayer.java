@@ -1,7 +1,7 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 
@@ -14,6 +14,16 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     private final int height;
     private final Tile[][] tiles;
 
+    /**
+     * Creates a new layer from a LibGDX {@link TiledMapTileLayer}.
+     *
+     * @param mapTileLayer Layer source.
+     * @param world        Box2D world for binding {@link PhysicalTile PhysicalTiles}.
+     * @throws InvalidPropertiesFormatException When some required properties where missing
+     *                                          or were of an invalid type for any of the tiles.
+     * @throws IllegalArgumentException         When a tile property contains an illegal value.
+     * @see TileFactory#createTile(TiledMapTile, World, int, int)
+     */
     public TileMapLayer(TiledMapTileLayer mapTileLayer, World world)
         throws InvalidPropertiesFormatException {
 
@@ -29,7 +39,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
                     continue;
                 }
 
-                tiles[x][y] = Tile.fromMapTile(cell.getTile(), world, new Vector2(x, y));
+                tiles[x][y] = TileFactory.createTile(cell.getTile(), world, x, y);
             }
         }
     }
@@ -68,12 +78,12 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return getFlatList().isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return false;
+        return getFlatList().contains(o);
     }
 
     @Override
@@ -83,17 +93,21 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public Object[] toArray() {
-        throw new UnsupportedOperationException("");
+        return getFlatList().toArray();
     }
 
     @Override
+    @Deprecated
     public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException("");
+        throw new UnsupportedOperationException("Unsupported");
     }
 
     @Override
     public boolean add(Tile tile) {
-        throw new UnsupportedOperationException("");
+        Tile previous = tiles[tile.getX()][tile.getY()];
+        tiles[tile.getX()][tile.getY()] = tile;
+
+        return Objects.equals(previous, tile);
     }
 
     @Override
@@ -124,12 +138,20 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public boolean addAll(Collection<? extends Tile> c) {
-        throw new UnsupportedOperationException("Not supported, use TileMapLayer::add(int x, int y)");
+        boolean changed = false;
+        for (Tile t : c) {
+            changed = add(t) || changed;
+        }
+        return changed;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return c.stream().anyMatch(this::remove);
+        boolean changed = false;
+        for (Object o : c) {
+            changed = remove(o) || changed;
+        }
+        return changed;
     }
 
     @Override
