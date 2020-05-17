@@ -6,6 +6,8 @@ import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
+import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;
@@ -188,7 +190,15 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     private void handleContact(PlayerEntity player, Entity other) {
         if (other instanceof CollectibleEntity) {
-            player.getInventory().collectItem(((CollectibleEntity) other).getItemType());
+            ItemType itemType = ((CollectibleEntity) other).getItemType();
+            Inventory inventory = player.getInventory();
+            switch (itemType) {
+                case SMALL_BOMB:
+                    inventory.incrementMaxQuantity(itemType, true);
+                default:
+                    inventory.addItem(itemType);
+            }
+
             other.markToRemove();
             listeners.forEach(listener -> listener.onEntityRemoved(other));
         }
