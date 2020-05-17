@@ -136,7 +136,7 @@ public class TileMap implements Disposable {
         /**
          * Called when a new Tile has been removed from the wall layer.
          *
-         * @param tile The new tile.
+         * @param tile The removed tile.
          */
         void onWallRemoved(Tile tile);
     }

@@ -5,7 +5,10 @@ import com.cyberbot.bomberman.core.controllers.ActionController;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
 
-public class InputController {
+/**
+ * Handles all input from the user and forwards the actions to the action controller.
+ */
+public final class InputController {
     private final KeyBinds keys;
     private final ActionController actionController;
 

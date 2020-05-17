@@ -7,6 +7,11 @@ import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.models.Drawable;
 
+/**
+ * Abstract base for entity's sprite, texture and animation management.
+ *
+ * @param <E> The managed entity.
+ */
 public abstract class EntitySprite<E extends Entity> implements Updatable, Drawable {
     protected final E entity;
     protected final Sprite sprite;
@@ -27,7 +32,7 @@ public abstract class EntitySprite<E extends Entity> implements Updatable, Drawa
     }
 
     @Override
-    public void draw(SpriteBatch batch) {
+    public final void draw(SpriteBatch batch) {
         sprite.draw(batch);
     }
 }

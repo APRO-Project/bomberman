@@ -7,9 +7,23 @@ import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
+import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
 import com.cyberbot.bomberman.utils.Atlas;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Factory for {@link Sprite} and {@link EntitySprite} objects.
+ */
 public class SpriteFactory {
+    /**
+     * Creates an {@link EntitySprite} matching the provided entity.
+     *
+     * @param entity The source entity.
+     * @param <E>    The entity managed by the EntitySprite.
+     * @return A new EntitySprite.
+     */
     public static <E extends Entity> EntitySprite<?> createEntitySprite(E entity) {
         if (entity instanceof PlayerEntity) {
             return new PlayerSprite((PlayerEntity) entity);
@@ -49,5 +63,9 @@ public class SpriteFactory {
         }
 
         throw new UnsupportedOperationException("Unsupported item type");
+    }
+
+    public static List<TileSprite> createTilesFromMapLayer(TileMapLayer layer) {
+        return layer.stream().map(TileSprite::new).collect(Collectors.toList());
     }
 }

@@ -1,6 +1,6 @@
 package com.cyberbot.bomberman.core.utils;
 
-public class Constants {
+public final class Constants {
     /**
      * Pixels per meter (unit). Determines the scaling between Box2D simulation and drawn pixels.
      * Usually set to the pixel size of a single map tile texture.

@@ -21,6 +21,10 @@ public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
 
     @Override
     public void update(float delta) {
+        animateBobbing(delta);
+    }
+
+    public void animateBobbing(float delta) {
         animationStage = (animationStage + animationDirection * (delta / ANIMATION_DURATION));
         if (animationStage > 1) {
             animationStage = 2 - animationStage;

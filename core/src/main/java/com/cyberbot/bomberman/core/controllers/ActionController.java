@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
-public class ActionController {
+public final class ActionController {
     public static final int MOVE_LEFT = 0x01;
     public static final int MOVE_RIGHT = 0x02;
     public static final int MOVE_UP = 0x04;

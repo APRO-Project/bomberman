@@ -15,13 +15,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class GameStateController implements Disposable, Updatable, ActionController.Listener, ContactListener {
+/**
+ * The main gameplay controller.
+ * Handles all contact detection, player actions, entity behaviour.
+ */
+public final class GameStateController implements Disposable, Updatable, ActionController.Listener, ContactListener {
     private final World world;
 
     private final TileMap map;
+
+    // Entities, split into separate lists for convenience
     private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
     private final List<CollectibleEntity> collectibles;
+
     private final List<ChangeListener> listeners;
 
     public GameStateController(World world, TileMap map) {
@@ -37,10 +44,12 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     @Override
     public void update(float delta) {
+        // Update all entities
         Stream.of(players, collectibles, bombs)
             .flatMap(Collection::stream)
             .forEach(entity -> entity.update(delta));
 
+        // Handle bomb explosion
         bombs.forEach(bomb -> {
             if (bomb.isBlown()) {
                 onBombExploded(bomb);
@@ -48,9 +57,11 @@ public class GameStateController implements Disposable, Updatable, ActionControl
             }
         });
 
+        // Remove any entities that have been marked to be removed
         Stream.of(players, collectibles, bombs)
             .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
 
+        // Update players
         players.forEach(player -> {
             Vector2 position = player.getPositionRaw();
             int x = (int) Math.floor(position.x);
@@ -77,7 +88,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
 
     public void addPlayers(Collection<PlayerEntity> players) {
         this.players.addAll(players);
-        players.forEach(player -> listeners.forEach(listener -> listener.onEntityAdded(player)));
+        players.forEach(this::onEntityAdded);
     }
 
     public void addListener(ChangeListener listener) {
@@ -99,15 +110,67 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         float x = (float) Math.floor(position.x) + 0.5f;
         float y = (float) Math.floor(position.y) + 0.5f;
 
+        // Place the bomb on the tile the player's currently at
         bomb.setPositionRaw(new Vector2(x, y));
 
         bombs.add(bomb);
-        listeners.forEach(listener -> listener.onEntityAdded(bomb));
+        onEntityAdded(bomb);
+    }
 
+    @Override
+    public void beginContact(Contact contact) {
+        Object a = contact.getFixtureA().getBody().getUserData();
+        Object b = contact.getFixtureB().getBody().getUserData();
+
+        if (a instanceof PhysicalTile || b instanceof PhysicalTile) {
+            return;
+        }
+
+        PlayerEntity player;
+        Entity other;
+
+        if (a instanceof PlayerEntity && b instanceof Entity) {
+            player = (PlayerEntity) a;
+            other = (Entity) b;
+        } else if (b instanceof PlayerEntity && a instanceof Entity) {
+            player = (PlayerEntity) b;
+            other = (Entity) b;
+        } else {
+            throw new RuntimeException("Contact detected between non-player entities");
+        }
+
+        if (other instanceof PlayerEntity) {
+            throw new RuntimeException("Contact detected between two PlayerEntities");
+        }
+
+        handleContact(player, other);
+    }
+
+    @Override
+    public void endContact(Contact contact) {
+        // Unused
+    }
+
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {
+        // Unused
+    }
+
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+        // Unused
+    }
+
+    private void onEntityAdded(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityAdded(entity));
+    }
+
+    private void onEntityRemoved(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityRemoved(entity));
     }
 
     private void onBombExploded(BombEntity bomb) {
-        listeners.forEach(listener -> listener.onEntityRemoved(bomb));
+        onEntityRemoved(bomb);
         bomb.dispose();
 
         int range = (int) bomb.getRange();
@@ -159,6 +222,13 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         }
     }
 
+    /**
+     * Damages a given tile and destroys it when needed.
+     *
+     * @param tile  Affected tile
+     * @param power The power that's used to damage the tile.
+     * @return The power left after the action
+     */
     private float damageTile(Tile tile, float power) {
         if (tile instanceof WallTile) {
             WallTile.Properties props = ((WallTile) tile).getProperties();
@@ -179,6 +249,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
     private void destroyTile(Tile tile) {
         map.removeWall(tile.getX(), tile.getY());
 
+        // Spawn a random collectible in place of the broken tile
         CollectibleEntity collectible = CollectibleFactory.createRandom(world);
         if (collectible == null) {
             return;
@@ -186,7 +257,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         collectible.setPosition(tile.getPosition());
 
         collectibles.add(collectible);
-        listeners.forEach(listener -> listener.onEntityAdded(collectible));
+        onEntityAdded(collectible);
     }
 
     private void handleContact(PlayerEntity player, Entity other) {
@@ -201,57 +272,26 @@ public class GameStateController implements Disposable, Updatable, ActionControl
             }
 
             other.markToRemove();
-            listeners.forEach(listener -> listener.onEntityRemoved(other));
+            onEntityRemoved(other);
         }
     }
 
-    @Override
-    public void beginContact(Contact contact) {
-        Object a = contact.getFixtureA().getBody().getUserData();
-        Object b = contact.getFixtureB().getBody().getUserData();
-
-        if (a instanceof PhysicalTile || b instanceof PhysicalTile) {
-            return;
-        }
-
-        PlayerEntity player;
-        Entity other;
-
-        if (a instanceof PlayerEntity && b instanceof Entity) {
-            player = (PlayerEntity) a;
-            other = (Entity) b;
-        } else if (b instanceof PlayerEntity && a instanceof Entity) {
-            player = (PlayerEntity) b;
-            other = (Entity) b;
-        } else {
-            throw new RuntimeException("Contact detected between non-player entities");
-        }
-
-        if (other instanceof PlayerEntity) {
-            throw new RuntimeException("Contact detected between two PlayerEntities");
-        }
-
-        handleContact(player, other);
-    }
-
-    @Override
-    public void endContact(Contact contact) {
-
-    }
-
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-
-    }
-
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-
-    }
-
+    /**
+     * An interface that any parties interested in changes to the game entities should implement.
+     */
     public interface ChangeListener {
+        /**
+         * Called when a new {@link Entity} has been added to game.
+         *
+         * @param entity The new entity.
+         */
         void onEntityAdded(Entity entity);
 
+        /**
+         * Called when an {@link Entity} has been removed from the game.
+         *
+         * @param entity The removed entity.
+         */
         void onEntityRemoved(Entity entity);
     }
 }
