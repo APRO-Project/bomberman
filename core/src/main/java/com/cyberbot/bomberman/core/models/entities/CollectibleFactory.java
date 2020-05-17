@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Factory for collectibles.
+ */
 public class CollectibleFactory {
     private static final float DROP_CHANCE = 0.25f;
     private static final HashMap<ItemType, Float> ITEM_WEIGHTS = new HashMap<>();

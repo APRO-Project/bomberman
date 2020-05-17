@@ -6,8 +6,13 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 
+/**
+ * A world entity that can be collected by a player.
+ *
+ * @see ItemType
+ */
 public class CollectibleEntity extends Entity {
-    private ItemType itemType;
+    private final ItemType itemType;
 
     public CollectibleEntity(World world, ItemType itemType) {
         super(world);

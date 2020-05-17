@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
 
+/**
+ * A bomb entity.
+ */
 public class BombEntity extends Entity {
     private final BombDef def;
 
@@ -41,6 +44,11 @@ public class BombEntity extends Entity {
         shape.dispose();
     }
 
+    /**
+     * Decreases the time left on the bomb, and sets it to blown if the time reaches 0.
+     *
+     * @param delta The time in seconds since the last update.
+     */
     @Override
     public void update(float delta) {
         super.update(delta);
