@@ -44,6 +44,7 @@ public class GameStateController implements Disposable, Updatable, ActionControl
         bombs.forEach(bomb -> {
             if (bomb.isBlown()) {
                 onBombExploded(bomb);
+                bomb.markToRemove();
             }
         });
 

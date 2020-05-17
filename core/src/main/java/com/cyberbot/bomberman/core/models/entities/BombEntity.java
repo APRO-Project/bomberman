@@ -58,7 +58,6 @@ public class BombEntity extends Entity {
 
         if (!blown && timeLeft == 0) {
             blown = true;
-            markToRemove();
         }
     }
 
