@@ -19,7 +19,8 @@ import java.util.List;
  * Used to draw the map and all entities present on the map.
  * listens for map and game state changes and updates it's sprite's accordingly.
  */
-public final class TextureController implements Drawable, Updatable, GameStateController.ChangeListener, TileMap.ChangeListener {
+public final class TextureController implements Drawable, Updatable,
+    GameStateController.ChangeListener, TileMap.ChangeListener {
     private final List<EntitySprite<?>> entities;
     private final List<TileSprite> base;
     private final List<TileSprite> floor;

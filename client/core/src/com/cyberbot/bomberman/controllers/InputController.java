@@ -1,23 +1,41 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
-import com.cyberbot.bomberman.core.controllers.ActionController;
+import com.cyberbot.bomberman.core.controllers.ActionListener;
+import com.cyberbot.bomberman.core.controllers.MovementListener;
+import com.cyberbot.bomberman.core.controllers.PlayerMovementController;
+import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.actions.UseItemAction;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles all input from the user and forwards the actions to the action controller.
  */
-public final class InputController {
+public final class InputController implements Updatable {
     private final KeyBinds keys;
-    private final ActionController actionController;
+    private final List<ActionListener> actionListeners;
+    private final List<MovementListener> movementListeners;
 
-    public InputController(KeyBinds keys, ActionController actionController) {
+    public InputController(KeyBinds keys) {
         this.keys = keys;
-        this.actionController = actionController;
+        this.actionListeners = new ArrayList<>();
+        this.movementListeners = new ArrayList<>();
     }
 
-    public void update() {
+    public void addActionController(ActionListener controller) {
+        actionListeners.add(controller);
+    }
+
+    public void addMovementController(MovementListener controller) {
+        movementListeners.add(controller);
+    }
+
+    @Override
+    public void update(float delta) {
         handleMove();
         handleItem();
     }
@@ -25,25 +43,26 @@ public final class InputController {
     private void handleItem() {
         if (Gdx.input.isKeyJustPressed(keys.useItem)) {
             // TODO: Get selected item from HUD
-            actionController.useItem(ItemType.SMALL_BOMB);
+            actionListeners.forEach(c -> c.executeAction(new UseItemAction(ItemType.SMALL_BOMB)));
         }
     }
 
     private void handleMove() {
-        int playerDirection = 0;
+        int direction = 0;
         if (Gdx.input.isKeyPressed(keys.up)) {
-            playerDirection |= ActionController.MOVE_UP;
+            direction |= PlayerMovementController.MOVE_UP;
         }
         if (Gdx.input.isKeyPressed(keys.down)) {
-            playerDirection |= ActionController.MOVE_DOWN;
+            direction |= PlayerMovementController.MOVE_DOWN;
         }
         if (Gdx.input.isKeyPressed(keys.right)) {
-            playerDirection |= ActionController.MOVE_RIGHT;
+            direction |= PlayerMovementController.MOVE_RIGHT;
         }
         if (Gdx.input.isKeyPressed(keys.left)) {
-            playerDirection |= ActionController.MOVE_LEFT;
+            direction |= PlayerMovementController.MOVE_LEFT;
         }
 
-        actionController.move(playerDirection);
+        final int finalDirection = direction;
+        movementListeners.forEach(c -> c.move(finalDirection));
     }
 }

@@ -48,7 +48,8 @@ public class TileMap implements Disposable {
      * @see TileFactory#createTile(TiledMapTile, World, int, int)
      */
     public TileMap(World world, String path) throws InvalidPropertiesFormatException, MissingLayersException {
-        TiledMap sourceMap = new TmxMapLoader().load(path);
+        TmxMapLoader tmxMapLoader = new TmxMapLoader();
+        TiledMap sourceMap = tmxMapLoader.load(path);
 
         listeners = new ArrayList<>();
 

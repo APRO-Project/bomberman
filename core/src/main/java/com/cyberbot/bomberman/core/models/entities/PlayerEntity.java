@@ -3,6 +3,7 @@ package com.cyberbot.bomberman.core.models.entities;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
@@ -115,7 +116,7 @@ public class PlayerEntity extends Entity {
         CircleShape shape = new CircleShape();
         shape.setRadius(0.49f);
 
-        body.createFixture(shape, 1);
+        Fixture fixture = body.createFixture(shape, 1);
         body.setUserData(this);
         shape.dispose();
     }

@@ -1,16 +1,11 @@
 package com.cyberbot.bomberman.core.controllers;
 
 import com.badlogic.gdx.math.Vector2;
-import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.items.ItemType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
-public final class ActionController {
+public class PlayerMovementController implements MovementListener {
     public static final int MOVE_LEFT = 0x01;
     public static final int MOVE_RIGHT = 0x02;
     public static final int MOVE_UP = 0x04;
@@ -19,25 +14,10 @@ public final class ActionController {
     private static final float MAX_VELOCITY_BASE = 5 * PPM;
     private static final float DRAG_BASE = 60f;
 
-    private final PlayerEntity playerEntity;
+    protected final PlayerEntity playerEntity;
 
-    private List<Listener> listeners;
-
-    public ActionController(PlayerEntity playerEntity) {
+    public PlayerMovementController(PlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
-        this.listeners = new ArrayList<>();
-    }
-
-    public void addListener(Listener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(Listener listener) {
-        listeners.remove(listener);
-    }
-
-    public void clearListeners() {
-        listeners.clear();
     }
 
     public void move(int direction) {
@@ -74,21 +54,5 @@ public final class ActionController {
         Vector2 force = new Vector2(forceX, forceY);
 
         playerEntity.applyForce(force);
-    }
-
-    public void useItem(ItemType itemType) {
-        if (!playerEntity.getInventory().removeItem(itemType)) {
-            return;
-        }
-
-        switch (itemType) {
-            case SMALL_BOMB:
-                BombDef def = new BombDef(1, 1, 3);
-                listeners.forEach(l -> l.onBombPlaced(def, playerEntity));
-        }
-    }
-
-    public interface Listener {
-        void onBombPlaced(BombDef bombDef, PlayerEntity executor);
     }
 }

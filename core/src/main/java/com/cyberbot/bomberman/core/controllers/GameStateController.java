@@ -8,6 +8,7 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
  * The main gameplay controller.
  * Handles all contact detection, player actions, entity behaviour.
  */
-public final class GameStateController implements Disposable, Updatable, ActionController.Listener, ContactListener {
+public final class GameStateController implements Disposable, Updatable, PlayerActionController.Listener, ContactListener {
     private final World world;
 
     private final TileMap map;
@@ -103,6 +104,13 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         listeners.clear();
     }
 
+    public GameSnapshot createSnapshot(int sequence) {
+        // TODO: Add other parts of the game state
+        GameSnapshot snapshot = new GameSnapshot(sequence);
+        snapshot.position = players.get(0).getPosition();
+        return snapshot;
+    }
+
     @Override
     public void onBombPlaced(BombDef bombDef, PlayerEntity executor) {
         BombEntity bomb = new BombEntity(world, bombDef);
@@ -140,7 +148,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         }
 
         if (other instanceof PlayerEntity) {
-            throw new RuntimeException("Contact detected between two PlayerEntities");
+            return; //throw new RuntimeException("Contact detected between two PlayerEntities");
         }
 
         handleContact(player, other);
@@ -264,6 +272,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         if (other instanceof CollectibleEntity) {
             ItemType itemType = ((CollectibleEntity) other).getItemType();
             Inventory inventory = player.getInventory();
+
             switch (itemType) {
                 case SMALL_BOMB:
                     inventory.incrementMaxQuantity(itemType, true);
