@@ -18,8 +18,11 @@ import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
+import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.KeyBinds;
 
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;
 
@@ -44,7 +47,7 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException {
+    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException, JAXBException, FileNotFoundException {
         super(app);
 
         camera = new OrthographicCamera();
@@ -62,7 +65,8 @@ public class GameScreen extends AbstractScreen {
 
         batch = new SpriteBatch();
 
-        map = new TileMap(world, "./map/bomberman_main.tmx");
+        //map = new TileMap(world, "./map/bomberman_main.tmx");
+        map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
 
         gsc = new GameStateController(world, map);
 

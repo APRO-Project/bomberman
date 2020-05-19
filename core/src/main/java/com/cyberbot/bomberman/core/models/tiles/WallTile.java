@@ -1,8 +1,9 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Properties;
+import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Property;
 
 import java.util.InvalidPropertiesFormatException;
 
@@ -57,17 +58,28 @@ public class WallTile extends PhysicalTile {
          *
          * @param properties Properties source.
          * @return A new instance of the Properties object.
-         * @throws InvalidPropertiesFormatException When some required properties where missing or
-         *                                          of invalid type from the MapProperties.
          */
-        static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
-            try {
-                return new Properties(
-                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
-                );
-            } catch (ClassCastException e) {
-                throw new InvalidPropertiesFormatException("The type of '" + DURABILITY + "' property has to be float.");
+//        static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
+//            try {
+//                return new Properties(
+//                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
+//                );
+//            } catch (ClassCastException e) {
+//                throw new InvalidPropertiesFormatException("The type of '" + DURABILITY + "' property has to be float.");
+//            }
+//        }
+        static Properties fromTileProperties(com.cyberbot.bomberman.core.models.tiles.loader.tileset.Properties properties) {
+            float durability = DURABILITY_INFINITE;
+
+            for (Property property : properties.getProperty()){
+                if (property.getName().equals("durability")){
+                    durability = Float.parseFloat(property.getValue());
+                }
             }
+
+            return new Properties(
+                durability
+            );
         }
     }
 }

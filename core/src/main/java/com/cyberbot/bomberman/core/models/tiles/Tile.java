@@ -10,12 +10,6 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * The position of the tiles index from (0, 0) and follow the euclidean coordinate system.
  */
 public class Tile {
-    public static final String PROPERTY_TILE_TYPE = "tile_type";
-    public static final String PROPERTY_TEXTURE_NAME = "texture";
-
-    public static final String TILE_TYPE_FLOOR = "floor";
-    public static final String TILE_TYPE_WALL = "wall";
-    public static final String TILE_TYPE_BASE = "base";
 
     private final String textureName;
     private final int x;

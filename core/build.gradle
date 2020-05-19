@@ -16,4 +16,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.6.0'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.4'
+
 }
