@@ -21,7 +21,7 @@ public class CollectibleFactory {
         ITEM_WEIGHTS.put(ItemType.UPGRADE_ARMOR, 1f);
     }
 
-    public static CollectibleEntity createRandom(World world) {
+    public static CollectibleEntity createRandom(World world, long id) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         float drop = random.nextFloat();
         if (drop > DROP_CHANCE) {
@@ -35,7 +35,7 @@ public class CollectibleFactory {
         for (Map.Entry<ItemType, Float> entry : ITEM_WEIGHTS.entrySet()) {
             pick -= entry.getValue();
             if (pick < 0) {
-                return new CollectibleEntity(world, entry.getKey());
+                return new CollectibleEntity(world, entry.getKey(), id);
             }
         }
 

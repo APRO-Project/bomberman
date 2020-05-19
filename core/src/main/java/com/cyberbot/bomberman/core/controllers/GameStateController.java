@@ -14,6 +14,7 @@ import com.cyberbot.bomberman.core.models.tiles.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 /**
@@ -46,9 +47,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     @Override
     public void update(float delta) {
         // Update all entities
-        Stream.of(players, collectibles, bombs)
-            .flatMap(Collection::stream)
-            .forEach(entity -> entity.update(delta));
+        entityStream().forEach(entity -> entity.update(delta));
 
         // Handle bomb explosion
         bombs.forEach(bomb -> {
@@ -113,16 +112,16 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
     @Override
     public void onBombPlaced(BombDef bombDef, PlayerEntity executor) {
-        BombEntity bomb = new BombEntity(world, bombDef);
+        BombEntity bomb = new BombEntity(world, bombDef, generateEntityId());
+        bombs.add(bomb);
+        onEntityAdded(bomb);
+
         Vector2 position = executor.getPositionRaw();
         float x = (float) Math.floor(position.x) + 0.5f;
         float y = (float) Math.floor(position.y) + 0.5f;
 
         // Place the bomb on the tile the player's currently at
         bomb.setPositionRaw(new Vector2(x, y));
-
-        bombs.add(bomb);
-        onEntityAdded(bomb);
     }
 
     @Override
@@ -167,6 +166,10 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
         // Unused
+    }
+
+    private Stream<Entity> entityStream() {
+        return Stream.of(players, collectibles, bombs).flatMap(Collection::stream);
     }
 
     private void onEntityAdded(Entity entity) {
@@ -258,7 +261,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         map.removeWall(tile.getX(), tile.getY());
 
         // Spawn a random collectible in place of the broken tile
-        CollectibleEntity collectible = CollectibleFactory.createRandom(world);
+        CollectibleEntity collectible = CollectibleFactory.createRandom(world, generateEntityId());
         if (collectible == null) {
             return;
         }
@@ -283,6 +286,20 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             other.markToRemove();
             onEntityRemoved(other);
         }
+    }
+
+    private long generateEntityId() {
+        long id;
+
+        do {
+            id = ThreadLocalRandom.current().nextLong();
+        } while (hasEntity(id));
+
+        return id;
+    }
+
+    private boolean hasEntity(long id) {
+        return entityStream().map(Entity::getId).anyMatch(pId -> pId == id);
     }
 
     /**

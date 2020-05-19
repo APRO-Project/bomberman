@@ -14,8 +14,8 @@ import com.cyberbot.bomberman.core.models.items.ItemType;
 public class CollectibleEntity extends Entity {
     private final ItemType itemType;
 
-    public CollectibleEntity(World world, ItemType itemType) {
-        super(world);
+    public CollectibleEntity(World world, ItemType itemType, long id) {
+        super(world, id);
         this.itemType = itemType;
     }
 

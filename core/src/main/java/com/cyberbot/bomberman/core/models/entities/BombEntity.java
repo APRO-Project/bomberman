@@ -18,8 +18,8 @@ public class BombEntity extends Entity {
     private float timeLeft;
     private boolean blown;
 
-    public BombEntity(World world, BombDef def) {
-        super(world);
+    public BombEntity(World world, BombDef def, long id) {
+        super(world, id);
         power = def.power;
         range = def.range;
         detonationTime = def.detonationTime;

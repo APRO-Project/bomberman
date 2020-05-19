@@ -13,11 +13,13 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * Abstract base for all game entities that contain a Box2D body.
  */
 public abstract class Entity implements Disposable, Updatable {
-    protected Body body;
+    private final long id;
     private boolean remove;
+    protected Body body;
 
-    public Entity(World world) {
-        remove = false;
+    public Entity(World world, long id) {
+        this.id = id;
+        this.remove = false;
         createBody(world);
     }
 
@@ -93,5 +95,9 @@ public abstract class Entity implements Disposable, Updatable {
      */
     public void markToRemove() {
         this.remove = true;
+    }
+
+    public long getId() {
+        return id;
     }
 }

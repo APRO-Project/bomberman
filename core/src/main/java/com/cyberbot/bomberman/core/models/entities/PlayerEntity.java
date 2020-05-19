@@ -27,8 +27,8 @@ public class PlayerEntity extends Entity {
     private LookingDirection horizontalDirection;
 
 
-    public PlayerEntity(World world, PlayerDef def) {
-        super(world);
+    public PlayerEntity(World world, PlayerDef def, long id) {
+        super(world, id);
 
         currentState = PlayerState.STANDING;
         previousState = PlayerState.STANDING;

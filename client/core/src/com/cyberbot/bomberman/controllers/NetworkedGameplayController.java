@@ -53,7 +53,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
         world = new World(new Vector2(0, 0), false);
         map = new TileMap(world, mapPath);
-        localPlayer = new PlayerEntity(world, player);
+        localPlayer = new PlayerEntity(world, player, 12345);
         localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         entities = new ArrayList<>();
         textureController = new TextureController(map);
@@ -102,7 +102,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         playerPosition = snapshot.position;
     }
 
-    private synchronized void createAndSendSnapshot() {
+    private void createAndSendSnapshot() {
         try {
             PlayerSnapshot snapshot = snapshotQueue.createSnapshot();
             netService.sendPlayerSnapshot(snapshot);
