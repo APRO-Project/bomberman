@@ -1,8 +1,5 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.util.*;
@@ -13,36 +10,6 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     private final int width;
     private final int height;
     private final Tile[][] tiles;
-
-//    /**
-//     * Creates a new layer from a LibGDX {@link TiledMapTileLayer}.
-//     *
-//     * @param mapTileLayer Layer source.
-//     * @param world        Box2D world for binding {@link PhysicalTile PhysicalTiles}.
-//     * @throws InvalidPropertiesFormatException When some required properties where missing
-//     *                                          or were of an invalid type for any of the tiles.
-//     * @throws IllegalArgumentException         When a tile property contains an illegal value.
-//     * @see TileFactory#createTile(TiledMapTile, World, int, int)
-//     */
-//    public TileMapLayer(TiledMapTileLayer mapTileLayer, World world)
-//        throws InvalidPropertiesFormatException {
-//
-//        width = mapTileLayer.getWidth();
-//        height = mapTileLayer.getHeight();
-//
-//        tiles = new Tile[width][height];
-//        for (int x = 0; x < width; x++) {
-//            for (int y = 0; y < height; y++) {
-//                TiledMapTileLayer.Cell cell = mapTileLayer.getCell(x, y);
-//
-//                if (cell == null) {
-//                    continue;
-//                }
-//
-//                tiles[x][y] = TileFactory.createTile(cell.getTile(), world, x, y);
-//            }
-//        }
-//    }
 
     public TileMapLayer(int width, int height, Tile[][] tiles) {
         this.width = width;

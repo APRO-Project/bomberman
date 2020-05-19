@@ -47,7 +47,7 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException, JAXBException, FileNotFoundException {
+    public GameScreen(final Client app) throws MissingLayersException, JAXBException, FileNotFoundException {
         super(app);
 
         camera = new OrthographicCamera();
@@ -65,7 +65,6 @@ public class GameScreen extends AbstractScreen {
 
         batch = new SpriteBatch();
 
-        //map = new TileMap(world, "./map/bomberman_main.tmx");
         map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
 
         gsc = new GameStateController(world, map);

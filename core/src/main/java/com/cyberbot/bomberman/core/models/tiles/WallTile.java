@@ -2,10 +2,7 @@ package com.cyberbot.bomberman.core.models.tiles;
 
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Properties;
 import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Property;
-
-import java.util.InvalidPropertiesFormatException;
 
 /**
  * Objects of this class represent a wall tile with special {@link WallTile.Properties}.
@@ -59,20 +56,12 @@ public class WallTile extends PhysicalTile {
          * @param properties Properties source.
          * @return A new instance of the Properties object.
          */
-//        static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
-//            try {
-//                return new Properties(
-//                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
-//                );
-//            } catch (ClassCastException e) {
-//                throw new InvalidPropertiesFormatException("The type of '" + DURABILITY + "' property has to be float.");
-//            }
-//        }
+
         static Properties fromTileProperties(com.cyberbot.bomberman.core.models.tiles.loader.tileset.Properties properties) {
             float durability = DURABILITY_INFINITE;
 
-            for (Property property : properties.getProperty()){
-                if (property.getName().equals("durability")){
+            for (Property property : properties.getProperty()) {
+                if (property.getName().equals("durability")) {
                     durability = Float.parseFloat(property.getValue());
                 }
             }

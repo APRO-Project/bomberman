@@ -1,7 +1,6 @@
 package com.cyberbot.bomberman.core.models.tiles.loader;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.tiles.*;
 import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tileset;
@@ -13,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.InvalidPropertiesFormatException;
 
 public class TileMapFactory {
     private static final String TAG = TileMapFactory.class.getSimpleName();
@@ -21,11 +19,10 @@ public class TileMapFactory {
     private static final String LAYER_BASE = "base";
     private static final String LAYER_FLOOR = "floor";
     private static final String LAYER_WALLS = "walls";
-    private static Tile mapCsv;
 
 
     public static TileMap createTileMap(World world, String path) throws JAXBException,
-            FileNotFoundException, MissingLayersException {
+        FileNotFoundException, MissingLayersException {
 
         Map sourceMap = loadXmlMap(path);
         Tileset tileset = loadXmlTileset("./map/" + sourceMap.getTileset().getSource());
@@ -59,10 +56,6 @@ public class TileMapFactory {
             }
         }
 
-
-        TiledMapTileLayer tiledMapTileLayer = new TiledMapTileLayer(1, 1, 1, 1);
-        tiledMapTileLayer.getCell(1, 1);
-
         return new TileMap(baseLayer, floorLayer, wallsLayer);
     }
 
@@ -95,15 +88,15 @@ public class TileMapFactory {
         Tile[][] tiles = new Tile[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                tiles[y][x] = TileFactory.createTile(getTileById(tileset, strings[y*width+x]), world, x, y);
+                tiles[x][y] = TileFactory.createTile(getTileById(tileset, strings[(height - y - 1) * width + x]), world, x, y);
             }
         }
         return tiles;
     }
 
-    private static com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile getTileById(Tileset tileset, String id){
-        for (com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile tile : tileset.getTile()){
-            if (tile.getId().intValue() == Integer.parseInt(id)){
+    private static com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile getTileById(Tileset tileset, String id) {
+        for (com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile tile : tileset.getTile()) {
+            if (tile.getId().intValue() + 1 == Integer.parseInt(id)) {
                 return tile;
             }
         }
