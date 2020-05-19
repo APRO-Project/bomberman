@@ -8,7 +8,6 @@ import com.cyberbot.bomberman.screens.GameScreen;
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.InvalidPropertiesFormatException;
 
 public final class GameScreenManager {
 
@@ -31,7 +30,7 @@ public final class GameScreenManager {
         screens = new HashMap<>();
         try {
             screens.put(ScreenState.GAME, new GameScreen(app));
-        } catch (InvalidPropertiesFormatException | MissingLayersException | JAXBException | FileNotFoundException e) {
+        } catch (MissingLayersException | JAXBException | FileNotFoundException e) {
             e.printStackTrace();
         }
     }
