@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.net.EntityData;
 import com.cyberbot.bomberman.core.utils.Constants;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -13,8 +14,9 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * Abstract base for all game entities that contain a Box2D body.
  */
 public abstract class Entity implements Disposable, Updatable {
-    private final long id;
     private boolean remove;
+
+    protected final long id;
     protected Body body;
 
     public Entity(World world, long id) {
@@ -100,4 +102,6 @@ public abstract class Entity implements Disposable, Updatable {
     public long getId() {
         return id;
     }
+
+    public abstract EntityData<? extends Entity> getData();
 }

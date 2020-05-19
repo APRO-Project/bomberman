@@ -1,22 +1,19 @@
-package com.cyberbot.bomberman;
+package com.cyberbot.bomberman.server;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.controllers.GameStateController;
 import com.cyberbot.bomberman.core.controllers.PlayerActionController;
 import com.cyberbot.bomberman.core.controllers.PlayerMovementController;
+import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.core.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.InvalidPropertiesFormatException;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,14 +24,14 @@ public class Session {
     private final List<ClientConnection> clients = new ArrayList<>();
 
     private long lastUpdate;
-
-    private GameSnapshot snapshot;
     private PlayerSnapshot playerSnapshot;
     private GameStateController gameStateController;
     private PlayerActionController actionController;
     private PlayerMovementController playerMovementController;
     private PlayerEntity playerEntity;
     private World world;
+
+    private Queue<Action> actionsQueue = new ArrayDeque<>();
 
     public Session() {
         this.world = new World(new Vector2(0, 0), false);
@@ -48,14 +45,14 @@ public class Session {
 
         this.gameStateController = new GameStateController(world, map);
         lastUpdate = System.currentTimeMillis();
-        playerEntity = new PlayerEntity(world, new PlayerDef());
+        playerEntity = new PlayerEntity(world, new PlayerDef(0), 12345);
         actionController = new PlayerActionController(playerEntity);
         playerMovementController = new PlayerMovementController(playerEntity);
         playerEntity.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         gameStateController.addPlayers(Collections.singleton(playerEntity));
         playerSnapshot = new PlayerSnapshot(0);
-        snapshot = new GameSnapshot(0);
-        snapshot.position = playerEntity.getPosition();
+
+        actionController.addListener(gameStateController);
 
         ScheduledExecutorService updateService = new ScheduledThreadPoolExecutor(1);
         updateService.scheduleAtFixedRate(() -> {
@@ -71,8 +68,9 @@ public class Session {
         }
 
         PlayerSnapshot newSnapshot = Utils.fromByteArray(data, PlayerSnapshot.class);
-        if (newSnapshot != null && Utils.isSequenceNext(newSnapshot.sequence, playerSnapshot.sequence)) {
+        if (newSnapshot != null) { //&& Utils.isSequenceNext(newSnapshot.sequence, playerSnapshot.sequence)) {
             this.playerSnapshot = newSnapshot;
+            actionsQueue.addAll(playerSnapshot.actions);
         }
 
         return true;
@@ -101,6 +99,8 @@ public class Session {
     private synchronized void update(float delta) {
         world.step(delta, 6, 2);
         playerMovementController.move(playerSnapshot.movingDirection);
+        actionsQueue.forEach(action -> actionController.executeAction(action));
+        actionsQueue.clear();
         gameStateController.update(delta);
     }
 }

@@ -99,7 +99,11 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     public void onNewSnapshot(GameSnapshot snapshot) {
         // TODO: Save to a buffer and interpolate
         snapshotQueue.removeUntil(snapshot.sequence);
-        playerPosition = snapshot.position;
+        snapshot.entities.stream()
+            .filter(it -> it.getId() == localPlayer.getId())
+            .map(it -> it.getPosition().toVector2())
+            .findFirst()
+            .ifPresent(vector2 -> playerPosition = vector2);
     }
 
     private void createAndSendSnapshot() {

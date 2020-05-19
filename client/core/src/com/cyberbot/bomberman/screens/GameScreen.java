@@ -43,7 +43,7 @@ public class GameScreen extends AbstractScreen {
 
         try {
             gameplayController = new NetworkedGameplayController(
-                new PlayerDef(), "./map/bomberman_main.tmx",
+                new PlayerDef(0), "./map/bomberman_main.tmx",
                 new Connection(8038, InetAddress.getLocalHost())
             );
         } catch (UnknownHostException e) {

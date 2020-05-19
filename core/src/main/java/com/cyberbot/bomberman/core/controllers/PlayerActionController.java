@@ -45,7 +45,8 @@ public final class PlayerActionController implements ActionListener {
 
         switch (itemType) {
             case SMALL_BOMB:
-                BombDef def = new BombDef(2, 5, 3);
+                // TODO: Load a proper texture variant
+                BombDef def = new BombDef(2, 5, 3, player.getTextureVariant());
                 listeners.forEach(l -> l.onBombPlaced(def, player));
         }
     }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
+import com.cyberbot.bomberman.core.models.net.BombData;
 
 /**
  * A bomb entity.
@@ -14,6 +15,7 @@ public class BombEntity extends Entity {
     private final float power;
     private final float range;
     private final float detonationTime;
+    private final int textureVariant;
 
     private float timeLeft;
     private boolean blown;
@@ -25,6 +27,7 @@ public class BombEntity extends Entity {
         detonationTime = def.detonationTime;
 
         this.timeLeft = def.detonationTime;
+        textureVariant = def.textureVariant;
         this.blown = false;
     }
 
@@ -66,6 +69,11 @@ public class BombEntity extends Entity {
         }
     }
 
+    @Override
+    public BombData getData() {
+        return new BombData(id, getPosition(), textureVariant);
+    }
+
     public float getRange() {
         return range;
     }
@@ -80,5 +88,9 @@ public class BombEntity extends Entity {
 
     public boolean isBlown() {
         return blown;
+    }
+
+    public int getTextureVariant() {
+        return textureVariant;
     }
 }

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id "application"
 }
 
 sourceCompatibility = 1.8
@@ -8,6 +9,14 @@ repositories {
 }
 
 project.ext.assetsDir = new File("main/resources")
+
+ext {
+    javaMainClass = "com.cyberbot.bomberman.server.Server"
+}
+
+application {
+    mainClassName = javaMainClass
+}
 
 dependencies {
     implementation project(":core")

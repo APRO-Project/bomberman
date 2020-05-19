@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.net.CollectibleData;
 
 /**
  * A world entity that can be collected by a player.
@@ -35,6 +36,11 @@ public class CollectibleEntity extends Entity {
         fixture.setSensor(true);
         body.setUserData(this);
         shape.dispose();
+    }
+
+    @Override
+    public CollectibleData getData() {
+        return new CollectibleData(id, getPosition(), itemType);
     }
 
     public ItemType getItemType() {

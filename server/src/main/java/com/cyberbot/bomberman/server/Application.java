@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman;
+package com.cyberbot.bomberman.server;
 
 import com.badlogic.gdx.ApplicationListener;
 

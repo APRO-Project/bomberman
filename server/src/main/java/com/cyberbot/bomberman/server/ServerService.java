@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman;
+package com.cyberbot.bomberman.server;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -16,6 +16,7 @@ public class ServerService implements Runnable {
         sessions.add(new Session());
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
         try {

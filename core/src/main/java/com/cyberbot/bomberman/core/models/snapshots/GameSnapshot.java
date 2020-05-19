@@ -1,22 +1,17 @@
 package com.cyberbot.bomberman.core.models.snapshots;
 
-import com.badlogic.gdx.math.Vector2;
+import com.cyberbot.bomberman.core.models.net.EntityData;
 
 import java.io.Serializable;
+import java.util.List;
 
-// TODO: Add all missing fields (entities, other players, tiles)
+// TODO: Add tiles
 public class GameSnapshot implements Serializable {
     public final int sequence;
-    public Vector2 position;
+    public final List<EntityData<?>> entities;
 
-    public GameSnapshot(int sequence) {
+    public GameSnapshot(int sequence, List<EntityData<?>> entities) {
         this.sequence = sequence;
-    }
-
-    @Override
-    public String toString() {
-        return "GameSnapshot{" +
-            "position=" + position +
-            '}';
+        this.entities = entities;
     }
 }

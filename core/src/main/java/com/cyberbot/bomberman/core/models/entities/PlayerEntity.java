@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.net.PlayerData;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -125,6 +126,11 @@ public class PlayerEntity extends Entity {
     public void update(float delta) {
         super.update(delta);
         inventory.update(delta);
+    }
+
+    @Override
+    public PlayerData getData() {
+        return new PlayerData(id, getPosition(), inventory, textureVariant);
     }
 
     public enum PlayerState {

@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.core.models.items;
 
 import com.cyberbot.bomberman.core.models.Updatable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  *
  * @see ItemStack
  */
-public class Inventory implements Updatable {
+public class Inventory implements Updatable, Serializable {
     private final List<ItemStack> items;
 
     /**

@@ -8,6 +8,7 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.net.EntityData;
 import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -104,10 +106,8 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     public GameSnapshot createSnapshot(int sequence) {
-        // TODO: Add other parts of the game state
-        GameSnapshot snapshot = new GameSnapshot(sequence);
-        snapshot.position = players.get(0).getPosition();
-        return snapshot;
+        List<EntityData<?>> entities = entityStream().map(Entity::getData).collect(Collectors.toList());
+        return new GameSnapshot(sequence, entities);
     }
 
     @Override
@@ -141,7 +141,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             other = (Entity) b;
         } else if (b instanceof PlayerEntity && a instanceof Entity) {
             player = (PlayerEntity) b;
-            other = (Entity) b;
+            other = (Entity) a;
         } else {
             throw new RuntimeException("Contact detected between non-player entities");
         }
