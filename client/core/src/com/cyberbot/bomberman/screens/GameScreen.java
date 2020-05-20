@@ -26,7 +26,7 @@ import java.util.InvalidPropertiesFormatException;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class GameScreen extends AbstractScreen {
-    private final static int VIEWPORT_WIDTH = 15;
+    private final static int VIEWPORT_WIDTH = 30;
     private final static int VIEWPORT_HEIGHT = 15;
 
     GameStateController gsc;
@@ -43,6 +43,8 @@ public class GameScreen extends AbstractScreen {
     TileMap map;
 
     SpriteBatch batch;
+
+    GameHud hud;
 
     public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException {
         super(app);
@@ -72,6 +74,12 @@ public class GameScreen extends AbstractScreen {
         gsc.addPlayers(Arrays.asList(player));
 
         actionController.addListener(gsc);
+
+        hud = new GameHud(viewport);
+        hud.setPlayer(player);
+        // TODO: Store map virtual size as a constant value somewhere is this class
+        hud.createHud(15);
+        Gdx.input.setInputProcessor(hud);
     }
 
     @Override
@@ -97,7 +105,9 @@ public class GameScreen extends AbstractScreen {
         gsc.update(delta);
         txc.update(delta);
 
-        batch.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined.cpy().translate((VIEWPORT_WIDTH - 15) / 2f * PPM, 0, 0));
+
+        hud.act(delta);
     }
 
     @Override
@@ -108,7 +118,9 @@ public class GameScreen extends AbstractScreen {
         txc.draw(batch);
         batch.end();
 
-        //b2dr.render(world, camera.combined.cpy().scl(PPM));
+        hud.draw();
+
+        b2dr.render(world, camera.combined.cpy().translate((VIEWPORT_WIDTH - 15) / 2f * PPM, 0, 0).scl(PPM));
     }
 
     @Override
@@ -133,6 +145,8 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void dispose() {
+        hud.dispose();
+
         batch.dispose();
         gsc.dispose();
 
