@@ -16,5 +16,5 @@ public final class Constants {
     public static final float ANIMATION_SPEED = 1f;
 
     public static final int SIM_RATE = 60;
-    public static final int TICK_RATE = 20;
+    public static final int TICK_RATE = 60;
 }

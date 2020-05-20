@@ -59,7 +59,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         inputController.addMovementController(snapshotQueue);
         //inputController.addMovementController(playerMovement);
 
-        worldController = new LocalWorldController(world, 20, snapshotQueue, localPlayer);
+        worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
         worldController.addListener(textureController);
 
         netService = new NetService(connection, worldController);
