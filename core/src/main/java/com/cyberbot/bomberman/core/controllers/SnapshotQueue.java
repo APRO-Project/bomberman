@@ -56,7 +56,7 @@ public class SnapshotQueue implements MovementListener, ActionListener {
 
     public PlayerSnapshot createSnapshot() {
         PlayerSnapshot previousSnapshot = currentSnapshot;
-        queue.add(currentSnapshot);
+        queue.add(previousSnapshot);
         currentSnapshot = new PlayerSnapshot(previousSnapshot.sequence + 1);
         latestSequence = previousSnapshot.sequence;
         return previousSnapshot;

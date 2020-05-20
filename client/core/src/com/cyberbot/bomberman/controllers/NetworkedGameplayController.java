@@ -76,7 +76,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     @Override
     public void update(float delta) {
-        world.step(delta, 6, 2);
+
         localPlayer.setPosition(playerPosition);
 
         inputController.update(delta);
