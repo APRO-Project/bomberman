@@ -1,7 +1,8 @@
-package com.cyberbot.bomberman.screens;
+package com.cyberbot.bomberman.screens.hud;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -19,6 +20,7 @@ public class GameHud extends Stage {
     private Skin skin;
     private Table left;
     private Table right;
+    private HealthBar healthBar;
     private PlayerEntity player;
 
     public GameHud(Viewport viewport) {
@@ -59,20 +61,40 @@ public class GameHud extends Stage {
         Table playerView = createPlayerView();
         Table inventoryView = createInventoryView();
 
-        left.add(playerView).expandX();
-        left.row();
-        left.add(inventoryView).expandY();
+        NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
+
+        left.add(playerView).expandX().padLeft(PPM).row();
+        left.add(new Image(separator)).fillX().minHeight(2).prefHeight(2).row();
+        left.add(inventoryView).expandY().fill();
 //        left.setDebug(true);
     }
 
     private Table createPlayerView() {
         Table playerView = new Table();
 
-        Image image = new Image(Atlas.getInstance().findRegion("Player_bbb_idle_front"));
-        Label label = new Label("James", skin);
+        Image playerAvatar = new Image(Atlas.getInstance().findRegion("Player_bbb_idle_front"));
+        healthBar = new HealthBar(player, playerAvatar.getWidth() * 2, PPM / 2);
 
-        playerView.add(image).pad(5).minWidth(image.getWidth() * 2).minHeight(image.getHeight() * 2);
-        playerView.add(label).prefWidth(999);
+        Label playerLabel = new Label("James", skin);
+        playerLabel.setAlignment(Align.center);
+
+        TextButton crap = new TextButton("Kill em", skin);
+        crap.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                healthBar.changeHealthBy(-10);
+            }
+        });
+
+        playerView.add(playerAvatar)
+            .padBottom(5)
+            .minWidth(playerAvatar.getWidth() * 2)
+            .minHeight(playerAvatar.getHeight() * 2);
+        playerView.add(playerLabel).prefWidth(999).padBottom(5).row();
+        playerView.add(healthBar).padBottom(PPM / 2);
+        playerView.add(crap);
+
+//        playerView.setDebug(true);
 
         return playerView;
     }
@@ -80,15 +102,36 @@ public class GameHud extends Stage {
     private Table createInventoryView() {
         Table inventoryView = new Table();
 
-        TextButton buttonStart = new TextButton("EXIT GAME", skin);
-        buttonStart.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
+        Label inventoryLabel = new Label("Inventory", skin);
+        Table effects = new Table();
+        Table items = new Table();
 
-        inventoryView.add(buttonStart).row();
+        for(int i = 0; i < 5; ++i) {
+            Button ib1 = new Button(skin);
+            Button ib2 = new Button(skin);
+
+            ib1.add(new Image(Atlas.getInstance().findRegion("DynamiteStatic")));
+            ib2.add(new Image(Atlas.getInstance().findRegion("DynamiteStatic")));
+
+            effects.add(ib1).padBottom(PPM / 2).row();
+            items.add(ib2).padBottom(PPM / 2).row();
+        }
+
+        inventoryView.add(inventoryLabel).colspan(3).padTop(5).padBottom(PPM / 2).row();
+        inventoryView.add(effects).expandX();
+
+        NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
+        inventoryView.add(new Image(separator))
+            .expandY()
+//            .padLeft(PPM / 4)
+//            .padRight(PPM / 4)
+            .padBottom(PPM / 2)
+            .minWidth(2)
+            .prefWidth(2)
+            .prefHeight(999);
+
+        inventoryView.add(items).expandX();
+//        inventoryView.setDebug(true);
 
         return inventoryView;
     }

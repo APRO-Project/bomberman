@@ -19,6 +19,7 @@ import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.KeyBinds;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 
 import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;
@@ -120,7 +121,7 @@ public class GameScreen extends AbstractScreen {
 
         hud.draw();
 
-        b2dr.render(world, camera.combined.cpy().translate((VIEWPORT_WIDTH - 15) / 2f * PPM, 0, 0).scl(PPM));
+//        b2dr.render(world, camera.combined.cpy().translate((VIEWPORT_WIDTH - 15) / 2f * PPM, 0, 0).scl(PPM));
     }
 
     @Override

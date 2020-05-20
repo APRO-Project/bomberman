@@ -31,6 +31,20 @@
 		}
 	}
 
+	ImageButtonStyle: {
+		default: {
+			up: button_up
+			down: button_down
+		}
+	}
+
+	ButtonStyle: {
+		default: {
+			up: button_up
+			down: button_down
+		}
+	}
+
 	TextTooltipStyle: {
 		default: {
 			label: default
