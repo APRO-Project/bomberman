@@ -5,9 +5,10 @@ import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SnapshotQueue implements MovementListener, ActionListener {
+public class SnapshotQueue implements MovementListener, ActionListener, Iterable<PlayerSnapshot> {
     private final CircularFifoQueue<PlayerSnapshot> queue;
     private PlayerSnapshot currentSnapshot;
     private int latestSequence;
@@ -16,7 +17,7 @@ public class SnapshotQueue implements MovementListener, ActionListener {
         queue = new CircularFifoQueue<>(bufferSize);
 
         int sequence = ThreadLocalRandom.current().nextInt();
-        currentSnapshot = new PlayerSnapshot(sequence);
+        currentSnapshot = new PlayerSnapshot(0);
     }
 
     @Override
@@ -60,5 +61,10 @@ public class SnapshotQueue implements MovementListener, ActionListener {
         currentSnapshot = new PlayerSnapshot(previousSnapshot.sequence + 1);
         latestSequence = previousSnapshot.sequence;
         return previousSnapshot;
+    }
+
+    @Override
+    public Iterator<PlayerSnapshot> iterator() {
+        return queue.iterator();
     }
 }

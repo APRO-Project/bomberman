@@ -1,6 +1,7 @@
 package com.cyberbot.bomberman.net;
 
 import com.cyberbot.bomberman.core.models.net.Connection;
+import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
 import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;

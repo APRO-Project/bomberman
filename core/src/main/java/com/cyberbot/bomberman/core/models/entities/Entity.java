@@ -111,5 +111,23 @@ public abstract class Entity implements Disposable, Updatable {
         setPosition(data.getPosition().toVector2());
     }
 
+    public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
+        if (d0.getId() != id || d1.getId() != id) {
+            throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
+        }
+
+        if (fraction > 1 || fraction < 0) {
+            throw new IllegalArgumentException("Interpolation fraction has to be in range 0-1");
+        }
+
+        final Vector2 pos0 = d0.getPosition().toVector2();
+        final Vector2 pos1 = d1.getPosition().toVector2();
+
+        // After this operation pos1 holds the delta vector and pos0 the new resulting position
+        pos0.mulAdd(pos1.sub(pos0), fraction);
+
+        setPosition(pos0);
+    }
+
     public abstract EntityData<? extends Entity> getData();
 }

@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.net;
+package com.cyberbot.bomberman.core.models.net;
 
 import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 

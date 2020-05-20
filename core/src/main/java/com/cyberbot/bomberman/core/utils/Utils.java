@@ -51,4 +51,11 @@ public final class Utils {
             .orElseThrow(() ->
                 new NoSuchElementException("No element matching predicate in the collection"));
     }
+
+    public static <T> T firstOrNull(Collection<T> collection, Predicate<T> predicate) {
+        return collection.stream()
+            .filter(predicate)
+            .findFirst()
+            .orElse(null);
+    }
 }

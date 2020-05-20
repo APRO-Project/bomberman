@@ -8,6 +8,7 @@ import com.cyberbot.bomberman.core.controllers.PlayerMovementController;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -78,7 +79,10 @@ public class Session {
     }
 
     public byte[] getState() {
-        return Utils.toByteArray(gameStateController.createSnapshot(playerSnapshot.sequence));
+        GameSnapshot snapshot = gameStateController.createSnapshot();
+        // TODO Create separate for all clients;
+        GameSnapshot customizedSnapshot = new GameSnapshot(snapshot, playerEntity.getData(), playerSnapshot.sequence);
+        return Utils.toByteArray(customizedSnapshot);
     }
 
     public Iterable<ClientConnection> getClients() {

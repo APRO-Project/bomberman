@@ -105,9 +105,9 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         listeners.clear();
     }
 
-    public GameSnapshot createSnapshot(int sequence) {
+    public GameSnapshot createSnapshot() {
         List<EntityData<?>> entities = entityStream().map(Entity::getData).collect(Collectors.toList());
-        return new GameSnapshot(sequence, entities);
+        return new GameSnapshot(entities);
     }
 
     @Override
