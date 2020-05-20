@@ -14,4 +14,8 @@ public class GameSnapshot implements Serializable {
         this.sequence = sequence;
         this.entities = entities;
     }
+
+    public boolean hasEntity(long id) {
+        return entities.stream().anyMatch(it -> it.getId() == id);
+    }
 }

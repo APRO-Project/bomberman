@@ -103,5 +103,13 @@ public abstract class Entity implements Disposable, Updatable {
         return id;
     }
 
+    public void updateFromData(EntityData<?> data) {
+        if (data.getId() != id) {
+            throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
+        }
+
+        setPosition(data.getPosition().toVector2());
+    }
+
     public abstract EntityData<? extends Entity> getData();
 }

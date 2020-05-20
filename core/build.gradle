@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-lang3:3.10'
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
