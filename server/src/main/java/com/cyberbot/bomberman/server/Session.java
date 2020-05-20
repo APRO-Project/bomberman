@@ -19,6 +19,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
+import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 
 public class Session {
     private final List<ClientConnection> clients = new ArrayList<>();
@@ -59,7 +60,7 @@ public class Session {
             long t0 = System.currentTimeMillis();
             update((t0 - lastUpdate) / 1_000f);
             lastUpdate = t0;
-        }, 0, 1_000_000 / 60, TimeUnit.MICROSECONDS);
+        }, 0, 1_000_000 / SIM_RATE, TimeUnit.MICROSECONDS);
     }
 
     public boolean handlePacket(ClientConnection connection, byte[] data, int length) {

@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
+import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable, GameSnapshotListener {
     private final PlayerEntity localPlayer;
@@ -71,7 +72,8 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         new Thread(netService).start();
 
         snapshotService = new ScheduledThreadPoolExecutor(1);
-        snapshotService.scheduleAtFixedRate(this::createAndSendSnapshot, 0, 50, TimeUnit.MILLISECONDS);
+        snapshotService.scheduleAtFixedRate(this::createAndSendSnapshot,
+            0, 1_000_000 / TICK_RATE, TimeUnit.MICROSECONDS);
     }
 
     @Override

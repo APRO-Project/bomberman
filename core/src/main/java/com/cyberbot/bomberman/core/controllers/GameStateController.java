@@ -33,7 +33,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     private final List<PlayerEntity> players;
     private final List<CollectibleEntity> collectibles;
 
-    private final List<ChangeListener> listeners;
+    private final List<WorldChangeListener> listeners;
 
     public GameStateController(World world, TileMap map) {
         this.world = world;
@@ -93,11 +93,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         players.forEach(this::onEntityAdded);
     }
 
-    public void addListener(ChangeListener listener) {
+    public void addListener(WorldChangeListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(ChangeListener listener) {
+    public void removeListener(WorldChangeListener listener) {
         listeners.remove(listener);
     }
 
@@ -300,24 +300,5 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
     private boolean hasEntity(long id) {
         return entityStream().map(Entity::getId).anyMatch(pId -> pId == id);
-    }
-
-    /**
-     * An interface that any parties interested in changes to the game entities should implement.
-     */
-    public interface ChangeListener {
-        /**
-         * Called when a new {@link Entity} has been added to game.
-         *
-         * @param entity The new entity.
-         */
-        void onEntityAdded(Entity entity);
-
-        /**
-         * Called when an {@link Entity} has been removed from the game.
-         *
-         * @param entity The removed entity.
-         */
-        void onEntityRemoved(Entity entity);
     }
 }

@@ -14,4 +14,7 @@ public final class Constants {
      * such as bomb fuse animations)
      */
     public static final float ANIMATION_SPEED = 1f;
+
+    public static final int SIM_RATE = 60;
+    public static final int TICK_RATE = 20;
 }

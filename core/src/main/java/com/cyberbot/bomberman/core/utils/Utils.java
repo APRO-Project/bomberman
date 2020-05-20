@@ -1,6 +1,9 @@
 package com.cyberbot.bomberman.core.utils;
 
 import java.io.*;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 public final class Utils {
     public static byte[] toByteArray(Object o) {
@@ -39,5 +42,13 @@ public final class Utils {
         } else {
             return sequence <= previous;
         }
+    }
+
+    public static <T> T first(Collection<T> collection, Predicate<T> predicate) {
+        return collection.stream()
+            .filter(predicate)
+            .findFirst()
+            .orElseThrow(() ->
+                new NoSuchElementException("No element matching predicate in the collection"));
     }
 }
