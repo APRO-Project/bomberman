@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.controllers.GameStateController;
 import com.cyberbot.bomberman.core.controllers.PlayerActionController;
-import com.cyberbot.bomberman.core.controllers.PlayerMovementController;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
@@ -29,11 +28,10 @@ public class Session {
     private PlayerSnapshot playerSnapshot;
     private GameStateController gameStateController;
     private PlayerActionController actionController;
-    private PlayerMovementController playerMovementController;
     private PlayerEntity playerEntity;
     private World world;
 
-    private Queue<Action> actionsQueue = new ArrayDeque<>();
+    private Queue<List<Action>> actionsQueue = new ArrayDeque<>();
 
     public Session() {
         this.world = new World(new Vector2(0, 0), false);
@@ -49,7 +47,6 @@ public class Session {
         lastUpdate = System.currentTimeMillis();
         playerEntity = new PlayerEntity(world, new PlayerDef(0), 12345);
         actionController = new PlayerActionController(playerEntity);
-        playerMovementController = new PlayerMovementController(playerEntity);
         playerEntity.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         gameStateController.addPlayers(Collections.singleton(playerEntity));
         playerSnapshot = new PlayerSnapshot(0);
@@ -103,9 +100,10 @@ public class Session {
 
     private synchronized void update(float delta) {
         world.step(delta, 6, 2);
-        playerMovementController.move(playerSnapshot.movingDirection);
-        actionsQueue.forEach(action -> actionController.executeAction(action));
-        actionsQueue.clear();
+        List<Action> actions = actionsQueue.poll();
+        if (actions != null) {
+            actionController.onActions(actions);
+        }
         gameStateController.update(delta);
     }
 }

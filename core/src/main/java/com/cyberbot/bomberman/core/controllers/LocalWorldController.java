@@ -3,17 +3,19 @@ package com.cyberbot.bomberman.core.controllers;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.EntityData;
 import com.cyberbot.bomberman.core.models.net.EntityDataPair;
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
 import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
-import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 
 public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener {
     private final int tickRate;
@@ -48,7 +50,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         world.step(delta, 6, 2);
 
         // Update all entities
-        entities.forEach((key, value) -> value.update(delta));
+        entities.forEach((key, entity) -> entity.update(delta));
 
         // Remove any entities marked for removal
         entities.entrySet().removeIf(it -> it.getValue().isMarkedToRemove());
@@ -118,10 +120,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     private void replayMovement() {
-        PlayerMovementController movementController = new PlayerMovementController(localPlayer);
-        for (PlayerSnapshot snapshot : interactionQueue) {
-            movementController.move(snapshot.movingDirection);
-            world.step(1f / tickRate, 6, 2);
+        PlayerActionController movementController = new PlayerActionController(localPlayer);
+        for (List<Action> actions : interactionQueue.userInputStream().collect(Collectors.toList())) {
+            movementController.onActions(actions);
+            world.step(1f / SIM_RATE, 6, 2);
         }
     }
 

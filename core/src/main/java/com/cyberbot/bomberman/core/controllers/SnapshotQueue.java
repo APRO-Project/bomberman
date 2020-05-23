@@ -5,10 +5,13 @@ import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
-public class SnapshotQueue implements MovementListener, ActionListener, Iterable<PlayerSnapshot> {
+public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshot> {
     private final CircularFifoQueue<PlayerSnapshot> queue;
     private PlayerSnapshot currentSnapshot;
     private int latestSequence;
@@ -21,13 +24,8 @@ public class SnapshotQueue implements MovementListener, ActionListener, Iterable
     }
 
     @Override
-    public void executeAction(Action action) {
-        currentSnapshot.actions.add(action);
-    }
-
-    @Override
-    public void move(int direction) {
-        currentSnapshot.movingDirection = direction;
+    public void onActions(List<Action> actions) {
+        currentSnapshot.actions.add(actions);
     }
 
     public int removeUntil(int latestSequence) {
@@ -61,6 +59,10 @@ public class SnapshotQueue implements MovementListener, ActionListener, Iterable
         currentSnapshot = new PlayerSnapshot(previousSnapshot.sequence + 1);
         latestSequence = previousSnapshot.sequence;
         return previousSnapshot;
+    }
+
+    public Stream<List<Action>> userInputStream() {
+        return queue.stream().map(it -> it.actions).flatMap(Collection::stream);
     }
 
     @Override

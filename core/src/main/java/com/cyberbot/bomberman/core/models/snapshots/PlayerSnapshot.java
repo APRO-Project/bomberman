@@ -9,12 +9,10 @@ import java.util.List;
 public final class PlayerSnapshot implements Serializable {
     public final int sequence;
 
-    public int movingDirection;
-    public final List<Action> actions;
+    public final List<List<Action>> actions;
 
     public PlayerSnapshot(int sequence) {
         this.sequence = sequence;
-        movingDirection = 0;
         actions = new ArrayList<>();
     }
 
@@ -22,7 +20,6 @@ public final class PlayerSnapshot implements Serializable {
     public String toString() {
         return "PlayerSnapshot{" +
             "sequence=" + sequence +
-            ", movingDirection=" + movingDirection +
             ", actions=" + actions +
             '}';
     }

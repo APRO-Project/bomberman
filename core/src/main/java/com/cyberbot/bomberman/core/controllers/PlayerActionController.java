@@ -1,6 +1,8 @@
 package com.cyberbot.bomberman.core.controllers;
 
+import com.badlogic.gdx.math.Vector2;
 import com.cyberbot.bomberman.core.models.actions.Action;
+import com.cyberbot.bomberman.core.models.actions.MoveAction;
 import com.cyberbot.bomberman.core.models.actions.UseItemAction;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
@@ -32,9 +34,13 @@ public final class PlayerActionController implements ActionListener {
     }
 
     @Override
-    public void executeAction(Action action) {
-        if (action instanceof UseItemAction) {
-            useItem(((UseItemAction) action).getItemType());
+    public void onActions(List<Action> actions) {
+        for (Action action : actions) {
+            if (action instanceof UseItemAction) {
+                useItem(((UseItemAction) action).getItemType());
+            } else if (action instanceof MoveAction) {
+                move(((MoveAction) action).getDirection());
+            }
         }
     }
 
@@ -49,6 +55,42 @@ public final class PlayerActionController implements ActionListener {
                 BombDef def = new BombDef(2, 5, 3, player.getTextureVariant());
                 listeners.forEach(l -> l.onBombPlaced(def, player));
         }
+    }
+
+    private void move(int direction) {
+        float maxVelocity = PlayerEntity.MAX_VELOCITY_BASE * player.getMaxSpeedModifier();
+        float drag = PlayerEntity.DRAG_BASE * player.getDragModifier();
+
+        Vector2 velocity = player.getVelocity();
+        if (direction == 0 && velocity.len() < 1) {
+            player.setVelocity(new Vector2(0, 0));
+        }
+
+        float desiredVelocityX = 0;
+        float desiredVelocityY = 0;
+
+        if ((direction & MoveAction.LEFT) > 0) {
+            desiredVelocityX -= maxVelocity;
+        }
+        if ((direction & MoveAction.RIGHT) > 0) {
+            desiredVelocityX += maxVelocity;
+        }
+        if ((direction & MoveAction.UP) > 0) {
+            desiredVelocityY += maxVelocity;
+        }
+        if ((direction & MoveAction.DOWN) > 0) {
+            desiredVelocityY -= maxVelocity;
+        }
+
+        float velocityChangeX = desiredVelocityX - velocity.x;
+        float velocityChangeY = desiredVelocityY - velocity.y;
+
+        float forceX = player.getMass() * velocityChangeX * drag;
+        float forceY = player.getMass() * velocityChangeY * drag;
+
+        Vector2 force = new Vector2(forceX, forceY);
+
+        player.applyForce(force);
     }
 
     public interface Listener {

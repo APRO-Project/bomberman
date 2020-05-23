@@ -12,8 +12,10 @@ import com.cyberbot.bomberman.core.models.net.PlayerData;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
-    private static final float ANIMATION_DURATION = 0.2f;
+    public static final float MAX_VELOCITY_BASE = 5 * PPM;
+    public static final float DRAG_BASE = 60f;
 
+    private static final float ANIMATION_DURATION = 0.2f;
 
     private final int textureVariant;
     private final Inventory inventory;

@@ -16,6 +16,7 @@ public abstract class Action implements Serializable {
     }
 
     public enum Type {
+        MOVE(0),
         USE_ITEM(1);
 
         private final int value;

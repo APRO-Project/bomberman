@@ -15,6 +15,14 @@ public final class Constants {
      */
     public static final float ANIMATION_SPEED = 1f;
 
+    /**
+     * How many times per second the user's input should be polled and
+     * how many times per second the server simulates the world.
+     */
     public static final int SIM_RATE = 60;
-    public static final int TICK_RATE = 60;
+
+    /**
+     * How many times per second a snapshot is sent over the network.
+     */
+    public static final int TICK_RATE = 20;
 }

@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
-import com.cyberbot.bomberman.core.controllers.PlayerMovementController;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
@@ -24,8 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.cyberbot.bomberman.core.utils.Constants.PPM;
-import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
+import static com.cyberbot.bomberman.core.utils.Constants.*;
 
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable {
     private final PlayerEntity localPlayer;
@@ -40,6 +38,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final NetService netService;
 
     private final ScheduledExecutorService snapshotService;
+    private final ScheduledExecutorService inputPollService;
 
     public NetworkedGameplayController(PlayerDef player, String mapPath, Connection connection)
         throws MissingLayersException, InvalidPropertiesFormatException {
@@ -51,12 +50,10 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         textureController = new TextureController(map);
 
-        PlayerMovementController playerMovement = new PlayerMovementController(localPlayer);
         snapshotQueue = new SnapshotQueue(100);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);
-        inputController.addMovementController(snapshotQueue);
         //inputController.addMovementController(playerMovement);
 
         worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
@@ -68,11 +65,15 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         snapshotService = new ScheduledThreadPoolExecutor(1);
         snapshotService.scheduleAtFixedRate(this::createAndSendSnapshot,
             0, 1_000_000 / TICK_RATE, TimeUnit.MICROSECONDS);
+
+        inputPollService = new ScheduledThreadPoolExecutor(1);
+        inputPollService.scheduleAtFixedRate(inputController::poll,
+            0, 1_000_000 / SIM_RATE, TimeUnit.MICROSECONDS);
+
     }
 
     @Override
     public void update(float delta) {
-        inputController.update(delta);
         worldController.update(delta);
         textureController.update(delta);
     }
