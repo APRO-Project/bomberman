@@ -11,7 +11,7 @@ import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.Connection;
-import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.Drawable;
@@ -92,8 +92,8 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private void createAndSendSnapshot() {
         try {
-            PlayerSnapshot snapshot = snapshotQueue.createSnapshot();
-            netService.sendPlayerSnapshot(snapshot);
+            PlayerSnapshotPacket packet = snapshotQueue.createSnapshot();
+            netService.sendPlayerSnapshot(packet);
         } catch (Exception e) {
             Gdx.app.log("Exception", e.toString());
         }

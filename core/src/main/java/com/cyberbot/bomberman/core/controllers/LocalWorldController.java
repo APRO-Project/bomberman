@@ -7,10 +7,10 @@ import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
-import com.cyberbot.bomberman.core.models.net.GameSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.EntityDataPair;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 
 import java.util.*;

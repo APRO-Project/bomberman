@@ -4,9 +4,6 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
   </component>
-  <component name="LibGDXSkins">
-    <file url="file://$PROJECT_DIR$/client/core/assets/skins/skin.json" />
-  </component>
   <component name="ProjectPlainTextFileTypeManager">
     <file url="file://$PROJECT_DIR$/client/core/assets/map/tiles_main_16.tsx" />
   </component>

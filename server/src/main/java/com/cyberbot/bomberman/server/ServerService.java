@@ -1,5 +1,9 @@
 package com.cyberbot.bomberman.server;
 
+import com.cyberbot.bomberman.core.models.net.InvalidPacketFormatException;
+import com.cyberbot.bomberman.core.models.net.SerializationUtils;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -28,23 +32,16 @@ public class ServerService implements Runnable {
 
                 ClientConnection client = ClientConnection.fromDatagramPacket(packet);
 
-                boolean inSession = false;
-                for (Session session : sessions) {
-                    if (session.handlePacket(client, packet.getData(), packet.getLength())) {
-                        if (inSession) {
-                            throw new IllegalStateException("Client present in multiple sessions");
-                        }
+                Object o = SerializationUtils.INSTANCE.deserialize(buffer, packet.getLength(), 0);
 
-                        inSession = true;
-                    }
-                }
-
-                if (!inSession) {
-                    // TODO: Read packet and assign or create session
-                    sessions.get(0).addClient(client);
+                if (o instanceof PlayerSnapshotPacket) {
+                    sessions.stream()
+                        .filter(it -> it.hasClient(client))
+                        .findFirst()
+                        .ifPresent(session -> session.onSnapshot(client, (PlayerSnapshotPacket) o));
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | InvalidPacketFormatException e) {
             e.printStackTrace();
         }
     }

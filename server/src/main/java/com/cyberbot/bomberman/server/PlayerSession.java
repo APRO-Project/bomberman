@@ -5,7 +5,7 @@ import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.PlayerSnapshotListener;
-import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.util.List;
@@ -49,9 +49,9 @@ public class PlayerSession implements PlayerSnapshotListener, Updatable {
     }
 
     @Override
-    public void onNewSnapshot(PlayerSnapshot snapshot) {
-        actionQueue.addAll(snapshot.actions);
-        sequence = snapshot.sequence;
+    public void onNewSnapshot(PlayerSnapshotPacket snapshot) {
+        actionQueue.addAll(snapshot.getSnapshot().actions);
+        sequence = snapshot.getSequence();
     }
 
     public int getSequence() {

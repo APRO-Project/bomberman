@@ -20,7 +20,7 @@ public final class Utils {
         return null;
     }
 
-    public static Object fromByteArray(byte[] buf) {
+    public static Object fromByteArray(byte[] buf, int offset, int length) {
         ByteArrayInputStream bis = new ByteArrayInputStream(buf);
         try (ObjectInput in = new ObjectInputStream(bis)) {
             return in.readObject();

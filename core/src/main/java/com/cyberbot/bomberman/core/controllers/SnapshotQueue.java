@@ -1,26 +1,27 @@
 package com.cyberbot.bomberman.core.controllers;
 
 import com.cyberbot.bomberman.core.models.actions.Action;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshot> {
-    private final CircularFifoQueue<PlayerSnapshot> queue;
+public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshotPacket> {
+    private final CircularFifoQueue<PlayerSnapshotPacket> queue;
     private PlayerSnapshot currentSnapshot;
     private int latestSequence;
 
     public SnapshotQueue(int bufferSize) {
         queue = new CircularFifoQueue<>(bufferSize);
 
-        int sequence = ThreadLocalRandom.current().nextInt();
-        currentSnapshot = new PlayerSnapshot(0);
+        latestSequence = 0;
+        currentSnapshot = new PlayerSnapshot();
     }
 
     @Override
@@ -30,7 +31,7 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshot> {
 
     public int removeUntil(int latestSequence) {
         int removed = 0;
-        while (queue.size() > 0 && Utils.isSequenceNext(latestSequence, queue.peek().sequence)) {
+        while (queue.size() > 0 && Utils.isSequenceNext(latestSequence, queue.peek().getSequence())) {
             removed++;
             queue.remove();
         }
@@ -42,7 +43,7 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshot> {
     }
 
     public Integer getOldestSequence() {
-        return queue.peek() != null ? queue.peek().sequence : null;
+        return queue.peek() != null ? queue.peek().getSequence() : null;
     }
 
     public Integer getLatestSequence() {
@@ -53,20 +54,21 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshot> {
         return queue.isFull();
     }
 
-    public PlayerSnapshot createSnapshot() {
-        PlayerSnapshot previousSnapshot = currentSnapshot;
-        queue.add(previousSnapshot);
-        currentSnapshot = new PlayerSnapshot(previousSnapshot.sequence + 1);
-        latestSequence = previousSnapshot.sequence;
-        return previousSnapshot;
+    public PlayerSnapshotPacket createSnapshot() {
+        PlayerSnapshotPacket packet = new PlayerSnapshotPacket(latestSequence + 1, currentSnapshot);
+        queue.add(packet);
+        currentSnapshot = new PlayerSnapshot();
+        latestSequence++;
+        return packet;
     }
 
     public Stream<List<Action>> userInputStream() {
-        return queue.stream().map(it -> it.actions).flatMap(Collection::stream);
+        return queue.stream().map(it -> it.getSnapshot().actions).flatMap(Collection::stream);
     }
 
+    @NotNull
     @Override
-    public Iterator<PlayerSnapshot> iterator() {
+    public Iterator<PlayerSnapshotPacket> iterator() {
         return queue.iterator();
     }
 }

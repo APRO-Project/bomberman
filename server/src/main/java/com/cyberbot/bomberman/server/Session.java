@@ -5,12 +5,11 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.controllers.GameStateController;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.net.GameSnapshotPacket;
+import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
-import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
-import com.cyberbot.bomberman.core.utils.Utils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -58,21 +57,14 @@ public class Session {
         tickService = new ScheduledThreadPoolExecutor(1);
     }
 
-    public boolean handlePacket(ClientConnection connection, byte[] data, int length) {
+    public boolean onSnapshot(ClientConnection connection, PlayerSnapshotPacket packet) {
         if (!hasClient(connection)) {
             return false;
         }
 
-        // TODO: Implement other packet types connection packets
-        Object payload = Utils.fromByteArray(data);
-        if (payload instanceof PlayerSnapshot) {
-            PlayerSnapshot snapshot = (PlayerSnapshot) payload;
-            clientSessions.get(connection).onNewSnapshot(snapshot);
+        clientSessions.get(connection).onNewSnapshot(packet);
 
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     public void addClient(ClientConnection connection) {

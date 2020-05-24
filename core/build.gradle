@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 sourceCompatibility = 1.8
@@ -19,4 +20,5 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.6.0'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
