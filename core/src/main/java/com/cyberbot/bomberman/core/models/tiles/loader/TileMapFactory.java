@@ -3,15 +3,18 @@ package com.cyberbot.bomberman.core.models.tiles.loader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.tiles.*;
-import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tileset;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.InvalidPropertiesFormatException;
 
 public class TileMapFactory {
     private static final String TAG = TileMapFactory.class.getSimpleName();
@@ -21,26 +24,34 @@ public class TileMapFactory {
     private static final String LAYER_WALLS = "walls";
 
 
-    public static TileMap createTileMap(World world, String path) throws JAXBException,
-        FileNotFoundException, MissingLayersException {
+    public static TileMap createTileMap(World world, String path) throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
 
-        Map sourceMap = loadXmlMap(path);
-        Tileset tileset = loadXmlTileset("./map/" + sourceMap.getTileset().getSource());
+        Node sourceMap = loadXmlMap(path);
+        Element mapElement = (Element) sourceMap;
+        NodeList tilesetSource = mapElement.getElementsByTagName("tileset");
+        Element tilesetSourceElement = (Element) tilesetSource.item(0);
+
+        NodeList tileset = loadXmlTileset("./map/" + tilesetSourceElement.getAttribute("source"));
 
         TileMapLayer baseLayer = null;
         TileMapLayer floorLayer = null;
         TileMapLayer wallsLayer = null;
 
-        for (Layer layer : sourceMap.getLayer()) {
 
-            Tile[][] tiles = csvStringToTileArray(layer.getData().getContent(),
-                layer.getWidth().intValue(),
-                layer.getHeight().intValue(),
+        NodeList layers = mapElement.getElementsByTagName("layer");
+
+        for (int i = 0; i < layers.getLength(); i++) {
+            Element element = (Element) layers.item(i);
+
+            Tile[][] tiles = csvStringToTileArray(element.getElementsByTagName("data").item(0).getTextContent(),
+                Integer.parseInt(element.getAttribute("width")),
+                Integer.parseInt(element.getAttribute("height")),
                 tileset,
                 world);
 
-            TileMapLayer mapLayer = new TileMapLayer(layer.getWidth().intValue(), layer.getHeight().intValue(), tiles);
-            switch (layer.getName()) {
+            TileMapLayer mapLayer = new TileMapLayer(Integer.parseInt(element.getAttribute("width")),
+                Integer.parseInt(element.getAttribute("height")), tiles);
+            switch (element.getAttribute("name")) {
                 case LAYER_BASE:
                     baseLayer = mapLayer;
                     break;
@@ -52,52 +63,56 @@ public class TileMapFactory {
                     break;
                 default:
                     Gdx.app.error(TAG, "Unsupported tile layer found: '" +
-                        layer.getName() + "', will be ignored");
+                        element.getAttribute("name") + "', will be ignored");
             }
         }
-
         return new TileMap(baseLayer, floorLayer, wallsLayer);
     }
 
-    private static Map loadXmlMap(String path) throws JAXBException, FileNotFoundException {
+    private static Node loadXmlMap(String path) throws IOException, ParserConfigurationException, SAXException {
 
-        JAXBContext jaxbContext;
-
-        jaxbContext = JAXBContext.newInstance(Map.class);
-        Unmarshaller um = jaxbContext.createUnmarshaller();
-
-        return (Map) um.unmarshal(new InputStreamReader(
-            new FileInputStream(path), StandardCharsets.UTF_8)
-        );
+        File inputFile = new File(path);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.parse(inputFile);
+        document.getDocumentElement().normalize();
+        return document.getDocumentElement();
     }
 
-    private static Tileset loadXmlTileset(String path) throws JAXBException, FileNotFoundException {
+    private static NodeList loadXmlTileset(String path) throws IOException, ParserConfigurationException, SAXException {
 
-        JAXBContext jaxbContext;
-
-        jaxbContext = JAXBContext.newInstance(Tileset.class);
-        Unmarshaller um = jaxbContext.createUnmarshaller();
-
-        return (Tileset) um.unmarshal(new InputStreamReader(
-            new FileInputStream(path), StandardCharsets.UTF_8)
-        );
+        File inputFile = new File(path);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.parse(inputFile);
+        document.getDocumentElement().normalize();
+        return document.getElementsByTagName("tile");
     }
 
-    private static Tile[][] csvStringToTileArray(String input, int width, int height, Tileset tileset, World world) {
-        String[] strings = input.trim().replaceAll("\n", "").split(",");
+    private static Tile[][] csvStringToTileArray(String input, int width, int height, NodeList tileset, World world)
+        throws InvalidPropertiesFormatException {
+        String[] mapStringArray = input.trim().replaceAll("\n", "").split(",");
         Tile[][] tiles = new Tile[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                tiles[x][y] = TileFactory.createTile(getTileById(tileset, strings[(height - y - 1) * width + x]), world, x, y);
+                tiles[x][y] = TileFactory.createTile(getTileById(tileset, mapStringArray[(height - y - 1) * width + x]),
+                    world,
+                    x,
+                    y);
             }
         }
         return tiles;
     }
 
-    private static com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile getTileById(Tileset tileset, String id) {
-        for (com.cyberbot.bomberman.core.models.tiles.loader.tileset.Tile tile : tileset.getTile()) {
-            if (tile.getId().intValue() + 1 == Integer.parseInt(id)) {
-                return tile;
+    private static NodeList getTileById(NodeList tileset, String id) {
+        for (int i = 0; i < tileset.getLength(); i++) {
+            Node node = tileset.item(i);
+            Element element = (Element) node;
+            int tileId = Integer.parseInt(id) - 1;
+            if (Integer.parseInt(element.getAttribute("id")) == tileId) {
+                Node properties = element.getElementsByTagName("properties").item(0);
+                Element element1 = (Element) properties;
+                return element1.getElementsByTagName("property");
             }
         }
         return null;

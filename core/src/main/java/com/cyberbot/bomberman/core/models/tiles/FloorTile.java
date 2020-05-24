@@ -1,6 +1,8 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
-import com.cyberbot.bomberman.core.models.tiles.loader.tileset.Property;
+
+import java.util.HashMap;
+import java.util.InvalidPropertiesFormatException;
 
 /**
  * Objects of this class represent a floor tile with special {@link Properties}.
@@ -42,21 +44,26 @@ public class FloorTile extends Tile {
             this.dragMultiplier = dragMultiplier;
         }
 
-        static Properties fromTileProperties(com.cyberbot.bomberman.core.models.tiles.loader.tileset.Properties properties) {
-            float maxSpeedMultiplier = 1f;
-            float dragMultiplier = 1f;
-
-            for (Property property : properties.getProperty()) {
-                if (property.getName().equals("max_speed")) {
-                    maxSpeedMultiplier = Float.parseFloat(property.getValue());
-                }
-
-                if (property.getName().equals("drag")) {
-                    dragMultiplier = Float.parseFloat(property.getValue());
-                }
+        static Properties fromProperties(HashMap<String, Object> properties) throws InvalidPropertiesFormatException {
+            if (!properties.containsKey(DRAG) ||
+                !properties.containsKey(MAX_SPEED)) {
+                throw new InvalidPropertiesFormatException(
+                    "Floor tiles have to contain '" +
+                        FloorTile.Properties.DRAG + "' and '" +
+                        FloorTile.Properties.MAX_SPEED + "' float properties"
+                );
             }
 
-            return new Properties(maxSpeedMultiplier, dragMultiplier);
+            try {
+                return new Properties(
+                    (float) properties.get(MAX_SPEED),
+                    (float) properties.get(DRAG)
+                );
+            } catch (ClassCastException e) {
+                throw new InvalidPropertiesFormatException("Floor tiles have to contain '" +
+                    FloorTile.Properties.DRAG + "' and '" +
+                    FloorTile.Properties.MAX_SPEED + "' float properties");
+            }
         }
     }
 }

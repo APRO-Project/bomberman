@@ -20,11 +20,12 @@ import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.KeyBinds;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
-import java.io.FileNotFoundException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.InvalidPropertiesFormatException;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -47,7 +48,8 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws MissingLayersException, JAXBException, FileNotFoundException {
+    public GameScreen(final Client app) throws MissingLayersException, IOException, ParserConfigurationException,
+        SAXException {
         super(app);
 
         camera = new OrthographicCamera();
