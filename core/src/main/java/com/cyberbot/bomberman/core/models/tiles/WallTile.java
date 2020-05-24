@@ -67,7 +67,8 @@ public class WallTile extends PhysicalTile {
                 }
                 return new Properties(durability);
             } catch (ClassCastException e) {
-                throw new InvalidPropertiesFormatException("The type of '" + DURABILITY + "' property has to be float.");
+                throw new InvalidPropertiesFormatException("Wall tiles have to contain '" +
+                    Properties.DURABILITY + "' float property");
             }
         }
 

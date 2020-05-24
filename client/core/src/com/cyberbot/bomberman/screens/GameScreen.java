@@ -22,7 +22,6 @@ import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.KeyBinds;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -67,7 +66,7 @@ public class GameScreen extends AbstractScreen {
 
         batch = new SpriteBatch();
 
-        map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
+        map = TileMapFactory.createTileMap(world, "./map/", "bomberman_main.tmx");
 
         gsc = new GameStateController(world, map);
 

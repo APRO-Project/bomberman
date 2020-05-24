@@ -20,6 +20,16 @@ public class TileFactory {
     private static final String TILE_TYPE_WALL = "wall";
     private static final String TILE_TYPE_BASE = "base";
 
+    /**
+     * Factory method for parsing DOM NodeList of tile properties and creating a new tile based on them.
+     *
+     * @param tile DOM NodeList of tile properties.
+     * @param world The world to bind the body to.
+     * @param x horizontal coordinate.
+     * @param y vertical coordinate.
+     * @return created Tile
+     * @throws InvalidPropertiesFormatException thrown on misdefined value type.
+     */
     public static Tile createTile(NodeList tile, World world, int x, int y) throws InvalidPropertiesFormatException {
         if (tile == null) {
             return null;
@@ -42,6 +52,7 @@ public class TileFactory {
                     properties.put(element.getAttribute("name"), element.getAttribute("value"));
             }
         }
+
         if (!properties.containsKey(PROPERTY_TILE_TYPE) || !properties.containsKey(PROPERTY_TEXTURE_NAME)) {
             throw new InvalidPropertiesFormatException(
                 "Each tile in the tile map has to contain '" +
@@ -50,8 +61,17 @@ public class TileFactory {
             );
         }
 
-        String tileType = (String) properties.get(PROPERTY_TILE_TYPE);
-        String textureName = (String) properties.get(PROPERTY_TEXTURE_NAME);
+        String tileType;
+        String textureName;
+
+        try {
+            tileType = (String) properties.get(PROPERTY_TILE_TYPE);
+            textureName = (String) properties.get(PROPERTY_TEXTURE_NAME);
+        } catch (ClassCastException classCastException) {
+            throw new InvalidPropertiesFormatException("All tiles have to contain '" +
+                PROPERTY_TILE_TYPE + "' and '" +
+                PROPERTY_TEXTURE_NAME + "' String(default) properties");
+        }
 
         switch (tileType) {
             case TILE_TYPE_FLOOR:
