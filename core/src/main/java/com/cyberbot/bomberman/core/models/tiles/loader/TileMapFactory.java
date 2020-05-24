@@ -41,7 +41,7 @@ public class TileMapFactory {
         Element sourceMap = (Element) loadXmlMap(mapFile);
         Element tilesetSourceElement = (Element) sourceMap.getElementsByTagName("tileset").item(0);
 
-        File tilesetFile = new File(mapFile.getParent() + "/" + tilesetSourceElement.getAttribute("source"));
+        File tilesetFile = new File(mapFile.getParent() + File.separator + tilesetSourceElement.getAttribute("source"));
 
         NodeList tileset = loadXmlTileset(tilesetFile);
 
