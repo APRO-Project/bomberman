@@ -66,7 +66,7 @@ public class GameScreen extends AbstractScreen {
 
         batch = new SpriteBatch();
 
-        map = TileMapFactory.createTileMap(world, "./map/", "bomberman_main.tmx");
+        map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
 
         gsc = new GameStateController(world, map);
 
