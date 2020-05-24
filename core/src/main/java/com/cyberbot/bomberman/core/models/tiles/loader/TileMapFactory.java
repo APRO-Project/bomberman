@@ -23,7 +23,6 @@ public class TileMapFactory {
     private static final String LAYER_FLOOR = "floor";
     private static final String LAYER_WALLS = "walls";
 
-
     /**
      * Factory method used to load {@link TileMap TileMap} with {@link DocumentBuilder DOM parser}.
      *
