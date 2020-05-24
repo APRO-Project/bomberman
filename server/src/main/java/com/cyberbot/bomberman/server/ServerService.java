@@ -13,7 +13,7 @@ public class ServerService implements Runnable {
 
     public ServerService(int port) {
         this.port = port;
-        sessions.add(new Session());
+        sessions.add(new Session(this));
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
@@ -31,6 +31,10 @@ public class ServerService implements Runnable {
                 boolean inSession = false;
                 for (Session session : sessions) {
                     if (session.handlePacket(client, packet.getData(), packet.getLength())) {
+                        if (inSession) {
+                            throw new IllegalStateException("Client present in multiple sessions");
+                        }
+
                         inSession = true;
                     }
                 }
@@ -45,17 +49,8 @@ public class ServerService implements Runnable {
         }
     }
 
-    public void tick() {
-        sessions.forEach(session -> {
-            byte[] state = session.getState();
-            session.getClients().forEach(client -> {
-                try {
-                    send(client, state, state.length);
-                } catch (IOException e) {
-                    session.removeClient(client);
-                }
-            });
-        });
+    public void send(DatagramPacket packet) throws IOException {
+        socket.send(packet);
     }
 
     private void send(ClientConnection client, byte[] data, int length) throws IOException {

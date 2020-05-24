@@ -8,13 +8,14 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.items.ItemType;
-import com.cyberbot.bomberman.core.models.net.EntityData;
-import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
+import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,9 +89,13 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         players.forEach(PlayerEntity::dispose);
     }
 
+    public void addPlayer(PlayerEntity player) {
+        this.players.add(player);
+        onEntityAdded(player);
+    }
+
     public void addPlayers(Collection<PlayerEntity> players) {
-        this.players.addAll(players);
-        players.forEach(this::onEntityAdded);
+        players.forEach(this::addPlayer);
     }
 
     public void addListener(WorldChangeListener listener) {
@@ -106,8 +111,22 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     public GameSnapshot createSnapshot() {
-        List<EntityData<?>> entities = entityStream().map(Entity::getData).collect(Collectors.toList());
+        Map<Long, EntityData<?>> entities = entityStream().collect(Collectors.toMap(Entity::getId, Entity::getData));
         return new GameSnapshot(entities);
+    }
+
+    public long generateEntityId() {
+        long id;
+
+        do {
+            id = ThreadLocalRandom.current().nextLong();
+        } while (hasEntity(id));
+
+        return id;
+    }
+
+    public boolean hasEntity(long id) {
+        return entityStream().map(Entity::getId).anyMatch(pId -> pId == id);
     }
 
     @Override
@@ -286,19 +305,5 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             other.markToRemove();
             onEntityRemoved(other);
         }
-    }
-
-    private long generateEntityId() {
-        long id;
-
-        do {
-            id = ThreadLocalRandom.current().nextLong();
-        } while (hasEntity(id));
-
-        return id;
-    }
-
-    private boolean hasEntity(long id) {
-        return entityStream().map(Entity::getId).anyMatch(pId -> pId == id);
     }
 }

@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.net.EntityData;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.utils.Constants;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;

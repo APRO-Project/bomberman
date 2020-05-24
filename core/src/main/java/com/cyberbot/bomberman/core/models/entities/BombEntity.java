@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
-import com.cyberbot.bomberman.core.models.net.BombData;
+import com.cyberbot.bomberman.core.models.net.data.BombData;
 
 /**
  * A bomb entity.

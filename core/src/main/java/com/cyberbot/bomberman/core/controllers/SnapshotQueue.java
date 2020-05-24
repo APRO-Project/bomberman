@@ -1,7 +1,7 @@
 package com.cyberbot.bomberman.core.controllers;
 
 import com.cyberbot.bomberman.core.models.actions.Action;
-import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
+import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 

@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.core.models.net;
+package com.cyberbot.bomberman.core.models.net.data;
 
 import com.badlogic.gdx.math.Vector2;
 

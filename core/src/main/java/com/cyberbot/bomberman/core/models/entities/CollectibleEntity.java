@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.items.ItemType;
-import com.cyberbot.bomberman.core.models.net.CollectibleData;
+import com.cyberbot.bomberman.core.models.net.data.CollectibleData;
 
 /**
  * A world entity that can be collected by a player.

@@ -20,11 +20,10 @@ public final class Utils {
         return null;
     }
 
-    public static <T> T fromByteArray(byte[] buf, Class<T> cls) {
+    public static Object fromByteArray(byte[] buf) {
         ByteArrayInputStream bis = new ByteArrayInputStream(buf);
         try (ObjectInput in = new ObjectInputStream(bis)) {
-            Object o = in.readObject();
-            return cls.cast(o);
+            return in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

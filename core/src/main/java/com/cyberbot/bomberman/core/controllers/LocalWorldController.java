@@ -6,11 +6,12 @@ import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.net.EntityData;
-import com.cyberbot.bomberman.core.models.net.EntityDataPair;
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
-import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
-import com.cyberbot.bomberman.core.utils.Utils;
+import com.cyberbot.bomberman.core.models.net.GameSnapshotPacket;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
+import com.cyberbot.bomberman.core.models.net.data.EntityDataPair;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,13 +23,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private final int interpolationDelay = 3;
     private final World world;
     private final Map<Long, Entity> entities;
-    private final Queue<GameSnapshot> gameSnapshots;
+    private final Queue<GameSnapshotPacket> gameSnapshots;
     private final SnapshotQueue interactionQueue;
     private final PlayerEntity localPlayer;
     private final List<WorldChangeListener> listeners;
 
-    private GameSnapshot latestSnapshot;
-    private GameSnapshot nextSnapshot;
+    private GameSnapshotPacket latestPacket;
+    private GameSnapshotPacket nextPacket;
 
     private int snapshotLength;
     private float interpFraction;
@@ -84,23 +85,25 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         }
 
         if (snapshotChanged) {
-            applySnapshot(latestSnapshot, false);
+            applySnapshot(latestPacket.getSnapshot(), false);
         }
 
-        List<EntityDataPair> updated = getUpdatedEntities(latestSnapshot);
+
+        float fraction = interpFraction / snapshotLength;
+
+        List<EntityDataPair> updated = getUpdatedEntities(latestPacket.getSnapshot());
         for (EntityDataPair pair : updated) {
-            EntityData<?> nextData = Utils.firstOrNull(nextSnapshot.getEntities(),
-                it -> it.getId() == pair.getData().getId());
+            EntityData<?> nextData = nextPacket.getSnapshot().getEntity(pair.getData().getId());
             if (nextData == null) continue;
 
-            pair.getEntity().updateFromData(pair.getData(), nextData, interpFraction / snapshotLength);
+            pair.getEntity().updateFromData(pair.getData(), nextData, fraction);
         }
     }
 
     private boolean loadNextSnapshot() {
-        if (nextSnapshot == null) {
+        if (nextPacket == null) {
             if (gameSnapshots.size() > 0) {
-                nextSnapshot = gameSnapshots.remove();
+                nextPacket = gameSnapshots.remove();
             } else {
                 return false;
             }
@@ -110,9 +113,9 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             return false;
         }
 
-        latestSnapshot = nextSnapshot;
-        nextSnapshot = gameSnapshots.remove();
-        snapshotLength = nextSnapshot.getSequence() - latestSnapshot.getSequence();
+        latestPacket = nextPacket;
+        nextPacket = gameSnapshots.remove();
+        snapshotLength = nextPacket.getSequence() - latestPacket.getSequence();
 
         snapshotLength = Math.max(Math.min(snapshotLength, interpolationDelay), 0);
 
@@ -165,7 +168,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         // Update all updated entities
         updated.forEach(it -> it.getEntity().updateFromData(it.getData()));
         if (includeLocalPlayer) {
-            localPlayer.updateFromData(snapshot.getPlayerData());
+            PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
+            localPlayer.updateFromData(playerData);
         }
 
         // Create and add references to all added entities
@@ -188,15 +192,16 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     private List<EntityData<?>> getAddedEntityData(GameSnapshot snapshot) {
-        return snapshot.getEntities().stream()
-            .filter(it -> !hasEntity(it.getId()))
+        return snapshot.getEntities().entrySet().stream()
+            .filter(it -> it.getKey() != localPlayer.getId() && !hasEntity(it.getKey()))
+            .map(Map.Entry::getValue)
             .collect(Collectors.toList());
     }
 
     private List<EntityDataPair> getUpdatedEntities(GameSnapshot snapshot) {
-        return snapshot.getEntities().stream()
-            .filter(it -> hasEntity(it.getId()))
-            .map(it -> new EntityDataPair(entities.get(it.getId()), it))
+        return snapshot.getEntities().entrySet().stream()
+            .filter(it -> hasEntity(it.getKey()))
+            .map(it -> new EntityDataPair(entities.get(it.getKey()), it.getValue()))
             .collect(Collectors.toList());
     }
 
@@ -205,7 +210,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     @Override
-    public void onNewSnapshot(GameSnapshot snapshot) {
+    public void onNewSnapshot(GameSnapshotPacket snapshot) {
         interactionQueue.removeUntil(snapshot.getSequence());
         gameSnapshots.add(snapshot);
     }

@@ -2,8 +2,8 @@ package com.cyberbot.bomberman.net;
 
 import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
-import com.cyberbot.bomberman.core.models.snapshots.GameSnapshot;
-import com.cyberbot.bomberman.core.models.snapshots.PlayerSnapshot;
+import com.cyberbot.bomberman.core.models.net.GameSnapshotPacket;
+import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 
 import java.io.IOException;
@@ -37,8 +37,10 @@ public class NetService implements Runnable {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                GameSnapshot snapshot = Utils.fromByteArray(buffer, GameSnapshot.class);
-                listener.onNewSnapshot(snapshot);
+                Object o = Utils.fromByteArray(buffer);
+                if (o instanceof GameSnapshotPacket) {
+                    listener.onNewSnapshot((GameSnapshotPacket) o);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

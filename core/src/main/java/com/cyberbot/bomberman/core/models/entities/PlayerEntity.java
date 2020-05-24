@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
-import com.cyberbot.bomberman.core.models.net.PlayerData;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
