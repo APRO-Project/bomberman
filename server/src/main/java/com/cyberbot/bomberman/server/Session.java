@@ -25,6 +25,8 @@ import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class Session {
+    private final String name;
+
     private final Map<ClientConnection, PlayerSession> clientSessions = new HashMap<>();
     private final GameStateController gameStateController;
     private final World world;
@@ -36,7 +38,8 @@ public class Session {
     private long lastUpdate;
     private boolean gameStarted;
 
-    public Session(ServerService serverService) {
+    public Session(String name, ServerService serverService) {
+        this.name = name;
         this.serverService = serverService;
         this.world = new World(new Vector2(0, 0), false);
         TileMap map = null;

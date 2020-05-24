@@ -1,5 +1,7 @@
 package com.cyberbot.bomberman.core.utils;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import java.io.*;
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -41,6 +43,10 @@ public final class Utils {
         } else {
             return sequence <= previous;
         }
+    }
+
+    public static String generateLobbyId(int length) {
+        return RandomStringUtils.randomAlphabetic(length);
     }
 
     public static <T> T first(Collection<T> collection, Predicate<T> predicate) {

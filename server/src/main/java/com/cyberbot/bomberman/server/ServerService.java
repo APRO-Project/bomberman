@@ -2,22 +2,26 @@ package com.cyberbot.bomberman.server;
 
 import com.cyberbot.bomberman.core.models.net.InvalidPacketFormatException;
 import com.cyberbot.bomberman.core.models.net.SerializationUtils;
+import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateRequest;
+import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateResponse;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
+import com.cyberbot.bomberman.core.utils.Utils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.cyberbot.bomberman.core.utils.Constants.LOBBY_ID_LENGTH;
 
 public class ServerService implements Runnable {
     private final int port;
+    private final Map<String, Session> sessions = new HashMap<>();
     private DatagramSocket socket;
-    private List<Session> sessions = new ArrayList<>(1);
 
     public ServerService(int port) {
         this.port = port;
-        sessions.add(new Session(this));
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
@@ -35,10 +39,26 @@ public class ServerService implements Runnable {
                 Object o = SerializationUtils.INSTANCE.deserialize(buffer, packet.getLength(), 0);
 
                 if (o instanceof PlayerSnapshotPacket) {
-                    sessions.stream()
+                    sessions.values().stream()
                         .filter(it -> it.hasClient(client))
                         .findFirst()
                         .ifPresent(session -> session.onSnapshot(client, (PlayerSnapshotPacket) o));
+                } else if (o instanceof LobbyCreateRequest) {
+                    String name = ((LobbyCreateRequest) o).getName();
+                    Session session = new Session(name, this);
+                    session.addClient(client);
+
+                    String sessionId;
+                    do {
+                        sessionId = Utils.generateLobbyId(LOBBY_ID_LENGTH);
+                    } while (sessions.containsKey(sessionId));
+
+                    sessions.put(sessionId, session);
+
+                    LobbyCreateResponse response = new LobbyCreateResponse(name, sessionId);
+
+                    byte[] bytes = SerializationUtils.INSTANCE.serialize(response);
+                    send(client, bytes, bytes.length);
                 }
             }
         } catch (IOException | InvalidPacketFormatException e) {

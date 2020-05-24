@@ -2,6 +2,8 @@ package com.cyberbot.bomberman.core.models.net
 
 import com.cyberbot.bomberman.core.models.Serializable
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
+import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateRequest
+import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateResponse
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 
 /**
@@ -11,10 +13,10 @@ object SerializationUtils {
     @Throws(InvalidPacketFormatException::class)
     fun deserialize(buf: ByteArray, length: Int, offset: Int = 0): Any {
         return when (PayloadType.getByValue(buf[offset])) {
-            PayloadType.PLAYER_SNAPSHOT -> PlayerSnapshotPacket.fromByteArray(buf, length, offset + 1)
-            PayloadType.GAME_SNAPSHOT -> GameSnapshotPacket.fromByteArray(buf, length, offset + 1)
-            PayloadType.LOBBY_CREATE_REQUEST -> TODO()
-            PayloadType.LOBBY_CREATE_RESPONSE -> TODO()
+            PayloadType.PLAYER_SNAPSHOT -> PlayerSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)
+            PayloadType.GAME_SNAPSHOT -> GameSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)
+            PayloadType.LOBBY_CREATE_REQUEST -> LobbyCreateRequest.fromByteArray(buf, offset + 1)
+            PayloadType.LOBBY_CREATE_RESPONSE -> LobbyCreateResponse.fromByteArray(buf, offset + 1)
             PayloadType.LOBBY_JOIN_REQUEST -> TODO()
             PayloadType.LOBBY_JOIN_RESPONSE -> TODO()
             null -> throw InvalidPacketFormatException("First byte of each packet should contain the payload type")
@@ -26,6 +28,13 @@ object SerializationUtils {
         return type + o.toByteArray()
     }
 
+    fun deserializeString(buf: ByteArray, offset: Int): Pair<String, Int> {
+        val nameLength = buf[offset]
+        val name = String(buf.copyOfRange(offset + 1, offset + 1 + nameLength))
+
+        return Pair(name, nameLength + 1)
+    }
+
     private fun getPayloadType(o: Serializable): PayloadType {
         return when (o) {
             is PlayerSnapshotPacket -> PayloadType.PLAYER_SNAPSHOT
@@ -35,4 +44,11 @@ object SerializationUtils {
             )
         }
     }
+}
+
+fun String.toBytes(): ByteArray {
+    val str = this.toByteArray()
+    val length = ByteArray(1) { str.size.toByte() }
+
+    return length + str
 }
