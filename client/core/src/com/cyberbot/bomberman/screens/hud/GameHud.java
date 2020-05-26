@@ -59,7 +59,7 @@ public class GameHud extends Stage {
         skin.load(Gdx.files.internal("skins/skin.json"));
 
         Table playerView = createPlayerView();
-        Table inventoryView = createInventoryView();
+        InventoryView inventoryView = new InventoryView(player, skin);
 
         NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
 
@@ -97,43 +97,6 @@ public class GameHud extends Stage {
 //        playerView.setDebug(true);
 
         return playerView;
-    }
-
-    private Table createInventoryView() {
-        Table inventoryView = new Table();
-
-        Label inventoryLabel = new Label("Inventory", skin);
-        Table effects = new Table();
-        Table items = new Table();
-
-        for(int i = 0; i < 5; ++i) {
-            Button ib1 = new Button(skin);
-            Button ib2 = new Button(skin);
-
-            ib1.add(new Image(Atlas.getInstance().findRegion("DynamiteStatic")));
-            ib2.add(new Image(Atlas.getInstance().findRegion("DynamiteStatic")));
-
-            effects.add(ib1).padBottom(PPM / 2).row();
-            items.add(ib2).padBottom(PPM / 2).row();
-        }
-
-        inventoryView.add(inventoryLabel).colspan(3).padTop(5).padBottom(PPM / 2).row();
-        inventoryView.add(effects).expandX();
-
-        NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
-        inventoryView.add(new Image(separator))
-            .expandY()
-//            .padLeft(PPM / 4)
-//            .padRight(PPM / 4)
-            .padBottom(PPM / 2)
-            .minWidth(2)
-            .prefWidth(2)
-            .prefHeight(999);
-
-        inventoryView.add(items).expandX();
-//        inventoryView.setDebug(true);
-
-        return inventoryView;
     }
 
     public void setPlayer(PlayerEntity player) {

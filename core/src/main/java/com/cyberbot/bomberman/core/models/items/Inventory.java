@@ -126,4 +126,15 @@ public class Inventory implements Updatable {
             .findFirst()
             .orElseGet(() -> createEmptyStack(itemType));
     }
+
+    public int getStackItemQuantity(ItemType itemType) {
+        return items.stream()
+            .filter(s -> s.getItemType() == itemType)
+            .findFirst()
+            .map(s -> s.quantity).orElse(-1);
+    }
+
+    public List<ItemStack> getItems() {
+        return items;
+    }
 }
