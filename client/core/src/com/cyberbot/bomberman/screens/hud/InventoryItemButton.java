@@ -41,16 +41,9 @@ public class InventoryItemButton extends InventoryButton {
     }
 
     public void setQuantity(int updatedQuantity) {
-        if (updatedQuantity == 0) {
-            makeEmpty();
-            updateDrawable();
-        } else {
-            if (updatedQuantity >= 0) {
-                updateDrawable();
-            }
-            quantity = updatedQuantity;
+        quantity = updatedQuantity;
+        if(!isEmpty())
             labelQuantity.setText(String.valueOf(quantity));
-        }
     }
 
     public int getQuantity() {
@@ -58,7 +51,7 @@ public class InventoryItemButton extends InventoryButton {
     }
 
     @Override
-    public Actor getMainElement() {
+    public Actor getMainWidget() {
         return stack;
     }
 

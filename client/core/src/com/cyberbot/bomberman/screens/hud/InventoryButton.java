@@ -57,7 +57,7 @@ public class InventoryButton extends Actor {
         return type == null;
     }
 
-    public Actor getMainElement() {
+    public Actor getMainWidget() {
         return button;
     }
 

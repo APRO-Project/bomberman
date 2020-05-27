@@ -23,6 +23,7 @@ public class GameHud extends Stage {
     private HealthBar healthBar;
     private PlayerEntity player;
     private InventoryView inventoryView;
+    private PlayerListView playerListView;
 
     public GameHud(Viewport viewport) {
         super(viewport);
@@ -61,6 +62,7 @@ public class GameHud extends Stage {
 
         Table playerView = createPlayerView();
         inventoryView = new InventoryView(player, skin);
+        playerListView = new PlayerListView(skin);
 
         NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
 
@@ -68,6 +70,8 @@ public class GameHud extends Stage {
         left.add(new Image(separator)).fillX().minHeight(2).prefHeight(2).row();
         left.add(inventoryView).expandY().fill();
 //        left.setDebug(true);
+
+        right.add(playerListView).fill().expand();
     }
 
     private Table createPlayerView() {

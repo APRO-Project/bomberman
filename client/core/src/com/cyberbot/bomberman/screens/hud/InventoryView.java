@@ -56,8 +56,8 @@ public final class InventoryView extends Table {
             effectButtons[i] = new InventoryButton(null);
             itemButtons[i] = new InventoryItemButton(null, skin);
 
-            effects.add(effectButtons[i].getMainElement()).padBottom(PPM / 2).row();
-            items.add(itemButtons[i].getMainElement()).padBottom(PPM / 2).row();
+            effects.add(effectButtons[i].getMainWidget()).padBottom(PPM / 2).row();
+            items.add(itemButtons[i].getMainWidget()).padBottom(PPM / 2).row();
         }
 
         this.add(inventoryLabel).colspan(3).padTop(5).padBottom(PPM / 2).row();
@@ -113,16 +113,13 @@ public final class InventoryView extends Table {
                 .findFirst();
 
             if (correspondingButton.isPresent()) {
-                if (stack.getQuantity() == 0) {
-                    correspondingButton.get().makeEmpty();
-                    change = true;
-                } else
-                    correspondingButton.get().setQuantity(stack.getQuantity());
+                correspondingButton.get().setQuantity(stack.getQuantity());
             } else {
                 final int slot = getNextEmptyItemSlot();
                 if (slot != -1) {
                     itemButtons[slot].type = stack.getItemType();
                     itemButtons[slot].setQuantity(stack.getQuantity());
+                    itemButtons[slot].updateDrawable();
                     change = true;
                 }
             }
