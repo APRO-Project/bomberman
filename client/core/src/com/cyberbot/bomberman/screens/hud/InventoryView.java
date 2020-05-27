@@ -1,5 +1,6 @@
 package com.cyberbot.bomberman.screens.hud;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -9,35 +10,36 @@ import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.items.ItemStack;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.utils.Atlas;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
-public class InventoryView extends Table {
+public final class InventoryView extends Table {
 
-    private static final ArrayList<ItemType> ITEMS = new ArrayList<>();
-    private static final ArrayList<ItemType> EFFECTS = new ArrayList<>();
+    private static final List<ItemType> ITEMS;
+    private static final List<ItemType> EFFECTS;
 
     static {
-        ITEMS.add(ItemType.SMALL_BOMB);
-
-        EFFECTS.add(ItemType.UPGRADE_ARMOR);
-        EFFECTS.add(ItemType.UPGRADE_MOVEMENT_SPEED);
-        EFFECTS.add(ItemType.UPGRADE_REFILL_SPEED);
+        ITEMS = Arrays.asList(
+            ItemType.SMALL_BOMB
+        );
+        EFFECTS = Arrays.asList(
+            ItemType.UPGRADE_ARMOR,
+            ItemType.UPGRADE_MOVEMENT_SPEED,
+            ItemType.UPGRADE_REFILL_SPEED
+        );
     }
 
-    private final InventoryItemButton[] effectButtons;
+    private final InventoryButton[] effectButtons;
     private final InventoryItemButton[] itemButtons;
 
     private final PlayerEntity player;
 
     public InventoryView(PlayerEntity player, Skin skin) {
-        effectButtons = new InventoryItemButton[5];
+        effectButtons = new InventoryButton[5];
         itemButtons = new InventoryItemButton[5];
 
         this.player = player;
@@ -51,11 +53,11 @@ public class InventoryView extends Table {
         Table items = new Table();
 
         for (int i = 0; i < 5; ++i) {
-            effectButtons[i] = new InventoryItemButton(null);
-            itemButtons[i] = new InventoryItemButton(null);
+            effectButtons[i] = new InventoryButton(null);
+            itemButtons[i] = new InventoryItemButton(null, skin);
 
-            effects.add(effectButtons[i].button).padBottom(PPM / 2).row();
-            items.add(itemButtons[i].button).padBottom(PPM / 2).row();
+            effects.add(effectButtons[i].getMainElement()).padBottom(PPM / 2).row();
+            items.add(itemButtons[i].getMainElement()).padBottom(PPM / 2).row();
         }
 
         this.add(inventoryLabel).colspan(3).padTop(5).padBottom(PPM / 2).row();
@@ -73,72 +75,83 @@ public class InventoryView extends Table {
 //        inventoryView.setDebug(true);
     }
 
-    private void scanForInventoryChanges() {
-        ArrayList<ItemStack> effectStacks = player.getInventory().getItems().stream()
+    private boolean scanForInventoryChanges() {
+        boolean change = false;
+
+        final ArrayList<ItemStack> effectStacks = player.getInventory().getItems().stream()
             .filter(i -> EFFECTS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        ArrayList<ItemStack> itemStacks = player.getInventory().getItems().stream()
+        final ArrayList<ItemStack> itemStacks = player.getInventory().getItems().stream()
             .filter(i -> ITEMS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
         // Effects
         for (ItemStack stack : effectStacks) {
-            Optional<InventoryItemButton> correspondingButton = Arrays.stream(effectButtons)
+            final Optional<InventoryButton> correspondingButton = Arrays.stream(effectButtons)
                 .filter(btn -> btn.type == stack.getItemType())
                 .findFirst();
 
-            if (correspondingButton.isPresent()) {
-                if (stack.getQuantity() == 0)
-                    correspondingButton.get().makeEmpty();
-                else
-                    correspondingButton.get().quantity = stack.getQuantity();
-            } else {
-                int slot = getNextEmptyEffectSlot();
+            if (!correspondingButton.isPresent() && stack.getQuantity() != 0) {
+                final int slot = getNextEmptyEffectSlot();
                 if (slot != -1) {
-                    effectButtons[slot].setType(stack.getItemType());
-                    effectButtons[slot].setQuantity(stack.getQuantity());
+                    effectButtons[slot].type = stack.getItemType();
+                    effectButtons[slot].updateDrawable();
+                    change = true;
                 }
+            } else if (correspondingButton.isPresent() && stack.getQuantity() == 0) {
+                correspondingButton.get().makeEmpty();
+                correspondingButton.get().updateDrawable();
+                change = true;
             }
         }
 
         // Items
         for (ItemStack stack : itemStacks) {
-            Optional<InventoryItemButton> correspondingButton = Arrays.stream(itemButtons)
+            final Optional<InventoryItemButton> correspondingButton = Arrays.stream(itemButtons)
                 .filter(btn -> btn.type == stack.getItemType())
                 .findFirst();
 
             if (correspondingButton.isPresent()) {
-                if (stack.getQuantity() == 0)
+                if (stack.getQuantity() == 0) {
                     correspondingButton.get().makeEmpty();
-                else
-                    correspondingButton.get().quantity = stack.getQuantity();
+                    change = true;
+                } else
+                    correspondingButton.get().setQuantity(stack.getQuantity());
             } else {
-                int slot = getNextEmptyItemSlot();
+                final int slot = getNextEmptyItemSlot();
                 if (slot != -1) {
-                    itemButtons[slot].setType(stack.getItemType());
+                    itemButtons[slot].type = stack.getItemType();
                     itemButtons[slot].setQuantity(stack.getQuantity());
+                    change = true;
                 }
             }
         }
+
+        return change;
     }
 
-    private void sortButtons() {
-        List<InventoryItemButton> partitionedEffects = Arrays.stream(effectButtons)
-            .collect(Collectors.partitioningBy(InventoryItemButton::isEmpty))
+    private void rearrangeButtons() {
+        final List<ItemType> partitionedEffects = Arrays.stream(effectButtons)
+            .collect(Collectors.partitioningBy(InventoryButton::isEmpty))
             .values().stream()
             .flatMap(List::stream)
+            .map(btn -> btn.type)
             .collect(Collectors.toList());
 
-        List<InventoryItemButton> partitionedItems = Arrays.stream(itemButtons)
+        final List<ImmutablePair<ItemType, Integer>> partitionedItems = Arrays.stream(itemButtons)
             .collect(Collectors.partitioningBy(InventoryItemButton::isEmpty))
             .values().stream()
             .flatMap(List::stream)
+            .map(btn -> new ImmutablePair<>(btn.type, btn.getQuantity()))
             .collect(Collectors.toList());
 
         for (int i = 0; i < effectButtons.length; ++i) {
-            effectButtons[i] = partitionedEffects.get(i);
-            itemButtons[i] = partitionedItems.get(i);
+            effectButtons[i].type = partitionedEffects.get(i);
+            effectButtons[i].updateDrawable();
+
+            itemButtons[i].type = partitionedItems.get(i).getKey();
+            itemButtons[i].setQuantity(partitionedItems.get(i).getValue());
         }
     }
 
@@ -164,7 +177,12 @@ public class InventoryView extends Table {
     public void act(float delta) {
         super.act(delta);
 
-        scanForInventoryChanges();
-        sortButtons();
+        if (scanForInventoryChanges())
+            rearrangeButtons();
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        super.draw(batch, parentAlpha);
     }
 }

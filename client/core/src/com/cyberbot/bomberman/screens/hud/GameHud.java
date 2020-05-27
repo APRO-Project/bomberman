@@ -22,6 +22,7 @@ public class GameHud extends Stage {
     private Table right;
     private HealthBar healthBar;
     private PlayerEntity player;
+    private InventoryView inventoryView;
 
     public GameHud(Viewport viewport) {
         super(viewport);
@@ -59,7 +60,7 @@ public class GameHud extends Stage {
         skin.load(Gdx.files.internal("skins/skin.json"));
 
         Table playerView = createPlayerView();
-        InventoryView inventoryView = new InventoryView(player, skin);
+        inventoryView = new InventoryView(player, skin);
 
         NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
 
