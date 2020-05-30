@@ -25,30 +25,21 @@ import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class Session {
-    private final String name;
-
     private final Map<ClientConnection, PlayerSession> clientSessions = new HashMap<>();
     private final GameStateController gameStateController;
     private final World world;
 
     private final ScheduledExecutorService simulationService;
     private final ScheduledExecutorService tickService;
-    private final ServerService serverService;
+    private final GameSocket socket;
 
     private long lastUpdate;
     private boolean gameStarted;
 
-    public Session(String name, ServerService serverService) {
-        this.name = name;
-        this.serverService = serverService;
+    public Session(GameSocket socket) throws MissingLayersException, InvalidPropertiesFormatException {
+        this.socket = socket;
         this.world = new World(new Vector2(0, 0), false);
-        TileMap map = null;
-        try {
-            map = new TileMap(world, "./map/bomberman_main.tmx");
-        } catch (InvalidPropertiesFormatException | MissingLayersException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        TileMap map = new TileMap(world, "./map/bomberman_main.tmx");
 
         this.gameStateController = new GameStateController(world, map);
 
@@ -62,7 +53,7 @@ public class Session {
 
     public boolean onSnapshot(ClientConnection connection, PlayerSnapshotPacket packet) {
         if (!hasClient(connection)) {
-            return false;
+            throw new RuntimeException("Client not part of this session");
         }
 
         clientSessions.get(connection).onNewSnapshot(packet);
@@ -102,7 +93,7 @@ public class Session {
             DatagramPacket packet = entry.getValue();
             PlayerSession session = entry.getKey();
             try {
-                serverService.send(packet);
+                socket.send(packet);
                 session.clearErrors();
             } catch (IOException e) {
                 session.onError();

@@ -5,11 +5,7 @@ package com.cyberbot.bomberman.core.models.net
  */
 enum class PayloadType(val value: Byte) {
     PLAYER_SNAPSHOT(0),
-    GAME_SNAPSHOT(1),
-    LOBBY_CREATE_REQUEST(2),
-    LOBBY_CREATE_RESPONSE(3),
-    LOBBY_JOIN_REQUEST(4),
-    LOBBY_JOIN_RESPONSE(5);
+    GAME_SNAPSHOT(1);
 
     companion object {
         private val values = values()

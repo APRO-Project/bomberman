@@ -2,8 +2,6 @@ package com.cyberbot.bomberman.core.models.net
 
 import com.cyberbot.bomberman.core.models.Serializable
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
-import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateRequest
-import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateResponse
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 
 /**
@@ -15,10 +13,6 @@ object SerializationUtils {
         return when (PayloadType.getByValue(buf[offset])) {
             PayloadType.PLAYER_SNAPSHOT -> PlayerSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)
             PayloadType.GAME_SNAPSHOT -> GameSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)
-            PayloadType.LOBBY_CREATE_REQUEST -> LobbyCreateRequest.fromByteArray(buf, offset + 1)
-            PayloadType.LOBBY_CREATE_RESPONSE -> LobbyCreateResponse.fromByteArray(buf, offset + 1)
-            PayloadType.LOBBY_JOIN_REQUEST -> TODO()
-            PayloadType.LOBBY_JOIN_RESPONSE -> TODO()
             null -> throw InvalidPacketFormatException("First byte of each packet should contain the payload type")
         }
     }
