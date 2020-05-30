@@ -1,16 +1,23 @@
 package com.cyberbot.bomberman.server
 
-import com.cyberbot.bomberman.core.models.net.packets.Client
-import com.cyberbot.bomberman.core.models.net.packets.ClientRegisterRequest
-import com.cyberbot.bomberman.core.models.net.packets.ClientRegisterResponse
+import com.cyberbot.bomberman.core.models.items.Inventory
+import com.cyberbot.bomberman.core.models.net.data.PlayerData
+import com.cyberbot.bomberman.core.models.net.packets.*
+import com.cyberbot.bomberman.core.utils.Utils
 import java.io.IOException
 import java.net.ServerSocket
 import java.util.concurrent.ThreadLocalRandom
 
-class ServerService(private val port: Int) : ClientController, Runnable {
-    private val sessions = HashMap<Int, SessionService>()
-    private val clients = HashMap<Client, ClientControlService>()
 
+class ServerService(
+    private val port: Int,
+    private val maxLobbyCount: Int = 5,
+    private val lobbyIdLength: Int = 5,
+    private val maxPlayersPerLobby: Int = 4
+) : ClientController, Runnable {
+    private val sessions = HashMap<String, SessionService>()
+    private val clients = HashMap<Client, ClientControlService>()
+    private val lobbies = HashMap<String, Lobby>()
 
     @Volatile
     private var running = false
@@ -42,6 +49,69 @@ class ServerService(private val port: Int) : ClientController, Runnable {
         }
 
         return ClientRegisterResponse(client != null, client)
+    }
+
+    override fun onLobbyCreate(request: LobbyCreateRequest, client: Client): LobbyCreateResponse {
+        return if (lobbies.size < maxLobbyCount) {
+            val lobby = createLobby(client)
+            val id = lobby.id ?: throw RuntimeException("Created lobby missing id")
+            lobbies[id] = lobby
+
+            LobbyCreateResponse(true, id)
+        } else {
+            LobbyCreateResponse(false)
+        }
+    }
+
+    override fun onLobbyJoin(request: LobbyJoinRequest, client: Client): LobbyJoinResponse? {
+        val lobby = lobbies[request.id] ?: return LobbyJoinResponse(false)
+
+        return if (lobby.clients.size < maxPlayersPerLobby) {
+            lobby.clients.add(client)
+            notifyLobbyChange(lobby)
+
+            null
+        } else {
+            LobbyJoinResponse(false)
+        }
+    }
+
+    override fun onGameStart(request: GameStartRequest, client: Client) {
+        val lobby = lobbies.values.firstOrNull { it.owner == client } ?: return
+        val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
+
+        val session = SessionService()
+        // TODO: Add clients
+        sessions[lobbyId] = session
+
+        Thread(session).start()
+
+        lobby.clients.forEachIndexed { i, c ->
+            val id = c.id ?: throw RuntimeException("Client without id")
+            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i)
+
+            // Clients has to contain a client that's present in a lobby
+            clients[c]!!.sendPacket(GameStart(session.port, data))
+        }
+    }
+
+
+    private fun notifyLobbyChange(lobby: Lobby) {
+        val lobbyUpdate = LobbyUpdate(System.currentTimeMillis(), lobby)
+        lobby.clients.map { clients[it] }.forEach { it?.sendPacket(lobbyUpdate) }
+    }
+
+    private fun createLobby(owner: Client): Lobby {
+        // Remove any lobbies previously created by this client
+        lobbies.entries.removeIf { it.value.owner == owner }
+
+        var id: String
+
+        do {
+            id = Utils.generateLobbyId(lobbyIdLength)
+        } while (lobbies.keys.contains(id))
+
+        return Lobby(id, owner, ArrayList())
     }
 
     private fun createClient(nick: String): Client? {
