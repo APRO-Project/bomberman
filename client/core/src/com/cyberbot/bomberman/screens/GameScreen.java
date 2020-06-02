@@ -1,21 +1,14 @@
 package com.cyberbot.bomberman.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.InputController;
-import com.cyberbot.bomberman.controllers.TextureController;
-import com.cyberbot.bomberman.core.controllers.ActionController;
-import com.cyberbot.bomberman.core.controllers.GameStateController;
+import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
@@ -32,20 +25,15 @@ public class GameScreen extends AbstractScreen {
     private final static int VIEWPORT_WIDTH = 15;
     private final static int VIEWPORT_HEIGHT = 15;
 
-    GameStateController gsc;
-    TextureController txc;
+    private final OrthographicCamera camera;
+    private final Viewport viewport;
 
-    OrthographicCamera camera;
-    Viewport viewport;
+    private final Box2DDebugRenderer b2dr;
 
-    World world;
-    Box2DDebugRenderer b2dr;
+    private final SpriteBatch batch;
 
-    InputController inputController;
+    private NetworkedGameplayController gameplayController;
 
-    TileMap map;
-
-    SpriteBatch batch;
 
     public GameScreen(final Client app) throws MissingLayersException, IOException, ParserConfigurationException,
         SAXException {
@@ -55,15 +43,7 @@ public class GameScreen extends AbstractScreen {
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
         viewport = new FitViewport(VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
 
-        world = new World(new Vector2(0, 0), false);
         b2dr = new Box2DDebugRenderer();
-
-        PlayerEntity player = new PlayerEntity(world, new PlayerDef());
-        player.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
-
-        ActionController actionController = new ActionController(player);
-        inputController = new InputController(new KeyBinds(), actionController);
-
         batch = new SpriteBatch();
 
         map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
@@ -85,22 +65,9 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void update(float delta) {
-        world.step(1 / 60f, 6, 2);
+        gameplayController.update(delta);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.O)) {
-            camera.zoom -= 1 / PPM;
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
-            camera.zoom += 1 / PPM;
-        }
-
-        inputController.update();
         camera.update();
-
-        gsc.update(delta);
-        txc.update(delta);
-
         batch.setProjectionMatrix(camera.combined);
     }
 
@@ -109,7 +76,7 @@ public class GameScreen extends AbstractScreen {
         super.render(delta);
 
         batch.begin();
-        txc.draw(batch);
+        gameplayController.draw(batch);
         batch.end();
 
         //b2dr.render(world, camera.combined.cpy().scl(PPM));
@@ -138,9 +105,7 @@ public class GameScreen extends AbstractScreen {
     @Override
     public void dispose() {
         batch.dispose();
-        gsc.dispose();
-
-        world.dispose();
+        gameplayController.dispose();
         b2dr.dispose();
     }
 }

@@ -1,49 +1,64 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.Gdx;
-import com.cyberbot.bomberman.core.controllers.ActionController;
+import com.cyberbot.bomberman.core.controllers.ActionListener;
+import com.cyberbot.bomberman.core.models.actions.Action;
+import com.cyberbot.bomberman.core.models.actions.MoveAction;
+import com.cyberbot.bomberman.core.models.actions.UseItemAction;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles all input from the user and forwards the actions to the action controller.
  */
 public final class InputController {
     private final KeyBinds keys;
-    private final ActionController actionController;
+    private final List<ActionListener> actionListeners;
 
-    public InputController(KeyBinds keys, ActionController actionController) {
+    public InputController(KeyBinds keys) {
         this.keys = keys;
-        this.actionController = actionController;
+        this.actionListeners = new ArrayList<>();
     }
 
-    public void update() {
-        handleMove();
-        handleItem();
+    public void addActionController(ActionListener controller) {
+        actionListeners.add(controller);
+    }
+
+    public void poll() {
+        final List<Action> actions = new ArrayList<>();
+
+        if (Gdx.input.isKeyJustPressed(keys.useItem)) {
+            // TODO: Get selected item from HUD
+            actions.add(new UseItemAction(ItemType.SMALL_BOMB));
+        }
+
+        int direction = 0;
+        if (Gdx.input.isKeyPressed(keys.up)) {
+            direction |= MoveAction.UP;
+        }
+        if (Gdx.input.isKeyPressed(keys.down)) {
+            direction |= MoveAction.DOWN;
+        }
+        if (Gdx.input.isKeyPressed(keys.right)) {
+            direction |= MoveAction.RIGHT;
+        }
+        if (Gdx.input.isKeyPressed(keys.left)) {
+            direction |= MoveAction.LEFT;
+        }
+
+        actions.add(new MoveAction(direction));
+
+        actionListeners.forEach(it -> it.onActions(actions));
     }
 
     private void handleItem() {
-        if (Gdx.input.isKeyJustPressed(keys.useItem)) {
-            // TODO: Get selected item from HUD
-            actionController.useItem(ItemType.SMALL_BOMB);
-        }
+
     }
 
     private void handleMove() {
-        int playerDirection = 0;
-        if (Gdx.input.isKeyPressed(keys.up)) {
-            playerDirection |= ActionController.MOVE_UP;
-        }
-        if (Gdx.input.isKeyPressed(keys.down)) {
-            playerDirection |= ActionController.MOVE_DOWN;
-        }
-        if (Gdx.input.isKeyPressed(keys.right)) {
-            playerDirection |= ActionController.MOVE_RIGHT;
-        }
-        if (Gdx.input.isKeyPressed(keys.left)) {
-            playerDirection |= ActionController.MOVE_LEFT;
-        }
 
-        actionController.move(playerDirection);
     }
 }

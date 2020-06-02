@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.utils.Constants;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -13,11 +14,14 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * Abstract base for all game entities that contain a Box2D body.
  */
 public abstract class Entity implements Disposable, Updatable {
-    protected Body body;
     private boolean remove;
 
-    public Entity(World world) {
-        remove = false;
+    protected final long id;
+    protected Body body;
+
+    public Entity(World world, long id) {
+        this.id = id;
+        this.remove = false;
         createBody(world);
     }
 
@@ -94,4 +98,36 @@ public abstract class Entity implements Disposable, Updatable {
     public void markToRemove() {
         this.remove = true;
     }
+
+    public long getId() {
+        return id;
+    }
+
+    public void updateFromData(EntityData<?> data) {
+        if (data.getId() != id) {
+            throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
+        }
+
+        setPosition(data.getPosition().toVector2());
+    }
+
+    public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
+        if (d0.getId() != id || d1.getId() != id) {
+            throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
+        }
+
+        if (fraction > 1 || fraction < 0) {
+            throw new IllegalArgumentException("Interpolation fraction has to be in range 0-1");
+        }
+
+        final Vector2 pos0 = d0.getPosition().toVector2();
+        final Vector2 pos1 = d1.getPosition().toVector2();
+
+        // After this operation pos1 holds the delta vector and pos0 the new resulting position
+        pos0.mulAdd(pos1.sub(pos0), fraction);
+
+        setPosition(pos0);
+    }
+
+    public abstract EntityData<? extends Entity> getData();
 }
