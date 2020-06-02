@@ -13,7 +13,7 @@ public class InventoryItemButton extends InventoryButton {
 
     private int quantity;
 
-    private final Stack stack;
+    private final Stack mainWidget;
     private final Label labelQuantity;
 
     public InventoryItemButton(ItemType type, Skin skin) {
@@ -27,9 +27,9 @@ public class InventoryItemButton extends InventoryButton {
         Container<Label> labelContainer = new Container<>(labelQuantity);
         labelContainer.align(Align.bottomRight).pad(1);
 
-        stack = new Stack();
-        stack.add(button);
-        stack.add(labelContainer);
+        mainWidget = new Stack();
+        mainWidget.add(button);
+        mainWidget.add(labelContainer);
     }
 
     @Override
@@ -52,11 +52,11 @@ public class InventoryItemButton extends InventoryButton {
 
     @Override
     public Actor getMainWidget() {
-        return stack;
+        return mainWidget;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        stack.draw(batch, parentAlpha);
+        mainWidget.draw(batch, parentAlpha);
     }
 }

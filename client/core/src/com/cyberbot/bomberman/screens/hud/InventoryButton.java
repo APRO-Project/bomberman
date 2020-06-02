@@ -20,6 +20,7 @@ public class InventoryButton extends Actor {
 
         ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
         buttonStyle.imageUp = region;
+        buttonStyle.checked = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("button_checked"));
 
         button = new ImageButton(buttonStyle);
     }

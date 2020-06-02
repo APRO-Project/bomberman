@@ -1,18 +1,19 @@
 package com.cyberbot.bomberman.screens.hud;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.items.ItemStack;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.utils.Atlas;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -35,6 +36,8 @@ public final class InventoryView extends Table {
 
     private final InventoryButton[] effectButtons;
     private final InventoryItemButton[] itemButtons;
+    private final ButtonGroup<ImageButton> itemButtonGroup;
+    private int currentItem;
 
     private final PlayerEntity player;
 
@@ -45,12 +48,25 @@ public final class InventoryView extends Table {
         this.player = player;
 
         init(skin);
+
+        itemButtonGroup = new ButtonGroup<>();
+        for (int i = 0; i < 5; ++i) {
+            itemButtonGroup.add(itemButtons[i].button);
+        }
+        itemButtonGroup.setMaxCheckCount(1);
+        itemButtonGroup.setMinCheckCount(0);
+        itemButtonGroup.setUncheckLast(true);
+
+        currentItem = -1;
+        scanForInventoryChanges();
+        changeCurrentItem(true);
     }
 
     public void init(Skin skin) {
         Label inventoryLabel = new Label("Inventory", skin);
         Table effects = new Table();
         Table items = new Table();
+        NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
 
         for (int i = 0; i < 5; ++i) {
             effectButtons[i] = new InventoryButton(null);
@@ -60,19 +76,18 @@ public final class InventoryView extends Table {
             items.add(itemButtons[i].getMainWidget()).padBottom(PPM / 2).row();
         }
 
-        this.add(inventoryLabel).colspan(3).padTop(5).padBottom(PPM / 2).row();
-        this.add(effects).expandX();
-
-        NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
-        this.add(new Image(separator))
-            .expandY()
+        add(inventoryLabel)
+            .colspan(3)
             .padBottom(PPM / 2)
+            .row();
+        add(effects).expandX();
+        add(new Image(separator))
+            .expandY()
+            .fillY()
             .minWidth(2)
-            .prefWidth(2)
-            .prefHeight(999);
+            .prefWidth(2);
 
-        this.add(items).expandX();
-//        inventoryView.setDebug(true);
+        add(items).expandX();
     }
 
     private boolean scanForInventoryChanges() {
@@ -170,16 +185,64 @@ public final class InventoryView extends Table {
         return -1;
     }
 
+    public ItemType getCurrentItem() {
+        return currentItem == -1 ? null : itemButtons[currentItem].type;
+    }
+
+    private void changeCurrentItem(boolean up) {
+        final int itemCount = (int) Arrays.stream(itemButtons)
+            .filter(btn -> btn.type != null)
+            .count();
+
+        if (itemCount == 0) {
+            return;
+        }
+
+        if (currentItem == -1) {
+            currentItem = 0;
+        } else if (up && currentItem == 0) {
+            currentItem = itemCount - 1;
+        } else {
+            final int direction = up ? -1 : 1;
+            currentItem = (currentItem + direction) % itemCount;
+        }
+
+        // Check current item
+        itemButtons[currentItem].button.setChecked(true);
+    }
+
+    private void updateCurrentItem() {
+        int updatedCurrentItem = -1;
+
+        for (int i = 0; i < 5; ++i) {
+            if (itemButtons[i].button.isChecked()) {
+                if (itemButtons[i].isEmpty()) {
+                    itemButtons[i].button.setChecked(false);
+                } else {
+                    updatedCurrentItem = i;
+                    itemButtons[i].button.setChecked(true);
+                }
+            }
+        }
+
+        currentItem = updatedCurrentItem;
+    }
+
     @Override
     public void act(float delta) {
         super.act(delta);
 
         if (scanForInventoryChanges())
             rearrangeButtons();
-    }
 
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
+        updateCurrentItem();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+            // Item up
+            changeCurrentItem(true);
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            // Item down
+            changeCurrentItem(false);
+        }
     }
 }

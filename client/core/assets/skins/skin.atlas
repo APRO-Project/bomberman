@@ -4,6 +4,14 @@ size: 94,134
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+button_checked
+  rotate: false
+  xy: 68, 54
+  size: 16, 16
+  split: 3, 3, 3, 3
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 button_down
   rotate: false
   xy: 68, 72
@@ -45,7 +53,7 @@ progress_bar_fill
   index: -1
 separator
   rotate: false
-  xy: 68, 54
+  xy: 68, 36
   size: 16, 16
   split: 1, 1, 1, 1
   orig: 16, 16

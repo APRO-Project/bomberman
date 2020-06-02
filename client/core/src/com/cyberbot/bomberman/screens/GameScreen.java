@@ -60,8 +60,13 @@ public class GameScreen extends AbstractScreen {
         PlayerEntity player = new PlayerEntity(world, new PlayerDef());
         player.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
 
+        hud = new GameHud(player, viewport);
+        // TODO: Store map virtual size as a constant value somewhere is this class
+        hud.createHud(15);
+        Gdx.input.setInputProcessor(hud);
+
         ActionController actionController = new ActionController(player);
-        inputController = new InputController(new KeyBinds(), actionController);
+        inputController = new InputController(new KeyBinds(), actionController, hud);
 
         batch = new SpriteBatch();
 
@@ -75,12 +80,6 @@ public class GameScreen extends AbstractScreen {
         gsc.addPlayers(Arrays.asList(player));
 
         actionController.addListener(gsc);
-
-        hud = new GameHud(viewport);
-        hud.setPlayer(player);
-        // TODO: Store map virtual size as a constant value somewhere is this class
-        hud.createHud(15);
-        Gdx.input.setInputProcessor(hud);
     }
 
     @Override

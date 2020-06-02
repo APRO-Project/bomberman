@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.cyberbot.bomberman.core.controllers.ActionController;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 
 /**
  * Handles all input from the user and forwards the actions to the action controller.
@@ -11,10 +12,12 @@ import com.cyberbot.bomberman.models.KeyBinds;
 public final class InputController {
     private final KeyBinds keys;
     private final ActionController actionController;
+    private final GameHud hud;
 
-    public InputController(KeyBinds keys, ActionController actionController) {
+    public InputController(KeyBinds keys, ActionController actionController, GameHud hud) {
         this.keys = keys;
         this.actionController = actionController;
+        this.hud = hud;
     }
 
     public void update() {
@@ -24,8 +27,10 @@ public final class InputController {
 
     private void handleItem() {
         if (Gdx.input.isKeyJustPressed(keys.useItem)) {
-            // TODO: Get selected item from HUD
-            actionController.useItem(ItemType.SMALL_BOMB);
+            final ItemType item = hud.getCurrentItem();
+            if (item != null) {
+                actionController.useItem(item);
+            }
         }
     }
 

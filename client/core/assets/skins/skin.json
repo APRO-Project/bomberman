@@ -35,6 +35,9 @@
 		default: {
 			up: button_up
 			down: button_down
+			checked: button_checked
+			checkedFocused: button_checked
+			checkedOver: button_checked
 		}
 	}
 
