@@ -6,24 +6,30 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
-
-import static com.cyberbot.bomberman.core.utils.Constants.PPM;
+import com.cyberbot.bomberman.screens.menu.MenuOptions;
 
 public class MenuScreen extends AbstractScreen {
 
-    private Texture background;
+    private final Texture background;
 
     OrthographicCamera camera;
     SpriteBatch batch;
     Viewport viewport;
 
+    MenuOptions menuOptions;
+
     public MenuScreen(final Client app) {
         super(app);
+
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
+
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
         background = new Texture("./textures/menu_bg.png");
+
+        menuOptions = new MenuOptions(viewport);
+        menuOptions.createMenuOptions();
     }
 
     @Override
@@ -31,6 +37,7 @@ public class MenuScreen extends AbstractScreen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
+        menuOptions.act(delta);
     }
 
     @Override
@@ -45,6 +52,7 @@ public class MenuScreen extends AbstractScreen {
         batch.begin();
         batch.draw(background, 0 ,0,1920f,1080f);
         batch.end();
+        menuOptions.draw();
 
     }
 
@@ -70,6 +78,7 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void dispose() {
+        menuOptions.dispose();
         batch.dispose();
     }
 }

@@ -36,6 +36,20 @@ public final class GameScreenController {
     }
 
     public void setScreen(ScreenState state) {
-        app.setScreen(screens.get(state));
+        switch (state){
+            case MENU :
+                app.setScreen(screens.get(state));
+                break;
+            case GAME:
+                try {
+                    app.setScreen(new GameScreen(app));
+                } catch (MissingLayersException | IOException | ParserConfigurationException | SAXException e) {
+                    throw new IllegalStateException("Unexpected value: " + app);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + state);
+        }
+
     }
 }

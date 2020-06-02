@@ -1,0 +1,53 @@
+
+skin.png
+size: 94,134
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+button_down
+  rotate: false
+  xy: 68, 72
+  size: 16, 16
+  split: 4, 4, 4, 4
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_up
+  rotate: false
+  xy: 68, 90
+  size: 16, 16
+  split: 4, 4, 4, 4
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+placeholder
+  rotate: false
+  xy: 68, 108
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+progress_bar_empty
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  split: 9, 9, 3, 3
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+progress_bar_fill
+  rotate: false
+  xy: 2, 68
+  size: 64, 64
+  split: 9, 9, 9, 9
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+separator
+  rotate: false
+  xy: 68, 54
+  size: 16, 16
+  split: 1, 1, 1, 1
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
