@@ -14,14 +14,15 @@ import java.util.stream.Stream;
 
 public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshotPacket> {
     private final CircularFifoQueue<PlayerSnapshotPacket> queue;
+    private final long clientId;
     private PlayerSnapshot currentSnapshot;
     private int latestSequence;
 
-    public SnapshotQueue(int bufferSize) {
-        queue = new CircularFifoQueue<>(bufferSize);
-
-        latestSequence = 0;
-        currentSnapshot = new PlayerSnapshot();
+    public SnapshotQueue(long clientId, int bufferSize) {
+        this.queue = new CircularFifoQueue<>(bufferSize);
+        this.latestSequence = 0;
+        this.currentSnapshot = new PlayerSnapshot();
+        this.clientId = clientId;
     }
 
     @Override
@@ -55,7 +56,7 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshotPac
     }
 
     public PlayerSnapshotPacket createSnapshot() {
-        PlayerSnapshotPacket packet = new PlayerSnapshotPacket(latestSequence + 1, currentSnapshot);
+        PlayerSnapshotPacket packet = new PlayerSnapshotPacket(latestSequence + 1, clientId, currentSnapshot);
         queue.add(packet);
         currentSnapshot = new PlayerSnapshot();
         latestSequence++;

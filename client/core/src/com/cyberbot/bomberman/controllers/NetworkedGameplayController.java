@@ -8,9 +8,9 @@ import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.Connection;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -40,17 +40,17 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
-    public NetworkedGameplayController(PlayerDef player, String mapPath, Connection connection)
+    public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection)
         throws MissingLayersException, InvalidPropertiesFormatException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
         World world = new World(new Vector2(0, 0), false);
         map = new TileMap(world, mapPath);
-        localPlayer = new PlayerEntity(world, player, 12345);
+        localPlayer = player.createEntity(world);
         localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         textureController = new TextureController(map);
 
-        snapshotQueue = new SnapshotQueue(100);
+        snapshotQueue = new SnapshotQueue(player.getId(), 100);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);

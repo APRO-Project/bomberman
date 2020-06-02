@@ -81,18 +81,18 @@ class ServerService(
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
         val session = SessionService()
-        // TODO: Add clients
         sessions[lobbyId] = session
-
-        Thread(session).start()
 
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
             val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i)
 
+            session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
             clients[c]!!.sendPacket(GameStart(session.port, data))
         }
+
+        Thread(session).start()
     }
 
 

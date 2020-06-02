@@ -44,9 +44,7 @@ class ClientControlService(private val clientSocket: Socket, private val control
     }
 
     fun sendPacket(packet: ControlPacket) {
-        if (!running) {
-            throw IllegalStateException("Attempting to send a packet when the service is not running")
-        }
+        check(running) { "Attempting to send a packet when the service is not running" }
 
         output.println(gson.toJson(packet, ControlPacket::class.java))
         output.flush()

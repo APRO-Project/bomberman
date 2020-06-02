@@ -3,8 +3,7 @@ package com.cyberbot.bomberman.server
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.cyberbot.bomberman.core.controllers.GameStateController
-import com.cyberbot.bomberman.core.models.defs.PlayerDef
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity
+import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import com.cyberbot.bomberman.core.models.tiles.TileMap
@@ -22,7 +21,8 @@ class Session(private val socket: GameSocket) {
     private val simulationService: ScheduledExecutorService
     private val tickService: ScheduledExecutorService
     private var lastUpdate: Long
-    private var gameStarted: Boolean
+    var gameStarted: Boolean
+        private set
 
     init {
         val map = TileMap(world, "./map/bomberman_main.tmx")
@@ -33,22 +33,16 @@ class Session(private val socket: GameSocket) {
         tickService = ScheduledThreadPoolExecutor(1)
     }
 
-    fun onSnapshot(connection: ClientConnection, packet: PlayerSnapshotPacket?): Boolean {
-        if (!hasClient(connection)) {
-            throw RuntimeException("Client not part of this session")
-        }
-        clientSessions[connection]!!.onNewSnapshot(packet!!)
-        return true
+    fun onSnapshot(connection: ClientConnection, packet: PlayerSnapshotPacket): Boolean {
+        return clientSessions[connection]?.run {
+            onNewSnapshot(packet)
+            return true
+        } ?: false
     }
 
-    fun addClient(connection: ClientConnection) {
+    fun addClient(connection: ClientConnection, player: PlayerData) {
         check(!gameStarted) { "The game has already started, cannot add clients" }
-        val playerIndex = clientSessions.size
-        val playerEntity = PlayerEntity(
-            world,
-            PlayerDef(playerIndex),
-            gameStateController.generateEntityId()
-        )
+        val playerEntity = player.createEntity(world)
         gameStateController.addPlayer(playerEntity)
         clientSessions[connection] = PlayerSession(playerEntity)
     }
@@ -83,8 +77,8 @@ class Session(private val socket: GameSocket) {
         })
     }
 
-    private fun startGame() {
-        check(!gameStarted) { "The game hasalready been started" }
+    fun startGame() {
+        check(!gameStarted) { "The game has already been started" }
         gameStarted = true
         scheduleSimulationUpdates()
         scheduleTickUpdates()
