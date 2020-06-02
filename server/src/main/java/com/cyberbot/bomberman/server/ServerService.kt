@@ -77,7 +77,7 @@ class ServerService(
     }
 
     override fun onGameStart(request: GameStartRequest, client: Client) {
-        val lobby = lobbies.values.firstOrNull { it.owner == client } ?: return
+        val lobby = lobbies.values.firstOrNull { it.ownerId == client.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
         val session = SessionService()
@@ -103,7 +103,7 @@ class ServerService(
 
     private fun createLobby(owner: Client): Lobby {
         // Remove any lobbies previously created by this client
-        lobbies.entries.removeIf { it.value.owner == owner }
+        lobbies.entries.removeIf { it.value.ownerId == owner.id }
 
         var id: String
 
@@ -111,7 +111,7 @@ class ServerService(
             id = Utils.generateLobbyId(lobbyIdLength)
         } while (lobbies.keys.contains(id))
 
-        return Lobby(id, owner, ArrayList())
+        return Lobby(id, owner.id, ArrayList())
     }
 
     private fun createClient(nick: String): Client? {

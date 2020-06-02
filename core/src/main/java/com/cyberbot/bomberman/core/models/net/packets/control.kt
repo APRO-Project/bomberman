@@ -9,7 +9,7 @@ private const val TYPE = "type"
 open class ControlPacket
 
 class Client(val id: Long? = null, val nick: String? = null)
-class Lobby(val id: String? = null, val owner: Client? = null, val clients: MutableList<Client> = ArrayList())
+class Lobby(val id: String? = null, val ownerId: Long? = null, val clients: MutableList<Client> = ArrayList())
 
 class ClientRegisterRequest(val nick: String? = null) : ControlPacket()
 class ClientRegisterResponse(val success: Boolean? = null, val client: Client? = null) : ControlPacket()
