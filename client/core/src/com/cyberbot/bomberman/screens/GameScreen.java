@@ -10,10 +10,14 @@ import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
+import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
+import com.cyberbot.bomberman.models.KeyBinds;
+import org.xml.sax.SAXException;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.InvalidPropertiesFormatException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.Arrays;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -31,7 +35,8 @@ public class GameScreen extends AbstractScreen {
     private NetworkedGameplayController gameplayController;
 
 
-    public GameScreen(final Client app) throws InvalidPropertiesFormatException, MissingLayersException {
+    public GameScreen(final Client app) throws MissingLayersException, IOException, ParserConfigurationException,
+        SAXException {
         super(app);
 
         camera = new OrthographicCamera();
@@ -41,14 +46,16 @@ public class GameScreen extends AbstractScreen {
         b2dr = new Box2DDebugRenderer();
         batch = new SpriteBatch();
 
-        try {
-            gameplayController = new NetworkedGameplayController(
-                new PlayerDef(0), "./map/bomberman_main.tmx",
-                new Connection(8038, InetAddress.getLocalHost())
-            );
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx");
+
+        gsc = new GameStateController(world, map);
+
+        txc = new TextureController(map);
+        gsc.addListener(txc);
+
+        gsc.addPlayers(Arrays.asList(player));
+
+        actionController.addListener(gsc);
     }
 
     @Override

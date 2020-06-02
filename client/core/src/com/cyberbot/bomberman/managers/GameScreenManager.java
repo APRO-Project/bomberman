@@ -4,9 +4,11 @@ import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.screens.AbstractScreen;
 import com.cyberbot.bomberman.screens.GameScreen;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.InvalidPropertiesFormatException;
 
 public final class GameScreenManager {
 
@@ -29,7 +31,7 @@ public final class GameScreenManager {
         screens = new HashMap<>();
         try {
             screens.put(ScreenState.GAME, new GameScreen(app));
-        } catch (InvalidPropertiesFormatException | MissingLayersException e) {
+        } catch (MissingLayersException | SAXException | ParserConfigurationException | IOException e) {
             e.printStackTrace();
         }
     }

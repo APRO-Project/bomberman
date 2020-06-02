@@ -1,7 +1,7 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
-import com.badlogic.gdx.maps.MapProperties;
 
+import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 
 /**
@@ -44,15 +44,7 @@ public class FloorTile extends Tile {
             this.dragMultiplier = dragMultiplier;
         }
 
-        /**
-         * Factory method for creating the properties object from given LibGDX MapProperties.
-         *
-         * @param properties Properties source.
-         * @return A new instance of the Properties object.
-         * @throws InvalidPropertiesFormatException When some required properties where missing or
-         *                                          of invalid type from the MapProperties.
-         */
-        static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
+        static Properties fromProperties(HashMap<String, Object> properties) throws InvalidPropertiesFormatException {
             if (!properties.containsKey(DRAG) ||
                 !properties.containsKey(MAX_SPEED)) {
                 throw new InvalidPropertiesFormatException(
@@ -64,8 +56,8 @@ public class FloorTile extends Tile {
 
             try {
                 return new Properties(
-                    properties.get(MAX_SPEED, float.class),
-                    properties.get(DRAG, float.class)
+                    (float) properties.get(MAX_SPEED),
+                    (float) properties.get(DRAG)
                 );
             } catch (ClassCastException e) {
                 throw new InvalidPropertiesFormatException("Floor tiles have to contain '" +
