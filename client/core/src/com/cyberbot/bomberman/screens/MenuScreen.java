@@ -1,11 +1,13 @@
 package com.cyberbot.bomberman.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.controllers.InputController;
 import com.cyberbot.bomberman.screens.menu.MenuOptions;
 
 public class MenuScreen extends AbstractScreen {
@@ -15,6 +17,7 @@ public class MenuScreen extends AbstractScreen {
     OrthographicCamera camera;
     SpriteBatch batch;
     Viewport viewport;
+
 
     MenuOptions menuOptions;
 
@@ -30,6 +33,7 @@ public class MenuScreen extends AbstractScreen {
 
         menuOptions = new MenuOptions(viewport);
         menuOptions.createMenuOptions();
+        Gdx.input.setInputProcessor(menuOptions);
     }
 
     @Override

@@ -50,6 +50,5 @@ public final class GameScreenController {
             default:
                 throw new IllegalStateException("Unexpected value: " + state);
         }
-
     }
 }
