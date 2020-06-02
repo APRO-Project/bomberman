@@ -14,11 +14,14 @@ import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
+import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.net.NetService;
+import org.xml.sax.SAXException;
 
-import java.util.InvalidPropertiesFormatException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +44,11 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService inputPollService;
 
     public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection)
-        throws MissingLayersException, InvalidPropertiesFormatException {
+        throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
         World world = new World(new Vector2(0, 0), false);
-        map = new TileMap(world, mapPath);
+        map = TileMapFactory.createTileMap(world, mapPath);
         localPlayer = player.createEntity(world);
         localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         textureController = new TextureController(map);
