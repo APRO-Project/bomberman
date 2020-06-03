@@ -2,16 +2,14 @@ package com.cyberbot.bomberman.controllers;
 
 import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
-import com.cyberbot.bomberman.screens.AbstractScreen;
-import com.cyberbot.bomberman.screens.GameScreen;
-import com.cyberbot.bomberman.screens.MenuScreen;
+import com.cyberbot.bomberman.screens.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.HashMap;
 
-public final class GameScreenController {
+public final class GameScreenController implements ScreenChangeInterface{
 
 
     private HashMap<ScreenState, AbstractScreen> screens;
@@ -27,24 +25,23 @@ public final class GameScreenController {
 
     private void initScreens() {
         screens = new HashMap<>();
-        try {
-            screens.put(ScreenState.GAME, new GameScreen(app));
-            screens.put(ScreenState.MENU, new MenuScreen(app));
-        } catch (MissingLayersException | SAXException | ParserConfigurationException | IOException e) {
-            e.printStackTrace();
-        }
+        screens.put(ScreenState.MENU, new MenuScreen(app, this));
     }
 
+    @Override
     public void setScreen(ScreenState state) {
         switch (state){
             case MENU :
                 app.setScreen(screens.get(state));
                 break;
+            case LOBBY:
+                app.setScreen(new LobbyScreen(app, this));
+                break;
             case GAME:
                 try {
-                    app.setScreen(new GameScreen(app));
+                    app.setScreen(new GameScreen(app, this));
                 } catch (MissingLayersException | IOException | ParserConfigurationException | SAXException e) {
-                    throw new IllegalStateException("Unexpected value: " + app);
+                    throw new RuntimeException("Unable to start game");
                 }
                 break;
             default:

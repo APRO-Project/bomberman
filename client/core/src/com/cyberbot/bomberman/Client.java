@@ -18,4 +18,8 @@ public class Client extends Game {
 
         gsm = new GameScreenController(this);
     }
+
+    public GameScreenController getGsm() {
+        return gsm;
+    }
 }

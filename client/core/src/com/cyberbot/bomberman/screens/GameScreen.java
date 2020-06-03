@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.controllers.InputController;
 import com.cyberbot.bomberman.controllers.TextureController;
 import com.cyberbot.bomberman.core.controllers.ActionController;
@@ -47,9 +48,9 @@ public class GameScreen extends AbstractScreen {
 
     SpriteBatch batch;
 
-    public GameScreen(final Client app) throws MissingLayersException, IOException, ParserConfigurationException,
+    public GameScreen(final Client app, GameScreenController gameScreenController) throws MissingLayersException, IOException, ParserConfigurationException,
         SAXException {
-        super(app);
+        super(app, gameScreenController);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);

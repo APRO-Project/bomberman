@@ -1,27 +1,19 @@
 package com.cyberbot.bomberman.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.controllers.GameScreenController;
-import com.cyberbot.bomberman.screens.menu.MenuOptions;
 
-public class MenuScreen extends AbstractScreen {
+public class LobbyScreen extends AbstractScreen{
 
-    private final Texture background;
+    final OrthographicCamera camera;
+    final SpriteBatch batch;
+    final Viewport viewport;
 
-    private final OrthographicCamera camera;
-    private final SpriteBatch batch;
-    private final Viewport viewport;
-
-
-    MenuOptions menuOptions;
-
-    public MenuScreen(final Client app, GameScreenController gameScreenController) {
+    public LobbyScreen(Client app, GameScreenController gameScreenController) {
         super(app, gameScreenController);
 
         batch = new SpriteBatch();
@@ -29,11 +21,6 @@ public class MenuScreen extends AbstractScreen {
 
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
-        background = new Texture("./textures/menu_bg.png");
-
-        menuOptions = new MenuOptions(viewport, gameScreenController);
-        menuOptions.createMenuOptions();
-        Gdx.input.setInputProcessor(menuOptions);
     }
 
     @Override
@@ -41,7 +28,7 @@ public class MenuScreen extends AbstractScreen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-        menuOptions.act(delta);
+
     }
 
     @Override
@@ -54,10 +41,7 @@ public class MenuScreen extends AbstractScreen {
         super.render(delta);
 
         batch.begin();
-        batch.draw(background, 0 ,0,1920f,1080f);
         batch.end();
-        menuOptions.draw();
-
     }
 
     @Override
@@ -82,7 +66,6 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void dispose() {
-        menuOptions.dispose();
         batch.dispose();
     }
 }
