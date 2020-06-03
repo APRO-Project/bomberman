@@ -1,11 +1,13 @@
 package com.cyberbot.bomberman.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.controllers.GameScreenController;
+import com.cyberbot.bomberman.screens.lobby.LobbyLayout;
 
 public class LobbyScreen extends AbstractScreen{
 
@@ -13,6 +15,7 @@ public class LobbyScreen extends AbstractScreen{
     final SpriteBatch batch;
     final Viewport viewport;
 
+    LobbyLayout lobbyLayout;
     public LobbyScreen(Client app, GameScreenController gameScreenController) {
         super(app, gameScreenController);
 
@@ -21,6 +24,10 @@ public class LobbyScreen extends AbstractScreen{
 
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
+
+        lobbyLayout = new LobbyLayout(viewport, gameScreenController);
+        lobbyLayout.createLobbyUi();
+        Gdx.input.setInputProcessor(lobbyLayout);
     }
 
     @Override
@@ -28,7 +35,7 @@ public class LobbyScreen extends AbstractScreen{
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-
+        lobbyLayout.act(delta);
     }
 
     @Override
@@ -42,6 +49,7 @@ public class LobbyScreen extends AbstractScreen{
 
         batch.begin();
         batch.end();
+        lobbyLayout.draw();
     }
 
     @Override
@@ -66,6 +74,7 @@ public class LobbyScreen extends AbstractScreen{
 
     @Override
     public void dispose() {
+        lobbyLayout.dispose();
         batch.dispose();
     }
 }

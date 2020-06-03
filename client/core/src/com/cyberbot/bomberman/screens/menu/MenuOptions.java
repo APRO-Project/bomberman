@@ -34,7 +34,7 @@ public class MenuOptions extends Stage {
 
     public void createMenuOptions() {
         Table options = new Table();
-        options.setDebug(false);
+        options.setDebug(true);
 
         float worldWidth = getViewport().getWorldWidth();
         float worldHeight = getViewport().getWorldHeight();
