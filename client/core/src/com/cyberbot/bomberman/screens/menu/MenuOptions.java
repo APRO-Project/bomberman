@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.screens.menu;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.screens.GameScreen;
 import com.cyberbot.bomberman.utils.Atlas;
@@ -23,15 +21,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public class MenuOptions extends Stage {
-    private Table options;
-    private Skin skin;
 
     public MenuOptions(Viewport viewport) {
         super(viewport);
     }
 
     public void createMenuOptions() {
-        options = new Table();
+        Table options = new Table();
         options.setDebug(true);
 
         float worldWidth = getViewport().getWorldWidth();
@@ -49,7 +45,7 @@ public class MenuOptions extends Stage {
         fontParams.size = 20;
         BitmapFont font = generator.generateFont(fontParams);
 
-        skin = new Skin(Atlas.getSkinAtlas());
+        Skin skin = new Skin(Atlas.getSkinAtlas());
         skin.add("default_font", font);
         skin.load(Gdx.files.internal("skins/skin.json"));
 

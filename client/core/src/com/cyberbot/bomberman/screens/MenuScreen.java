@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.InputController;
 import com.cyberbot.bomberman.screens.menu.MenuOptions;
 
 public class MenuScreen extends AbstractScreen {
