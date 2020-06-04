@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
@@ -31,9 +32,9 @@ public class GameScreen extends AbstractScreen {
     private NetworkedGameplayController gameplayController;
 
 
-    public GameScreen(final Client app, final PlayerData playerData, final String mapPath, final Connection connection)
+    public GameScreen(GameScreenController gameScreenController, final PlayerData playerData, final String mapPath, final Connection connection)
         throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
-        super(app);
+        super(gameScreenController);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);

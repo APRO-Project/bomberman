@@ -1,0 +1,53 @@
+{
+	"Color": {
+		"pastel_red": {
+			"hex": "bf7676ff"
+		}
+
+		"white": {
+			"hex": "ffffffff"
+		}
+	}
+
+	"TintedDrawable": {
+		"button_over": {
+			"name": "button_up"
+			"color": "pastel_red"
+		}
+	}
+
+	"LabelStyle": {
+		"default": {
+			"font": "default_font"
+		}
+	}
+
+	"TextButtonStyle": {
+		"default": {
+			"font": "default_font"
+			"up": "button_up"
+			"down": "button_down"
+			"over": "button_over"
+		}
+	}
+
+	"ImageButtonStyle": {
+		"default": {
+			"up": "button_up"
+			"down": "button_down"
+		}
+	}
+
+	"ButtonStyle": {
+		"default": {
+			"up": "button_up"
+			"down": "button_down"
+		}
+	}
+
+	"TextTooltipStyle": {
+		"default": {
+			"label": "default"
+		}
+	}
+}
