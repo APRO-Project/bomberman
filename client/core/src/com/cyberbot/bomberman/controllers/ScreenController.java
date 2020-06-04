@@ -95,7 +95,12 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void onLobbyUpdate(@NotNull LobbyUpdate payload) {
-        Gdx.app.postRunnable(() -> lobby.updateLobby(payload.getLobby()));
+        Gdx.app.postRunnable(() -> {
+            Boolean owner = payload.isOwner();
+            if (owner != null) {
+                lobby.updateLobby(payload.getLobby(), owner);
+            }
+        });
     }
 
     @Override
