@@ -11,20 +11,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.controllers.GameScreenController;
-import com.cyberbot.bomberman.screens.ScreenState;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class MenuOptions extends Stage {
 
-    final GameScreenController gameScreenController;
+    final MenuInteraction delegate;
     final Skin skin;
     TextField nicknameField;
     TextField lobbyIdField;
 
-    public MenuOptions(Viewport viewport, GameScreenController gameScreenController) {
+    public MenuOptions(Viewport viewport, MenuInteraction delegate) {
         super(viewport);
-        this.gameScreenController = gameScreenController;
+        this.delegate = delegate;
         skin = new Skin(Gdx.files.internal("skins\\clean-crispy\\skin\\clean-crispy-ui.json"));
         skin.getFont("font").getData().setScale(5);
     }
@@ -61,9 +59,7 @@ public class MenuOptions extends Stage {
         createLobby.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                String nickname = nicknameField.getText();
-                //TODO add server request
-                gameScreenController.setLobbyScreen( nickname, true);
+                delegate.createLobby();
             }
         });
 
@@ -72,10 +68,7 @@ public class MenuOptions extends Stage {
         joinLobby.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                String nickname = nicknameField.getText();
-                String lobbyId = lobbyIdField.getText();
-                //TODO add server request
-                gameScreenController.setLobbyScreen(false);
+                delegate.joinLobby(lobbyIdField.getText());
             }
         });
 

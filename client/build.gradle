@@ -13,9 +13,12 @@ project(":client:desktop") {
 
 project(":client:core") {
     apply plugin: "java-library"
+    apply plugin:  'org.jetbrains.kotlin.jvm'
 
     dependencies {
         implementation project(":core")
+        implementation "org.jetbrains.kotlin:kotlin-stdlib:1.1.60"
+        implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"

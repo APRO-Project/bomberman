@@ -6,7 +6,7 @@ import com.cyberbot.bomberman.core.controllers.GameStateController
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
-import com.cyberbot.bomberman.core.models.tiles.TileMap
+import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
 import java.io.IOException
 import java.net.DatagramPacket
@@ -25,7 +25,7 @@ class Session(private val socket: GameSocket) {
         private set
 
     init {
-        val map = TileMap(world, "./map/bomberman_main.tmx")
+        val map = TileMapFactory.createTileMap(world, "./map/bomberman_main.tmx")
         gameStateController = GameStateController(world, map)
         gameStarted = false
         lastUpdate = System.currentTimeMillis()

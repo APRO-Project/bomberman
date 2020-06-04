@@ -5,8 +5,13 @@ import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
 import java.io.IOException
+import java.net.InetSocketAddress
 import java.net.ServerSocket
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 
 
 class ServerService(
@@ -21,14 +26,14 @@ class ServerService(
 
     @Volatile
     private var running = false
-    private var serverSocket: ServerSocket? = null
+    private var serverSocket = ServerSocket()
 
     override fun run() {
         try {
             running = true
-            serverSocket = ServerSocket(port)
+            serverSocket.bind(InetSocketAddress(port))
             while (running) {
-                val client = serverSocket!!.accept()
+                val client = serverSocket.accept()
                 Thread(ClientControlService(client, this)).start()
             }
         } catch (e: IOException) {
@@ -68,9 +73,13 @@ class ServerService(
 
         return if (lobby.clients.size < maxPlayersPerLobby) {
             lobby.clients.add(client)
-            notifyLobbyChange(lobby)
 
-            null
+            // Quick and dirty way to first send the response to a client and only later the update packet
+            Timer().schedule(100) {
+                notifyLobbyChange(lobby)
+            }
+
+            LobbyJoinResponse(true)
         } else {
             LobbyJoinResponse(false)
         }
@@ -95,9 +104,8 @@ class ServerService(
         Thread(session).start()
     }
 
-
     private fun notifyLobbyChange(lobby: Lobby) {
-        val lobbyUpdate = LobbyUpdate(System.currentTimeMillis(), lobby)
+        val lobbyUpdate = LobbyUpdate(System.currentTimeMillis(), Lobby.stripIds(lobby))
         lobby.clients.map { clients[it] }.forEach { it?.sendPacket(lobbyUpdate) }
     }
 

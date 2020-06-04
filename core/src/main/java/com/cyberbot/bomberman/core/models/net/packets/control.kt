@@ -9,13 +9,22 @@ private const val TYPE = "type"
 open class ControlPacket
 
 class Client(val id: Long? = null, val nick: String? = null)
-class Lobby(val id: String? = null, val ownerId: Long? = null, val clients: MutableList<Client> = ArrayList())
+class Lobby(val id: String? = null, val ownerId: Long? = null, clients: List<Client> = ArrayList()) {
+    val clients = ArrayList(clients)
+
+    companion object {
+        fun stripIds(lobby: Lobby): Lobby {
+            val clients = lobby.clients.map { Client(nick = it.nick) }
+            return Lobby(id = lobby.id, clients = clients)
+        }
+    }
+}
 
 class ClientRegisterRequest(val nick: String? = null) : ControlPacket()
 class ClientRegisterResponse(val success: Boolean? = null, val client: Client? = null) : ControlPacket()
 
 class LobbyCreateRequest : ControlPacket()
-class LobbyCreateResponse(success: Boolean? = null, val id: String? = null) : ControlPacket()
+class LobbyCreateResponse(val success: Boolean? = null, val id: String? = null) : ControlPacket()
 
 class LobbyJoinRequest(val id: String? = null) : ControlPacket()
 class LobbyJoinResponse(val success: Boolean? = null) : ControlPacket()

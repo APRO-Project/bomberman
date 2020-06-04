@@ -35,7 +35,7 @@ public class TileMapFactory {
      * @throws SAXException                 {@link DocumentBuilder DOM parser} exception.
      */
     public static TileMap createTileMap(World world, String path) throws IOException,
-        MissingLayersException, ParserConfigurationException, SAXException {
+        MissingLayersException, ParserConfigurationException, SAXException { // TODO: Better map exception handling
         File mapFile = new File(path);
 
         Element sourceMap = (Element) loadXmlMap(mapFile);

@@ -7,8 +7,8 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import java.io.IOException
-import java.io.PrintWriter
 import java.net.Socket
 
 class ClientControlService(private val clientSocket: Socket, private val controller: ClientController) : Runnable {
@@ -17,24 +17,21 @@ class ClientControlService(private val clientSocket: Socket, private val control
     private var running = true
 
     private var client: Client? = null
+
     private lateinit var gson: Gson
-    private lateinit var output: PrintWriter
+    private lateinit var reader: JsonReader
+    private lateinit var writer: JsonWriter
 
     override fun run() {
         try {
-            val input = clientSocket.getInputStream().reader()
-            output = PrintWriter(clientSocket.getOutputStream().writer())
+            clientSocket.keepAlive = true
+            writer = JsonWriter(clientSocket.getOutputStream().writer().buffered())
+            reader = JsonReader(clientSocket.getInputStream().reader().buffered())
             gson = GsonBuilder().registerControlPacketAdapter().create()
-            val jsonReader = JsonReader(input)
 
             while (running) {
-                val response = handleJson(gson, jsonReader)
-                response?.let {
-                    // For Gson to use the proper adapter type has to be explicitly set to the superclass
-                    val json = gson.toJson(it, ControlPacket::class.java)
-                    output.println(json)
-                    output.flush()
-                }
+                val response = handleJson()
+                response?.let { sendPacket(it) }
             }
         } catch (e: IOException) {
             running = false
@@ -46,11 +43,12 @@ class ClientControlService(private val clientSocket: Socket, private val control
     fun sendPacket(packet: ControlPacket) {
         check(running) { "Attempting to send a packet when the service is not running" }
 
-        output.println(gson.toJson(packet, ControlPacket::class.java))
-        output.flush()
+        // For Gson to use the proper adapter type has to be explicitly set to the superclass
+        gson.toJson(packet, ControlPacket::class.java, writer)
+        writer.flush()
     }
 
-    private fun handleJson(gson: Gson, reader: JsonReader): ControlPacket? {
+    private fun handleJson(): ControlPacket? {
         return try {
             val packet: ControlPacket? = gson.fromJsonOrNull(reader)
 

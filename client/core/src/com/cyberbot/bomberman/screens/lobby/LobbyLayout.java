@@ -11,8 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.controllers.GameScreenController;
-import com.cyberbot.bomberman.screens.ScreenState;
+import com.cyberbot.bomberman.core.models.net.packets.Lobby;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import java.util.Arrays;
@@ -24,17 +23,17 @@ public class LobbyLayout extends Stage {
     private final float buttonHeight = 150;
     private boolean isOwner;
 
-    Label[] playerLabels;
-    boolean[] playerEmpty;
+    private Label[] playerLabels;
+    private boolean[] playerEmpty;
 
-    final GameScreenController gameScreenController;
+    private LobbyInteraction delegate;
 
-    public LobbyLayout(Viewport viewport, boolean isOwner, GameScreenController gameScreenController) {
+    public LobbyLayout(Viewport viewport, LobbyInteraction delegate) {
         super(viewport);
-        this.isOwner = isOwner;
-        this.gameScreenController = gameScreenController;
-        playerLabels = new Label[4];
-        playerEmpty = new boolean[4];
+        this.isOwner = false;
+        this.delegate = delegate;
+        this.playerLabels = new Label[4];
+        this.playerEmpty = new boolean[4];
         Arrays.fill(playerEmpty, true);
     }
 
@@ -89,13 +88,12 @@ public class LobbyLayout extends Stage {
             ui2.setHeight(worldHeight);
             addActor(ui2);
 
-            TextButton createLobby = new TextButton("Start Game", skin2);
-            setupButton(ui2, tableWidth, createLobby);
-            createLobby.addListener(new ClickListener() {
+            TextButton startGameButton = new TextButton("Start Game", skin2);
+            setupButton(ui2, tableWidth, startGameButton);
+            startGameButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    //TODO add server request
-                    gameScreenController.setGameScreen();
+                    delegate.startGame();
                 }
             });
         }
@@ -104,18 +102,17 @@ public class LobbyLayout extends Stage {
         Table ui3 = new Table();
         ui3.setDebug(false);
 
-        ui3.setPosition(worldWidth-tableWidth, 1);
+        ui3.setPosition(worldWidth - tableWidth, 1);
         ui3.setWidth(tableWidth);
         ui3.setHeight(worldHeight);
         addActor(ui3);
 
-        TextButton createLobby = new TextButton("Leave", skin2);
-        setupButton(ui3, tableWidth, createLobby);
-        createLobby.addListener(new ClickListener() {
+        TextButton leaveLobbyButton = new TextButton("Leave", skin2);
+        setupButton(ui3, tableWidth, leaveLobbyButton);
+        leaveLobbyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO add server request
-                gameScreenController.setMenuScreen();
+                delegate.leaveLobby();
             }
         });
     }
@@ -137,7 +134,7 @@ public class LobbyLayout extends Stage {
         playerLabels[number].setText(playername);
     }
 
-    public void removePlayer(int number){
+    public void removePlayer(int number) {
         playerEmpty[number] = true;
         playerLabels[number].setText("Empty");
     }
@@ -146,5 +143,9 @@ public class LobbyLayout extends Stage {
         button.getLabel().setFontScale(4);
         table.add(button).width(tableWidth - 50).height(buttonHeight).row();
         table.add().height(spaceHeight).row();
+    }
+
+    public void updateLobby(Lobby lobby) {
+        // TODO: Update lobby
     }
 }
