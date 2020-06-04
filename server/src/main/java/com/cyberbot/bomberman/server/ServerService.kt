@@ -105,8 +105,18 @@ class ServerService(
     }
 
     private fun notifyLobbyChange(lobby: Lobby) {
-        val lobbyUpdate = LobbyUpdate(System.currentTimeMillis(), Lobby.stripIds(lobby))
-        lobby.clients.map { clients[it] }.forEach { it?.sendPacket(lobbyUpdate) }
+        val updateTime = System.currentTimeMillis()
+        val strippedLobby = Lobby.stripIds(lobby)
+        val lobbyUpdate = LobbyUpdate(updateTime, strippedLobby, false)
+
+        lobby.clients
+            .filter { it.id != lobby.ownerId }
+            .map { clients[it] }
+            .forEach { it?.sendPacket(lobbyUpdate) }
+
+        val owner = lobby.clients.first { it.id == lobby.ownerId }
+
+        clients[owner]!!.sendPacket(LobbyUpdate(updateTime, strippedLobby, true))
     }
 
     private fun createLobby(owner: Client): Lobby {

@@ -31,7 +31,9 @@ class LobbyJoinResponse(val success: Boolean? = null) : ControlPacket()
 
 class GameStartRequest : ControlPacket()
 
-class LobbyUpdate(val timestamp: Long? = null, val lobby: Lobby = Lobby()) : ControlPacket()
+class LobbyUpdate(val timestamp: Long? = null, val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) :
+    ControlPacket()
+
 class GameStart(val port: Int, val playerInit: PlayerData) : ControlPacket()
 
 class ErrorResponse(val error: String? = null) : ControlPacket()

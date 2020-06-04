@@ -37,8 +37,8 @@ public class LobbyScreen extends AbstractScreen {
         lobbyLayout.addPlayer(nick, number);
     }
 
-    public void updateLobby(Lobby lobby) {
-        lobbyLayout.updateLobby(lobby);
+    public void updateLobby(Lobby lobby, boolean isOwner) {
+        lobbyLayout.updateLobby(lobby, isOwner);
     }
 
     @Override

@@ -145,7 +145,7 @@ public class LobbyLayout extends Stage {
         table.add().height(spaceHeight).row();
     }
 
-    public void updateLobby(Lobby lobby) {
+    public void updateLobby(Lobby lobby, boolean isOwner) {
         // TODO: Update lobby
     }
 }
