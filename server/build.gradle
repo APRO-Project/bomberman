@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id "application"
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 sourceCompatibility = 1.8
@@ -7,13 +9,33 @@ repositories {
     mavenCentral()
 }
 
+project.ext.assetsDir = new File("main/resources")
+
+ext {
+    javaMainClass = "com.cyberbot.bomberman.server.Server"
+}
+
+application {
+    mainClassName = javaMainClass
+}
+
 dependencies {
     implementation project(":core")
     implementation 'org.apache.logging.log4j:log4j-api:2.13.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.2'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
+
+    implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.6.0'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }

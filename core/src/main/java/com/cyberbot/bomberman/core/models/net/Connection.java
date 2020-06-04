@@ -1,20 +1,20 @@
-package com.cyberbot.bomberman;
+package com.cyberbot.bomberman.core.models.net;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.Objects;
 
-public class ClientConnection {
+public class Connection {
     private final int port;
     private final InetAddress address;
 
-    public ClientConnection(int port, InetAddress address) {
+    public Connection(int port, InetAddress address) {
         this.port = port;
         this.address = address;
     }
 
-    public static ClientConnection fromDatagramPacket(DatagramPacket packet) {
-        return new ClientConnection(packet.getPort(), packet.getAddress());
+    public static Connection fromDatagramPacket(DatagramPacket packet) {
+        return new Connection(packet.getPort(), packet.getAddress());
     }
 
     public int getPort() {
@@ -30,7 +30,7 @@ public class ClientConnection {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ClientConnection that = (ClientConnection) o;
+        Connection that = (Connection) o;
 
         if (port != that.port) return false;
         return Objects.equals(address, that.address);

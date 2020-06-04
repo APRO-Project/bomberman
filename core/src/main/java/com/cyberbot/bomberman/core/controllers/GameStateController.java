@@ -8,18 +8,23 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
+import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * The main gameplay controller.
  * Handles all contact detection, player actions, entity behaviour.
  */
-public final class GameStateController implements Disposable, Updatable, ActionController.Listener, ContactListener {
+public final class GameStateController implements Disposable, Updatable, PlayerActionController.Listener, ContactListener {
     private final World world;
 
     private final TileMap map;
@@ -29,7 +34,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
     private final List<PlayerEntity> players;
     private final List<CollectibleEntity> collectibles;
 
-    private final List<ChangeListener> listeners;
+    private final List<WorldChangeListener> listeners;
 
     public GameStateController(World world, TileMap map) {
         this.world = world;
@@ -45,9 +50,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
     @Override
     public void update(float delta) {
         // Update all entities
-        Stream.of(players, collectibles, bombs)
-            .flatMap(Collection::stream)
-            .forEach(entity -> entity.update(delta));
+        entityStream().forEach(entity -> entity.update(delta));
 
         // Handle bomb explosion
         bombs.forEach(bomb -> {
@@ -86,16 +89,20 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         players.forEach(PlayerEntity::dispose);
     }
 
-    public void addPlayers(Collection<PlayerEntity> players) {
-        this.players.addAll(players);
-        players.forEach(this::onEntityAdded);
+    public void addPlayer(PlayerEntity player) {
+        this.players.add(player);
+        onEntityAdded(player);
     }
 
-    public void addListener(ChangeListener listener) {
+    public void addPlayers(Collection<PlayerEntity> players) {
+        players.forEach(this::addPlayer);
+    }
+
+    public void addListener(WorldChangeListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(ChangeListener listener) {
+    public void removeListener(WorldChangeListener listener) {
         listeners.remove(listener);
     }
 
@@ -103,18 +110,37 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         listeners.clear();
     }
 
+    public GameSnapshot createSnapshot() {
+        Map<Long, EntityData<?>> entities = entityStream().collect(Collectors.toMap(Entity::getId, Entity::getData));
+        return new GameSnapshot(entities);
+    }
+
+    public long generateEntityId() {
+        long id;
+
+        do {
+            id = ThreadLocalRandom.current().nextLong();
+        } while (hasEntity(id));
+
+        return id;
+    }
+
+    public boolean hasEntity(long id) {
+        return entityStream().map(Entity::getId).anyMatch(pId -> pId == id);
+    }
+
     @Override
     public void onBombPlaced(BombDef bombDef, PlayerEntity executor) {
-        BombEntity bomb = new BombEntity(world, bombDef);
+        BombEntity bomb = new BombEntity(world, bombDef, generateEntityId());
+        bombs.add(bomb);
+        onEntityAdded(bomb);
+
         Vector2 position = executor.getPositionRaw();
         float x = (float) Math.floor(position.x) + 0.5f;
         float y = (float) Math.floor(position.y) + 0.5f;
 
         // Place the bomb on the tile the player's currently at
         bomb.setPositionRaw(new Vector2(x, y));
-
-        bombs.add(bomb);
-        onEntityAdded(bomb);
     }
 
     @Override
@@ -134,13 +160,13 @@ public final class GameStateController implements Disposable, Updatable, ActionC
             other = (Entity) b;
         } else if (b instanceof PlayerEntity && a instanceof Entity) {
             player = (PlayerEntity) b;
-            other = (Entity) b;
+            other = (Entity) a;
         } else {
             throw new RuntimeException("Contact detected between non-player entities");
         }
 
         if (other instanceof PlayerEntity) {
-            throw new RuntimeException("Contact detected between two PlayerEntities");
+            return; //throw new RuntimeException("Contact detected between two PlayerEntities");
         }
 
         handleContact(player, other);
@@ -159,6 +185,10 @@ public final class GameStateController implements Disposable, Updatable, ActionC
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
         // Unused
+    }
+
+    private Stream<Entity> entityStream() {
+        return Stream.of(players, collectibles, bombs).flatMap(Collection::stream);
     }
 
     private void onEntityAdded(Entity entity) {
@@ -250,7 +280,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         map.removeWall(tile.getX(), tile.getY());
 
         // Spawn a random collectible in place of the broken tile
-        CollectibleEntity collectible = CollectibleFactory.createRandom(world);
+        CollectibleEntity collectible = CollectibleFactory.createRandom(world, generateEntityId());
         if (collectible == null) {
             return;
         }
@@ -264,6 +294,7 @@ public final class GameStateController implements Disposable, Updatable, ActionC
         if (other instanceof CollectibleEntity) {
             ItemType itemType = ((CollectibleEntity) other).getItemType();
             Inventory inventory = player.getInventory();
+
             switch (itemType) {
                 case SMALL_BOMB:
                     inventory.incrementMaxQuantity(itemType, true);
@@ -274,24 +305,5 @@ public final class GameStateController implements Disposable, Updatable, ActionC
             other.markToRemove();
             onEntityRemoved(other);
         }
-    }
-
-    /**
-     * An interface that any parties interested in changes to the game entities should implement.
-     */
-    public interface ChangeListener {
-        /**
-         * Called when a new {@link Entity} has been added to game.
-         *
-         * @param entity The new entity.
-         */
-        void onEntityAdded(Entity entity);
-
-        /**
-         * Called when an {@link Entity} has been removed from the game.
-         *
-         * @param entity The removed entity.
-         */
-        void onEntityRemoved(Entity entity);
     }
 }

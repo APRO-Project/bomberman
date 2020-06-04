@@ -3,15 +3,19 @@ package com.cyberbot.bomberman.core.models.entities;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
-    private static final float ANIMATION_DURATION = 0.2f;
+    public static final float MAX_VELOCITY_BASE = 5 * PPM;
+    public static final float DRAG_BASE = 60f;
 
+    private static final float ANIMATION_DURATION = 0.2f;
 
     private final int textureVariant;
     private final Inventory inventory;
@@ -26,8 +30,8 @@ public class PlayerEntity extends Entity {
     private LookingDirection horizontalDirection;
 
 
-    public PlayerEntity(World world, PlayerDef def) {
-        super(world);
+    public PlayerEntity(World world, PlayerDef def, long id) {
+        super(world, id);
 
         currentState = PlayerState.STANDING;
         previousState = PlayerState.STANDING;
@@ -115,7 +119,7 @@ public class PlayerEntity extends Entity {
         CircleShape shape = new CircleShape();
         shape.setRadius(0.49f);
 
-        body.createFixture(shape, 1);
+        Fixture fixture = body.createFixture(shape, 1);
         body.setUserData(this);
         shape.dispose();
     }
@@ -124,6 +128,11 @@ public class PlayerEntity extends Entity {
     public void update(float delta) {
         super.update(delta);
         inventory.update(delta);
+    }
+
+    @Override
+    public PlayerData getData() {
+        return new PlayerData(id, getPosition(), inventory, textureVariant);
     }
 
     public enum PlayerState {

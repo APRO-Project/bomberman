@@ -1,7 +1,7 @@
 package com.cyberbot.bomberman.controllers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.cyberbot.bomberman.core.controllers.GameStateController;
+import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.BombEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
@@ -19,7 +19,7 @@ import java.util.List;
  * Used to draw the map and all entities present on the map.
  * listens for map and game state changes and updates it's sprite's accordingly.
  */
-public final class TextureController implements Drawable, Updatable, GameStateController.ChangeListener, TileMap.ChangeListener {
+public final class TextureController implements Drawable, Updatable, WorldChangeListener, TileMap.ChangeListener {
     private final List<EntitySprite<?>> entities;
     private final List<TileSprite> base;
     private final List<TileSprite> floor;
