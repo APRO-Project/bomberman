@@ -63,7 +63,7 @@ public class MenuOptions extends Stage {
             public void clicked(InputEvent event, float x, float y) {
                 String nickname = nicknameField.getText();
                 //TODO add server request
-                gameScreenController.setScreen(ScreenState.LOBBY);
+                gameScreenController.setScreen(ScreenState.LOBBY, nickname, true);
             }
         });
 
@@ -81,6 +81,8 @@ public class MenuOptions extends Stage {
 
         nicknameField = new TextField("Player" + (int) (Math.random() * 9999), skin);
         nicknameField.setAlignment(1);
+        nicknameField.setMaxLength(10);
+
         lobbyIdField = new TextField("lobby id", skin);
         lobbyIdField.setAlignment(1);
 
@@ -89,9 +91,9 @@ public class MenuOptions extends Stage {
         options.add(lobbyIdField).width(tableWidth).height(buttonHeight).row();
     }
 
-    private void setupButton(Table options, float tableWidth, TextButton button) {
+    private void setupButton(Table table, float tableWidth, TextButton button) {
         button.getLabel().setFontScale(4);
-        options.add(button).width(tableWidth).height(buttonHeight).row();
-        options.add().height(spaceHeight).row();
+        table.add(button).width(tableWidth).height(buttonHeight).row();
+        table.add().height(spaceHeight).row();
     }
 }

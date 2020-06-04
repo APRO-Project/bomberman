@@ -35,7 +35,7 @@ public final class GameScreenController implements ScreenChangeInterface{
                 app.setScreen(screens.get(state));
                 break;
             case LOBBY:
-                app.setScreen(new LobbyScreen(app, this));
+                app.setScreen(new LobbyScreen(app, false, this));
                 break;
             case GAME:
                 try {
@@ -47,5 +47,13 @@ public final class GameScreenController implements ScreenChangeInterface{
             default:
                 throw new IllegalStateException("Unexpected value: " + state);
         }
+    }
+
+    @Override
+    public void setScreen(ScreenState state, String playerName, boolean isOwner) {
+        if (!state.equals(ScreenState.LOBBY)){
+            throw new IllegalArgumentException("Only lobby screen can contain player nickname");
+        }
+        app.setScreen(new LobbyScreen(app, this, playerName, isOwner));
     }
 }
