@@ -28,7 +28,7 @@ public class LobbyScreen extends AbstractScreen{
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
 
-        lobbyLayout = new LobbyLayout(viewport, false, gameScreenController);
+        lobbyLayout = new LobbyLayout(viewport, isOwner, gameScreenController);
         lobbyLayout.createLobbyUi();
         Gdx.input.setInputProcessor(lobbyLayout);
 
@@ -45,7 +45,7 @@ public class LobbyScreen extends AbstractScreen{
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
 
-        lobbyLayout = new LobbyLayout(viewport, false, gameScreenController);
+        lobbyLayout = new LobbyLayout(viewport, isOwner, gameScreenController);
         lobbyLayout.createLobbyUi();
         Gdx.input.setInputProcessor(lobbyLayout);
     }

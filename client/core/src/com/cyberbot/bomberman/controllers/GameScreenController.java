@@ -1,12 +1,17 @@
 package com.cyberbot.bomberman.controllers;
 
+import com.badlogic.gdx.math.Vector2;
 import com.cyberbot.bomberman.Client;
+import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.net.Connection;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.screens.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
 
 public final class GameScreenController implements ScreenChangeInterface{
@@ -39,7 +44,9 @@ public final class GameScreenController implements ScreenChangeInterface{
                 break;
             case GAME:
                 try {
-                    app.setScreen(new GameScreen(app, this));
+                    PlayerData playerData = new PlayerData(-1, new Vector2(0, 0), new Inventory(), 0);
+                    app.setScreen(new GameScreen(app,this, playerData, "./map/bomberman_main.tmx",
+                        new Connection(12345, InetAddress.getLocalHost())));
                 } catch (MissingLayersException | IOException | ParserConfigurationException | SAXException e) {
                     throw new RuntimeException("Unable to start game");
                 }
