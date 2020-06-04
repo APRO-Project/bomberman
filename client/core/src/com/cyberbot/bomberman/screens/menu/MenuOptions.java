@@ -63,7 +63,7 @@ public class MenuOptions extends Stage {
             public void clicked(InputEvent event, float x, float y) {
                 String nickname = nicknameField.getText();
                 //TODO add server request
-                gameScreenController.setScreen(ScreenState.LOBBY, nickname, true);
+                gameScreenController.setLobbyScreen( nickname, true);
             }
         });
 
@@ -75,7 +75,7 @@ public class MenuOptions extends Stage {
                 String nickname = nicknameField.getText();
                 String lobbyId = lobbyIdField.getText();
                 //TODO add server request
-                gameScreenController.setScreen(ScreenState.LOBBY);
+                gameScreenController.setLobbyScreen(false);
             }
         });
 

@@ -8,11 +8,9 @@ import com.cyberbot.bomberman.controllers.GameScreenController;
 
 public abstract class AbstractScreen implements Screen {
 
-    protected final Client app;
     protected final GameScreenController gameScreenController;
 
-    public AbstractScreen(final Client app, GameScreenController gameScreenController) {
-        this.app = app;
+    public AbstractScreen(GameScreenController gameScreenController) {
         this.gameScreenController = gameScreenController;
     }
 

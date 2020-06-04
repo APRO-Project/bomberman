@@ -9,7 +9,7 @@ import com.cyberbot.bomberman.Client;
 import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.screens.lobby.LobbyLayout;
 
-public class LobbyScreen extends AbstractScreen{
+public class LobbyScreen extends AbstractScreen {
 
     final OrthographicCamera camera;
     final SpriteBatch batch;
@@ -18,8 +18,8 @@ public class LobbyScreen extends AbstractScreen{
 
     LobbyLayout lobbyLayout;
 
-    public LobbyScreen(Client app, GameScreenController gameScreenController, String playerName, boolean isOwner) {
-        super(app, gameScreenController);
+    public LobbyScreen(GameScreenController gameScreenController, String playerName, boolean isOwner) {
+        super(gameScreenController);
         this.isOwner = isOwner;
 
         batch = new SpriteBatch();
@@ -35,8 +35,8 @@ public class LobbyScreen extends AbstractScreen{
         lobbyLayout.addPlayer(playerName);
     }
 
-    public LobbyScreen(Client app, boolean isOwner, GameScreenController gameScreenController) {
-        super(app, gameScreenController);
+    public LobbyScreen(GameScreenController gameScreenController, boolean isOwner) {
+        super(gameScreenController);
         this.isOwner = isOwner;
 
         batch = new SpriteBatch();
@@ -50,11 +50,11 @@ public class LobbyScreen extends AbstractScreen{
         Gdx.input.setInputProcessor(lobbyLayout);
     }
 
-    public void addPlayer(String nick){
+    public void addPlayer(String nick) {
         lobbyLayout.addPlayer(nick);
     }
 
-    public void addPlayer(String nick, int number){
+    public void addPlayer(String nick, int number) {
         lobbyLayout.addPlayer(nick, number);
     }
 

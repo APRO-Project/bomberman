@@ -14,53 +14,40 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 
-public final class GameScreenController implements ScreenChangeInterface{
-
-
-    private HashMap<ScreenState, AbstractScreen> screens;
+public final class GameScreenController implements ScreenChangeInterface {
 
     public final Client app;
 
     public GameScreenController(final Client app) {
         this.app = app;
-        initScreens();
 
-        setScreen(ScreenState.MENU);
-    }
-
-    private void initScreens() {
-        screens = new HashMap<>();
-        screens.put(ScreenState.MENU, new MenuScreen(app, this));
+        setMenuScreen();
     }
 
     @Override
-    public void setScreen(ScreenState state) {
-        switch (state){
-            case MENU :
-                app.setScreen(screens.get(state));
-                break;
-            case LOBBY:
-                app.setScreen(new LobbyScreen(app, false, this));
-                break;
-            case GAME:
-                try {
-                    PlayerData playerData = new PlayerData(-1, new Vector2(0, 0), new Inventory(), 0);
-                    app.setScreen(new GameScreen(app,this, playerData, "./map/bomberman_main.tmx",
-                        new Connection(12345, InetAddress.getLocalHost())));
-                } catch (MissingLayersException | IOException | ParserConfigurationException | SAXException e) {
-                    throw new RuntimeException("Unable to start game");
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + state);
+    public void setMenuScreen() {
+        app.setScreen(new MenuScreen(this));
+    }
+
+    @Override
+    public void setGameScreen() {
+        try {
+            // TODO: Load game screen when a game start packet is received with proper data
+            PlayerData playerData = new PlayerData(-1, new Vector2(0, 0), new Inventory(), 0);
+            app.setScreen(new GameScreen(this, playerData, "./map/bomberman_main.tmx",
+                new Connection(12345, InetAddress.getLocalHost())));
+        } catch (MissingLayersException | IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException("Unable to start game");
         }
     }
 
     @Override
-    public void setScreen(ScreenState state, String playerName, boolean isOwner) {
-        if (!state.equals(ScreenState.LOBBY)){
-            throw new IllegalArgumentException("Only lobby screen can contain player nickname");
-        }
-        app.setScreen(new LobbyScreen(app, this, playerName, isOwner));
+    public void setLobbyScreen(String playerName, boolean isOwner) {
+        app.setScreen(new LobbyScreen(this, playerName, isOwner));
+    }
+
+    @Override
+    public void setLobbyScreen(boolean isOwner) {
+        app.setScreen(new LobbyScreen(this, isOwner));
     }
 }

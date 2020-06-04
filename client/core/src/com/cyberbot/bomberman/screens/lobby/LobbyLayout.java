@@ -95,10 +95,29 @@ public class LobbyLayout extends Stage {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     //TODO add server request
-                    gameScreenController.setScreen(ScreenState.GAME);
+                    gameScreenController.setGameScreen();
                 }
             });
         }
+
+
+        Table ui3 = new Table();
+        ui3.setDebug(false);
+
+        ui3.setPosition(worldWidth-tableWidth, 1);
+        ui3.setWidth(tableWidth);
+        ui3.setHeight(worldHeight);
+        addActor(ui3);
+
+        TextButton createLobby = new TextButton("Leave", skin2);
+        setupButton(ui3, tableWidth, createLobby);
+        createLobby.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO add server request
+                gameScreenController.setMenuScreen();
+            }
+        });
     }
 
     //TODO use public addPlayer api in recieving server request

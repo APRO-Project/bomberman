@@ -21,8 +21,8 @@ public class MenuScreen extends AbstractScreen {
 
     MenuOptions menuOptions;
 
-    public MenuScreen(final Client app, GameScreenController gameScreenController) {
-        super(app, gameScreenController);
+    public MenuScreen(GameScreenController gameScreenController) {
+        super(gameScreenController);
 
         batch = new SpriteBatch();
         camera = new OrthographicCamera();

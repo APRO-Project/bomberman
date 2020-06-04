@@ -32,9 +32,9 @@ public class GameScreen extends AbstractScreen {
     private NetworkedGameplayController gameplayController;
 
 
-    public GameScreen(final Client app, GameScreenController gameScreenController, final PlayerData playerData, final String mapPath, final Connection connection)
+    public GameScreen(GameScreenController gameScreenController, final PlayerData playerData, final String mapPath, final Connection connection)
         throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
-        super(app, gameScreenController);
+        super(gameScreenController);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
