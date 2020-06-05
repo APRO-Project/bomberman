@@ -66,6 +66,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void leaveLobby() {
         game.setScreen(menu);
+        controlService.sendPacket(new LobbyLeaveRequest());
     }
 
     @Override
@@ -105,6 +106,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onClientDisconnected() {
         Gdx.app.log("ControlService", "Disconnected");
+        Gdx.app.postRunnable(() -> game.setScreen(login));
         // TODO: Show error
     }
 

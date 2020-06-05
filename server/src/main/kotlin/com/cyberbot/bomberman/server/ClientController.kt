@@ -12,6 +12,8 @@ interface ClientController {
 
     fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService)
 
+    fun onLobbyLeave(service: ClientControlService)
+
     fun onGameStart(request: GameStartRequest, service: ClientControlService)
 
     fun onClientDisconnected(service: ClientControlService)

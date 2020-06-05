@@ -90,6 +90,7 @@ class ServerService(
             }
 
             if (lobby.clients.size < maxPlayersPerLobby) {
+                removeClientFromLobby(client)
                 lobby.clients.add(client!!)
 
                 sendPacket(LobbyJoinResponse(true))
@@ -98,6 +99,10 @@ class ServerService(
                 sendPacket(LobbyJoinResponse(false))
             }
         }
+    }
+
+    override fun onLobbyLeave(service: ClientControlService) {
+        removeClientFromLobby(service.client)
     }
 
     override fun onGameStart(request: GameStartRequest, service: ClientControlService) {
@@ -121,6 +126,27 @@ class ServerService(
 
     override fun onClientDisconnected(service: ClientControlService) {
         clientHandlers.remove(service.client)
+        removeClientFromLobby(service.client)
+    }
+
+    private fun removeClientFromLobby(client: Client?) {
+        val removeLobbies = ArrayList<String>()
+        lobbies.map { it.value }.forEach {
+            if (it.clients.remove(client)) {
+                if (it.clients.size == 0) {
+                    removeLobbies.add(it.id!!)
+                } else {
+                    if (it.clients.size == 1) {
+                        it.ownerId = it.clients[0].id
+                    }
+                    notifyLobbyChange(it)
+                }
+            }
+        }
+
+        removeLobbies.forEach {
+            lobbies.remove(it)
+        }
     }
 
     private fun notifyLobbyChange(lobby: Lobby) {

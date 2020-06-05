@@ -69,7 +69,8 @@ public class MenuOptions extends Stage {
             }
         });
 
-        lobbyIdField = new TextField("lobby id", skin);
+        lobbyIdField = new TextField("", skin);
+        lobbyIdField.setMessageText("<Input id to join>");
         lobbyIdField.setAlignment(1);
 
         options.add(lobbyIdField).width(tableWidth).height(buttonHeight).row();

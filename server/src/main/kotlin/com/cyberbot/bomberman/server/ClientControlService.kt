@@ -69,6 +69,7 @@ class ClientControlService(private val clientSocket: Socket, private val control
                 is ClientRegisterRequest -> controller.onClientRegister(packet, this)
                 is LobbyCreateRequest -> controller.onLobbyCreate(packet, this)
                 is LobbyJoinRequest -> controller.onLobbyJoin(packet, this)
+                is LobbyLeaveRequest -> controller.onLobbyLeave(this)
                 is GameStartRequest -> controller.onGameStart(packet, this)
             }
         } catch (e: JsonSyntaxException) {
