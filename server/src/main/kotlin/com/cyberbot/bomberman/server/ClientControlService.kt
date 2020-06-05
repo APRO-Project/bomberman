@@ -40,9 +40,12 @@ class ClientControlService(private val clientSocket: Socket, private val control
         } finally {
             running = false
 
-            reader.close()
-            writer.close()
-            clientSocket.close()
+            try {
+                clientSocket.close()
+                reader.close()
+                writer.close()
+            } catch (ignored: IOException) {
+            }
 
             controller.onClientDisconnected(this)
         }

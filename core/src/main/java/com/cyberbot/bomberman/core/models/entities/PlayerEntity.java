@@ -132,7 +132,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public PlayerData getData() {
-        return new PlayerData(id, getPosition(), inventory, textureVariant);
+        return new PlayerData(id, getPositionRaw(), inventory, textureVariant);
     }
 
     public enum PlayerState {

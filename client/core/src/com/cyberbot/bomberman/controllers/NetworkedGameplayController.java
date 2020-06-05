@@ -26,7 +26,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.cyberbot.bomberman.core.utils.Constants.*;
+import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
+import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable {
     private final PlayerEntity localPlayer;
@@ -50,17 +51,17 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         World world = new World(new Vector2(0, 0), false);
         map = TileMapFactory.createTileMap(world, mapPath);
         localPlayer = player.createEntity(world);
-        localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         textureController = new TextureController(map);
 
         snapshotQueue = new SnapshotQueue(player.getId(), 100);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);
-        //inputController.addMovementController(playerMovement);
 
         worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
         worldController.addListener(textureController);
+
+        textureController.onEntityAdded(localPlayer);
 
         netService = new NetService(connection, worldController);
         new Thread(netService).start();

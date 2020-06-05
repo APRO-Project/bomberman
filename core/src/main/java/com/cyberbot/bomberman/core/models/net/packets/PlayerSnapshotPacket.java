@@ -4,7 +4,8 @@ import com.cyberbot.bomberman.core.models.Serializable;
 import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 
-public class PlayerSnapshotPacket implements Serializable {
+// TODO: Remove java.io.Serializable when own serialization is completed
+public class PlayerSnapshotPacket implements Serializable, java.io.Serializable {
     private final int sequence;
     private final long clientId;
     private final PlayerSnapshot snapshot;
@@ -26,7 +27,7 @@ public class PlayerSnapshotPacket implements Serializable {
 
     @Override
     public byte[] toByteArray() {
-        return new byte[0];
+        return Utils.toByteArray(this);
     }
 
 

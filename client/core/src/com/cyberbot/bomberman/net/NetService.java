@@ -1,7 +1,6 @@
 package com.cyberbot.bomberman.net;
 
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
-import com.cyberbot.bomberman.core.models.net.InvalidPacketFormatException;
 import com.cyberbot.bomberman.core.models.net.SerializationUtils;
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
@@ -37,7 +36,7 @@ public class NetService implements Runnable {
                     listener.onNewSnapshot((GameSnapshotPacket) o);
                 }
             }
-        } catch (IOException | InvalidPacketFormatException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

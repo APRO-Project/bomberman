@@ -16,7 +16,7 @@ public class CollectibleData extends EntityData<CollectibleEntity> {
     @Override
     public CollectibleEntity createEntity(World world) {
         CollectibleEntity entity = new CollectibleEntity(world, itemType, id);
-        entity.setPosition(position.toVector2());
+        entity.setPositionRaw(position.toVector2());
         return entity;
     }
 }

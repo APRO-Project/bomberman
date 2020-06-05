@@ -28,7 +28,7 @@ public final class Utils {
     }
 
     public static Object fromByteArray(byte[] buf, int offset, int length) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+        ByteArrayInputStream bis = new ByteArrayInputStream(buf, offset, length);
         try (ObjectInput in = new ObjectInputStream(bis)) {
             return in.readObject();
         } catch (IOException | ClassNotFoundException e) {

@@ -4,7 +4,8 @@ import com.cyberbot.bomberman.core.models.Serializable;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.utils.Utils;
 
-public class GameSnapshotPacket implements Serializable {
+// TODO: Remove java.io.Serializable when own serialization is completed
+public class GameSnapshotPacket implements Serializable, java.io.Serializable {
     private final int sequence;
     private final GameSnapshot snapshot;
 
