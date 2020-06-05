@@ -32,6 +32,9 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     private ControlService controlService;
     private final int defaultPort;
 
+    private String username;
+    private String password;
+
     public ScreenController(final Game game) {
         this(game, 8038);
     }
@@ -39,6 +42,9 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     public ScreenController(final Game game, int defaultPort) {
         this.game = game;
         this.defaultPort = defaultPort;
+
+        this.username = null;
+        this.password = null;
 
         this.menu = new MenuScreen(this);
         this.lobby = new LobbyScreen(this);
@@ -74,6 +80,9 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             controlService = new ControlService(serverAddress);
             controlService.getListeners().add(this);
             new Thread(controlService).start();
+
+            this.username = username;
+            this.password = password;
         } catch (URISyntaxException e) {
             Gdx.app.log("ControlService", "Invalid uri: " + e.getMessage());
             // TODO: Show error
@@ -83,7 +92,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onClientConnected() {
         Gdx.app.log("ControlService", "Client connected to the server");
-        controlService.sendPacket(new ClientRegisterRequest(Utils.generateLobbyId(10)));
+        controlService.sendPacket(new ClientRegisterRequest(username));
     }
 
     @Override

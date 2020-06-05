@@ -18,61 +18,42 @@ import com.cyberbot.bomberman.utils.Atlas;
 import java.util.ArrayList;
 
 public class LobbyLayout extends Stage {
-
     private final float spaceHeight = 0;
 
     private final Label[] playerLabels;
-
     private final LobbyInteraction delegate;
-
 
     private final float worldWidth = getViewport().getWorldWidth();
     private final float worldHeight = getViewport().getWorldHeight();
     private final float tableWidth = worldWidth / 3;
+    private final Skin skin2;
 
-    FreeTypeFontGenerator generator;
-    FreeTypeFontGenerator.FreeTypeFontParameter fontParams;
-    BitmapFont font;
-
-    Skin skin2;
-
-    Label lobbyID;
-
-    TextButton startGameButton;
+    private Label lobbyId;
+    private TextButton startGameButton;
 
     public LobbyLayout(Viewport viewport, LobbyInteraction delegate) {
         super(viewport);
         this.delegate = delegate;
         this.playerLabels = new Label[4];
 
-        generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
-        fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
         fontParams.size = 20;
-        font = generator.generateFont(fontParams);
+        BitmapFont font = generator.generateFont(fontParams);
 
-        skin2 = new Skin(Atlas.getSkinAtlas());
+        this.skin2 = new Skin(Atlas.getSkinAtlas());
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
     }
 
     public void createLobbyUi() {
         Table ui = new Table();
-        ui.setDebug(true);
-
+        ui.setDebug(false);
 
         ui.setPosition((worldWidth - tableWidth) / 2, 1);
         ui.setWidth(tableWidth);
         ui.setHeight(worldHeight);
         addActor(ui);
-
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        fontParams.size = 20;
-        BitmapFont font = generator.generateFont(fontParams);
-
-        Skin skin2 = new Skin(Atlas.getSkinAtlas());
-        skin2.add("default_font", font);
-        skin2.load(Gdx.files.internal("skins/skin.json"));
 
         Label title = new Label("Players", skin2);
         title.setWidth(tableWidth);
@@ -135,16 +116,16 @@ public class LobbyLayout extends Stage {
         Label lobbyIDText = new Label("Lobby ID", skin2);
         lobbyIDText.setWidth(tableWidth);
         lobbyIDText.setAlignment(1);
-        lobbyIDText.setFontScale(6);
+        lobbyIDText.setFontScale(4);
         lobbyIDText.setWrap(false);
         ui.add(lobbyIDText).width(tableWidth).height(playerLabelHeight).row();
 
-        lobbyID = new Label("", skin2);
-        lobbyID.setWidth(tableWidth);
-        lobbyID.setAlignment(1);
-        lobbyID.setFontScale(4);
-        lobbyID.setWrap(false);
-        ui.add(lobbyID).width(tableWidth).height(playerLabelHeight).row();
+        lobbyId = new Label("", skin2);
+        lobbyId.setWidth(tableWidth);
+        lobbyId.setAlignment(1);
+        lobbyId.setFontScale(3);
+        lobbyId.setWrap(false);
+        ui.add(lobbyId).width(tableWidth).height(playerLabelHeight).row();
     }
 
     public void addPlayer(String playername, int number) {
@@ -163,8 +144,7 @@ public class LobbyLayout extends Stage {
     }
 
     public void updateLobby(Lobby lobby, boolean isOwner) {
-
-        lobbyID.setText(lobby.getId());
+        lobbyId.setText(lobby.getId());
 
         if (isOwner) {
             startGameButton.setVisible(true);
