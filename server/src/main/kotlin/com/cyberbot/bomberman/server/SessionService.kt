@@ -9,21 +9,15 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 
 class SessionService(
-    port: Int? = null,
+    port: Int = 0,
     private val bufferSize: Int = 4096
 ) : GameSocket, Runnable {
     val port: Int
-    private val socket: DatagramSocket
+    private val socket: DatagramSocket = DatagramSocket(port)
     private val remainingClients = HashMap<Long, PlayerData>()
 
     init {
-        if (port == null) {
-            socket = DatagramSocket()
-            this.port = socket.port
-        } else {
-            socket = DatagramSocket(port)
-            this.port = port
-        }
+        this.port = socket.localPort
     }
 
     @Volatile

@@ -9,7 +9,7 @@ import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
  */
 object SerializationUtils {
     @Throws(InvalidPacketFormatException::class)
-    fun deserialize(buf: ByteArray, length: Int, offset: Int = 0): Any {
+    fun deserialize(buf: ByteArray, length: Int, offset: Int = 0): Any? {
         return when (PayloadType.getByValue(buf[offset])) {
             PayloadType.PLAYER_SNAPSHOT -> PlayerSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)
             PayloadType.GAME_SNAPSHOT -> GameSnapshotPacket.fromByteArray(buf, length - 1, offset + 1)

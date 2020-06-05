@@ -4,6 +4,7 @@ import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
+import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -15,7 +16,7 @@ class ServerService(
     private val maxLobbyCount: Int = 5,
     private val lobbyIdLength: Int = 5,
     private val maxPlayersPerLobby: Int = 4
-) : ClientController, Runnable {
+) : ClientController, Runnable, Logging {
     private val sessions = HashMap<String, SessionService>()
     private val clientHandlers = HashMap<Client, ClientControlService>()
     private val registeredClients = ArrayList<Client>() // TODO: Load registered client from file
@@ -29,11 +30,14 @@ class ServerService(
         try {
             running = true
             serverSocket.bind(InetSocketAddress(port))
+            logger.info { "Server started, bound to ${serverSocket.localPort}" }
+
             while (running) {
                 val client = serverSocket.accept()
-                Thread(ClientControlService(client, this)).start()
+                Thread(ClientControlService(client, this), "ClientControlService ${clientHandlers.size}").start()
             }
         } catch (e: IOException) {
+            logger.info("Server stopped")
             e.printStackTrace()
             running = false
         }
@@ -41,6 +45,7 @@ class ServerService(
 
     override fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
         service.apply {
+            logger.debug { "Client register request: ${request.nick}" }
             val nick = request.nick
             if (nick == null) {
                 sendPacket(ClientRegisterResponse(false))
@@ -56,6 +61,7 @@ class ServerService(
             val newClient = loginClient(nick, password)
             if (newClient == null) {
                 sendPacket(ClientRegisterResponse(false))
+                logger.info { "Client register failed" }
                 return
             }
 
@@ -63,6 +69,7 @@ class ServerService(
             clientHandlers[newClient] = this
             registeredClients.add(newClient)
 
+            logger.info { "Client logged in: ${newClient.id}" }
             sendPacket(ClientRegisterResponse(true, newClient))
         }
     }
@@ -74,8 +81,11 @@ class ServerService(
                 val id = lobby.id ?: throw RuntimeException("Created lobby missing id")
                 lobbies[id] = lobby
 
+                logger.info { "Created new lobby: $id" }
+
                 sendPacket(LobbyCreateResponse(true, id))
             } else {
+                logger.warn("Lobby limit reached, unable to create new lobby")
                 sendPacket(LobbyCreateResponse(false))
             }
         }
@@ -95,6 +105,8 @@ class ServerService(
 
                 sendPacket(LobbyJoinResponse(true))
                 notifyLobbyChange(lobby)
+
+                logger.debug { "Client ${client!!.id} joined lobby: ${lobby.id}" }
             } else {
                 sendPacket(LobbyJoinResponse(false))
             }
@@ -112,6 +124,8 @@ class ServerService(
         val session = SessionService()
         sessions[lobbyId] = session
 
+        logger.info { "Staring game on port ${session.port} with ${lobby.clients.size} clients" }
+
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
             val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i)
@@ -121,10 +135,11 @@ class ServerService(
             clientHandlers[c]!!.sendPacket(GameStart(session.port, data))
         }
 
-        Thread(session).start()
+        Thread(session, "Session Thread - ${session.port}").start()
     }
 
     override fun onClientDisconnected(service: ClientControlService) {
+        logger.info { "Client disconnected: ${service.client?.id}" }
         clientHandlers.remove(service.client)
         removeClientFromLobby(service.client)
     }
@@ -133,6 +148,7 @@ class ServerService(
         val removeLobbies = ArrayList<String>()
         lobbies.map { it.value }.forEach {
             if (it.clients.remove(client)) {
+                logger.debug { "Client ${client?.id} left lobby: ${it.id}" }
                 if (it.clients.size == 0) {
                     removeLobbies.add(it.id!!)
                 } else {
