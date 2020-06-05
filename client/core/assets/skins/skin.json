@@ -1,56 +1,53 @@
 {
-	Color: {
-		pastel_red: {
-			hex: bf7676ff
+	"Color": {
+		"pastel_red": {
+			"hex": "bf7676ff"
 		}
 
-		white: {
-			hex: ffffffff
-		}
-	}
-
-	TintedDrawable: {
-		button_over: {
-			name: button_up
-			color: pastel_red
+		"white": {
+			"hex": "ffffffff"
 		}
 	}
 
-	LabelStyle: {
-		default: {
-			font: default_font
+	"TintedDrawable": {
+		"button_over": {
+			"name": "button_up"
+			"color": "pastel_red"
 		}
 	}
 
-	TextButtonStyle: {
-		default: {
-			font: default_font
-			up: button_up
-			down: button_down
-			over: button_over
+	"LabelStyle": {
+		"default": {
+			"font": "default_font"
 		}
 	}
 
-	ImageButtonStyle: {
-		default: {
-			up: button_up
-			down: button_down
-			checked: button_checked
-			checkedFocused: button_checked
-			checkedOver: button_checked
+	"TextButtonStyle": {
+		"default": {
+			"font": "default_font"
+			"up": "button_up"
+			"down": "button_down"
+			"over": "button_over"
 		}
 	}
 
-	ButtonStyle: {
-		default: {
-			up: button_up
-			down: button_down
+	"ImageButtonStyle": {
+		"default": {
+			"up": "button_up"
+			"down": "button_down"
 		}
 	}
 
-	TextTooltipStyle: {
-		default: {
-			label: default
+	"ButtonStyle": {
+		"default": {
+			"up": "button_up"
+			"down": "button_down"
+		}
+	}
+
+	"TextTooltipStyle": {
+		"default": {
+			"label": "default"
 		}
 	}
 }
