@@ -7,11 +7,7 @@ import com.cyberbot.bomberman.core.utils.Utils
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
-import java.util.*
 import java.util.concurrent.ThreadLocalRandom
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.concurrent.schedule
 
 
 class ServerService(
@@ -21,7 +17,8 @@ class ServerService(
     private val maxPlayersPerLobby: Int = 4
 ) : ClientController, Runnable {
     private val sessions = HashMap<String, SessionService>()
-    private val clients = HashMap<Client, ClientControlService>()
+    private val clientHandlers = HashMap<Client, ClientControlService>()
+    private val registeredClients = ArrayList<Client>() // TODO: Load registered client from file
     private val lobbies = HashMap<String, Lobby>()
 
     @Volatile
@@ -42,51 +39,69 @@ class ServerService(
         }
     }
 
-    override fun onClientRegister(
-        request: ClientRegisterRequest,
-        service: ClientControlService
-    ): ClientRegisterResponse {
-        request.nick ?: return ClientRegisterResponse(false)
-        val client = createClient(request.nick!!)
-
-        client?.also {
-            clients[it] = service
-        }
-
-        return ClientRegisterResponse(client != null, client)
-    }
-
-    override fun onLobbyCreate(request: LobbyCreateRequest, client: Client): LobbyCreateResponse {
-        return if (lobbies.size < maxLobbyCount) {
-            val lobby = createLobby(client)
-            val id = lobby.id ?: throw RuntimeException("Created lobby missing id")
-            lobbies[id] = lobby
-
-            LobbyCreateResponse(true, id)
-        } else {
-            LobbyCreateResponse(false)
-        }
-    }
-
-    override fun onLobbyJoin(request: LobbyJoinRequest, client: Client): LobbyJoinResponse? {
-        val lobby = lobbies[request.id] ?: return LobbyJoinResponse(false)
-
-        return if (lobby.clients.size < maxPlayersPerLobby) {
-            lobby.clients.add(client)
-
-            // Quick and dirty way to first send the response to a client and only later the update packet
-            Timer().schedule(100) {
-                notifyLobbyChange(lobby)
+    override fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
+        service.apply {
+            val nick = request.nick
+            if (nick == null) {
+                sendPacket(ClientRegisterResponse(false))
+                return
             }
 
-            LobbyJoinResponse(true)
-        } else {
-            LobbyJoinResponse(false)
+            val password = request.password
+            if (password == null) {
+                sendPacket(ClientRegisterResponse(false))
+                return
+            }
+
+            val newClient = loginClient(nick, password)
+            if (newClient == null) {
+                sendPacket(ClientRegisterResponse(false))
+                return
+            }
+
+            client = newClient
+            clientHandlers[newClient] = this
+            registeredClients.add(newClient)
+
+            sendPacket(ClientRegisterResponse(true, newClient))
         }
     }
 
-    override fun onGameStart(request: GameStartRequest, client: Client) {
-        val lobby = lobbies.values.firstOrNull { it.ownerId == client.id } ?: return
+    override fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
+        service.apply {
+            if (lobbies.size < maxLobbyCount) {
+                val lobby = createLobby(client!!)
+                val id = lobby.id ?: throw RuntimeException("Created lobby missing id")
+                lobbies[id] = lobby
+
+                sendPacket(LobbyCreateResponse(true, id))
+            } else {
+                sendPacket(LobbyCreateResponse(false))
+            }
+        }
+    }
+
+    override fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
+        service.apply {
+            val lobby = lobbies[request.id]
+            if (lobby == null) {
+                sendPacket(LobbyJoinResponse(false))
+                return
+            }
+
+            if (lobby.clients.size < maxPlayersPerLobby) {
+                lobby.clients.add(client!!)
+
+                sendPacket(LobbyJoinResponse(true))
+                notifyLobbyChange(lobby)
+            } else {
+                sendPacket(LobbyJoinResponse(false))
+            }
+        }
+    }
+
+    override fun onGameStart(request: GameStartRequest, service: ClientControlService) {
+        val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
         val session = SessionService()
@@ -98,25 +113,28 @@ class ServerService(
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
-            clients[c]!!.sendPacket(GameStart(session.port, data))
+            clientHandlers[c]!!.sendPacket(GameStart(session.port, data))
         }
 
         Thread(session).start()
     }
 
+    override fun onClientDisconnected(service: ClientControlService) {
+        clientHandlers.remove(service.client)
+    }
+
     private fun notifyLobbyChange(lobby: Lobby) {
-        val updateTime = System.currentTimeMillis()
         val strippedLobby = Lobby.stripIds(lobby)
-        val lobbyUpdate = LobbyUpdate(updateTime, strippedLobby, false)
+        val lobbyUpdate = LobbyUpdate(strippedLobby, false)
 
         lobby.clients
             .filter { it.id != lobby.ownerId }
-            .map { clients[it] }
+            .map { clientHandlers[it] }
             .forEach { it?.sendPacket(lobbyUpdate) }
 
         val owner = lobby.clients.first { it.id == lobby.ownerId }
 
-        clients[owner]!!.sendPacket(LobbyUpdate(updateTime, strippedLobby, true))
+        clientHandlers[owner]!!.sendPacket(LobbyUpdate(strippedLobby, true))
     }
 
     private fun createLobby(owner: Client): Lobby {
@@ -132,19 +150,26 @@ class ServerService(
         return Lobby(id, owner.id, ArrayList())
     }
 
-    private fun createClient(nick: String): Client? {
-        val clients = clients.map { it.key }
-        if (clients.map { it.nick }.contains(nick)) {
+    private fun loginClient(nick: String, password: String): Client? {
+        val client = registeredClients
+            .firstOrNull { it.nick == nick }
+
+        // Check if client has an active connection
+        if (clientHandlers.containsKey(client)) {
             return null
         }
 
-        val ids = clients.map { it.id }
+        if (client != null) {
+            return if (client.password == password) client else null
+        }
+
+        val ids = registeredClients.map { it.id }
 
         var id: Long
         do {
             id = ThreadLocalRandom.current().nextLong()
         } while (ids.contains(id))
 
-        return Client(id, nick)
+        return Client(id, nick, password)
     }
 }

@@ -14,6 +14,7 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-lang3:3.10'
+    implementation 'com.google.guava:guava:20.0'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
     implementation group: 'com.google.code.gson', name: 'gson-extras', version: '2.8.5'
 

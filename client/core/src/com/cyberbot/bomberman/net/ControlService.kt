@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonWriter
 import java.io.IOException
 import java.net.Socket
 import java.net.SocketAddress
+import java.net.SocketException
 
 class ControlService(private val address: SocketAddress) : Runnable {
     val listeners = ArrayList<ClientControlListener>()
@@ -75,9 +76,15 @@ class ControlService(private val address: SocketAddress) : Runnable {
                 is ErrorResponse -> listeners.forEach { it.onError(packet) }
             }
         } catch (e: JsonSyntaxException) {
-            e.printStackTrace()
+            // This cursed shenanigans are required,
+            // because Gson catches the IOException and rethrows as JsonSyntaxException
+            // and we still need to ignore the syntax exceptions.
+            // From Gson: "Figure out whether it is indeed right to rethrow this as JsonSyntaxException"
+            if (e.cause is SocketException) {
+                throw e.cause as SocketException
+            }
         } catch (e: JsonParseException) {
-            e.printStackTrace()
+
         }
     }
 }

@@ -1,13 +1,18 @@
 package com.cyberbot.bomberman.server
 
-import com.cyberbot.bomberman.core.models.net.packets.*
+import com.cyberbot.bomberman.core.models.net.packets.ClientRegisterRequest
+import com.cyberbot.bomberman.core.models.net.packets.GameStartRequest
+import com.cyberbot.bomberman.core.models.net.packets.LobbyCreateRequest
+import com.cyberbot.bomberman.core.models.net.packets.LobbyJoinRequest
 
 interface ClientController {
-    fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService): ClientRegisterResponse?
+    fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService)
 
-    fun onLobbyCreate(request: LobbyCreateRequest, client: Client): LobbyCreateResponse?
+    fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService)
 
-    fun onLobbyJoin(request: LobbyJoinRequest, client: Client): LobbyJoinResponse?
+    fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService)
 
-    fun onGameStart(request: GameStartRequest, client: Client)
+    fun onGameStart(request: GameStartRequest, service: ClientControlService)
+
+    fun onClientDisconnected(service: ClientControlService)
 }

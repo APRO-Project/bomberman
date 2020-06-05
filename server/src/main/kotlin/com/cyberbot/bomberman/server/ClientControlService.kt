@@ -17,7 +17,7 @@ class ClientControlService(private val clientSocket: Socket, private val control
     @Volatile
     private var running = false
 
-    private var client: Client? = null
+    var client: Client? = null
 
     private lateinit var gson: Gson
     private lateinit var reader: JsonReader
@@ -33,8 +33,7 @@ class ClientControlService(private val clientSocket: Socket, private val control
             running = true
 
             while (running) {
-                val response = handleJson()
-                response?.let { sendPacket(it) }
+                handleJson()
             }
         } catch (e: IOException) {
 
@@ -44,6 +43,8 @@ class ClientControlService(private val clientSocket: Socket, private val control
             reader.close()
             writer.close()
             clientSocket.close()
+
+            controller.onClientDisconnected(this)
         }
     }
 
@@ -55,28 +56,20 @@ class ClientControlService(private val clientSocket: Socket, private val control
         writer.flush()
     }
 
-    private fun handleJson(): ControlPacket? {
-        return try {
+    private fun handleJson() {
+        try {
             val packet: ControlPacket? = gson.fromJsonOrNull(reader)
 
             if (client == null && packet !is ClientRegisterRequest) {
                 ErrorResponse("First packet should be a register packet")
             }
 
+            // TODO: Should be a single interface method with when in the delegate
             when (packet) {
-                is ClientRegisterRequest -> {
-                    val response = controller.onClientRegister(packet, this)
-                    client = response?.client
-
-                    response
-                }
-                is LobbyCreateRequest -> controller.onLobbyCreate(packet, client!!)
-                is LobbyJoinRequest -> controller.onLobbyJoin(packet, client!!)
-                is GameStartRequest -> {
-                    controller.onGameStart(packet, client!!)
-                    null
-                }
-                else -> null
+                is ClientRegisterRequest -> controller.onClientRegister(packet, this)
+                is LobbyCreateRequest -> controller.onLobbyCreate(packet, this)
+                is LobbyJoinRequest -> controller.onLobbyJoin(packet, this)
+                is GameStartRequest -> controller.onGameStart(packet, this)
             }
         } catch (e: JsonSyntaxException) {
             // This cursed shenanigans are required,
@@ -86,10 +79,8 @@ class ClientControlService(private val clientSocket: Socket, private val control
             if (e.cause is SocketException) {
                 throw e.cause as SocketException
             }
+        } catch (ignored: JsonParseException) {
 
-            null
-        } catch (e: JsonParseException) {
-            null
         }
     }
 }

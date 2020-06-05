@@ -8,7 +8,7 @@ private const val TYPE = "type"
 
 open class ControlPacket
 
-class Client(val id: Long? = null, val nick: String? = null)
+class Client(val id: Long? = null, val nick: String? = null, val password: String? = null)
 class Lobby(val id: String? = null, val ownerId: Long? = null, clients: List<Client> = ArrayList()) {
     val clients = ArrayList(clients)
 
@@ -20,7 +20,7 @@ class Lobby(val id: String? = null, val ownerId: Long? = null, clients: List<Cli
     }
 }
 
-class ClientRegisterRequest(val nick: String? = null) : ControlPacket()
+class ClientRegisterRequest(val nick: String? = null, val password: String? = null) : ControlPacket()
 class ClientRegisterResponse(val success: Boolean? = null, val client: Client? = null) : ControlPacket()
 
 class LobbyCreateRequest : ControlPacket()
@@ -31,8 +31,7 @@ class LobbyJoinResponse(val success: Boolean? = null) : ControlPacket()
 
 class GameStartRequest : ControlPacket()
 
-class LobbyUpdate(val timestamp: Long? = null, val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) :
-    ControlPacket()
+class LobbyUpdate(val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) : ControlPacket()
 
 class GameStart(val port: Int, val playerInit: PlayerData) : ControlPacket()
 

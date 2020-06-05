@@ -92,7 +92,8 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onClientConnected() {
         Gdx.app.log("ControlService", "Client connected to the server");
-        controlService.sendPacket(new ClientRegisterRequest(username));
+        ClientRegisterRequest packet = new ClientRegisterRequest(username, Utils.hashPassword(password));
+        controlService.sendPacket(packet);
     }
 
     @Override

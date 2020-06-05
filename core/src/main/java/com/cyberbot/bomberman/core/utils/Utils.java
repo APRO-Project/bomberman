@@ -1,11 +1,13 @@
 package com.cyberbot.bomberman.core.utils;
 
+import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
@@ -49,7 +51,7 @@ public final class Utils {
     }
 
     public static String generateLobbyId(int length) {
-        return RandomStringUtils.randomAlphabetic(length);
+        return RandomStringUtils.randomNumeric(length);
     }
 
     public static <T> T first(Collection<T> collection, Predicate<T> predicate) {
@@ -82,5 +84,12 @@ public final class Utils {
         }
 
         return new InetSocketAddress(host, port);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static String hashPassword(String password) {
+        return Hashing.sha256()
+            .hashString(password, StandardCharsets.UTF_8)
+            .toString();
     }
 }
