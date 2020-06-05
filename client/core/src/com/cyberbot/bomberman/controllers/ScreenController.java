@@ -11,6 +11,8 @@ import com.cyberbot.bomberman.net.ControlService;
 import com.cyberbot.bomberman.screens.GameScreen;
 import com.cyberbot.bomberman.screens.lobby.LobbyInteraction;
 import com.cyberbot.bomberman.screens.lobby.LobbyScreen;
+import com.cyberbot.bomberman.screens.login.LoginInteraction;
+import com.cyberbot.bomberman.screens.login.LoginScreen;
 import com.cyberbot.bomberman.screens.menu.MenuInteraction;
 import com.cyberbot.bomberman.screens.menu.MenuScreen;
 import org.jetbrains.annotations.NotNull;
@@ -21,11 +23,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public final class ScreenController implements MenuInteraction, LobbyInteraction, ClientControlListener {
+public final class ScreenController implements MenuInteraction, LobbyInteraction, LoginInteraction, ClientControlListener {
     private final Game game;
     private final ControlService controlService;
     private final LobbyScreen lobby;
     private final MenuScreen menu;
+    private final LoginScreen login;
     private final InetAddress serverAddress;
 
     public ScreenController(final Game game) {
@@ -33,6 +36,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
         menu = new MenuScreen(this);
         lobby = new LobbyScreen(this);
+        login = new LoginScreen(this);
 
         game.setScreen(menu);
 
@@ -59,8 +63,6 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void leaveLobby() {
-        lobby.hide();
-        menu.show();
         game.setScreen(menu);
     }
 
@@ -113,7 +115,6 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
                     "./map/bomberman_main.tmx",
                     new Connection(payload.getPort(), serverAddress)
                 );
-                lobby.hide();
                 game.setScreen(gameScreen);
 
             } catch (IOException | MissingLayersException | ParserConfigurationException | SAXException e) {
@@ -133,4 +134,8 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     }
 
 
+    @Override
+    public void login(String username, String password, String ip) {
+        //TODO login user
+    }
 }

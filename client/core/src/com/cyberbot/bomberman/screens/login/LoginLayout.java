@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.screens.menu;
+package com.cyberbot.bomberman.screens.login;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -13,22 +13,27 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.utils.Atlas;
 
-public class MenuOptions extends Stage {
+public class LoginLayout extends Stage {
 
-    final MenuInteraction delegate;
     final Skin skin;
-    TextField lobbyIdField;
+    TextField nicknameField;
+    TextField passwordField;
+    TextField ipField;
 
-    public MenuOptions(Viewport viewport, MenuInteraction delegate) {
+    final LoginInteraction delegate;
+
+    public LoginLayout(Viewport viewport, LoginInteraction delegate) {
         super(viewport);
+
         this.delegate = delegate;
         skin = new Skin(Gdx.files.internal("skins\\clean-crispy\\skin\\clean-crispy-ui.json"));
         skin.getFont("font").getData().setScale(5);
     }
 
     private final float buttonHeight = 150;
+    private final float spaceHeight = 10;
 
-    public void createMenuOptions() {
+    public void createLoginLayout() {
         Table options = new Table();
         options.setDebug(false);
 
@@ -51,34 +56,41 @@ public class MenuOptions extends Stage {
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
 
-        TextButton createLobby = new TextButton("Create Lobby", skin2);
-        setupButton(options, tableWidth, createLobby);
-        createLobby.addListener(new ClickListener() {
+        TextButton loginButton = new TextButton("Login", skin2);
+        setupButton(options, tableWidth, loginButton);
+        loginButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                delegate.createLobby();
+                delegate.login(nicknameField.getText(), passwordField.getText(), ipField.getText());
             }
         });
 
-        TextButton joinLobby = new TextButton("Join Lobby", skin2);
-        setupButton(options, tableWidth, joinLobby);
-        joinLobby.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                delegate.joinLobby(lobbyIdField.getText());
-            }
-        });
+        nicknameField = new TextField("Player" + (int) (Math.random() * 9999), skin);
+        nicknameField.setAlignment(1);
+        nicknameField.setMaxLength(12);
 
-        lobbyIdField = new TextField("lobby id", skin);
-        lobbyIdField.setAlignment(1);
+        passwordField = new TextField("Password" + (int) (Math.random() * 9999), skin);
+        passwordField.setAlignment(1);
+        passwordField.setMaxLength(12);
 
-        options.add(lobbyIdField).width(tableWidth).height(buttonHeight).row();
+        ipField = new TextField("ip:port" + (int) (Math.random() * 9999), skin);
+        ipField.setAlignment(1);
+        ipField.setMaxLength(12);
+
+        options.add(nicknameField).width(tableWidth).height(buttonHeight).row();
+        options.add().height(spaceHeight).row();
+
+        options.add(passwordField).width(tableWidth).height(buttonHeight).row();
+        options.add().height(spaceHeight).row();
+
+        options.add(ipField).width(tableWidth).height(buttonHeight).row();
+        options.add().height(spaceHeight).row();
     }
 
     private void setupButton(Table table, float tableWidth, TextButton button) {
         button.getLabel().setFontScale(4);
         table.add(button).width(tableWidth).height(buttonHeight).row();
-        float spaceHeight = 10;
         table.add().height(spaceHeight).row();
     }
 }
+

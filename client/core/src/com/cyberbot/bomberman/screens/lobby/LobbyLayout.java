@@ -19,8 +19,7 @@ import java.util.ArrayList;
 
 public class LobbyLayout extends Stage {
 
-    private final float playerLabelHeight = 150;
-    private final float spaceHeight = 10;
+    private final float spaceHeight = 0;
 
     private final Label[] playerLabels;
 
@@ -37,8 +36,9 @@ public class LobbyLayout extends Stage {
 
     Skin skin2;
 
-    Lobby lobby;
+    Label lobbyID;
 
+    TextButton startGameButton;
 
     public LobbyLayout(Viewport viewport, LobbyInteraction delegate) {
         super(viewport);
@@ -53,19 +53,17 @@ public class LobbyLayout extends Stage {
         skin2 = new Skin(Atlas.getSkinAtlas());
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
-        lobby = new Lobby();
     }
 
     public void createLobbyUi() {
         Table ui = new Table();
-        ui.setDebug(false);
+        ui.setDebug(true);
 
 
         ui.setPosition((worldWidth - tableWidth) / 2, 1);
         ui.setWidth(tableWidth);
         ui.setHeight(worldHeight);
         addActor(ui);
-
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -81,8 +79,8 @@ public class LobbyLayout extends Stage {
         title.setAlignment(1);
         title.setFontScale(8);
         title.setWrap(false);
+        float playerLabelHeight = 150;
         ui.add(title).width(tableWidth).height(playerLabelHeight).row();
-        ui.add().height(50).row();
 
         for (int i = 0; i < 4; i++) {
             Label label = new Label("Empty", skin2);
@@ -111,6 +109,42 @@ public class LobbyLayout extends Stage {
                 delegate.leaveLobby();
             }
         });
+
+        Table ui2 = new Table();
+        ui2.setDebug(false);
+
+        ui2.setPosition(1, 1);
+        ui2.setWidth(tableWidth);
+        ui2.setHeight(worldHeight);
+        addActor(ui2);
+
+        startGameButton = new TextButton("Start Game", skin2);
+        setupButton(ui2, tableWidth, startGameButton);
+        startGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                delegate.startGame();
+
+            }
+        });
+
+        startGameButton.setVisible(false);
+
+        ui.add().height(30).row();
+
+        Label lobbyIDText = new Label("Lobby ID", skin2);
+        lobbyIDText.setWidth(tableWidth);
+        lobbyIDText.setAlignment(1);
+        lobbyIDText.setFontScale(6);
+        lobbyIDText.setWrap(false);
+        ui.add(lobbyIDText).width(tableWidth).height(playerLabelHeight).row();
+
+        lobbyID = new Label("", skin2);
+        lobbyID.setWidth(tableWidth);
+        lobbyID.setAlignment(1);
+        lobbyID.setFontScale(4);
+        lobbyID.setWrap(false);
+        ui.add(lobbyID).width(tableWidth).height(playerLabelHeight).row();
     }
 
     public void addPlayer(String playername, int number) {
@@ -130,39 +164,17 @@ public class LobbyLayout extends Stage {
 
     public void updateLobby(Lobby lobby, boolean isOwner) {
 
-        Table ui2 = new Table();
-        ui2.setDebug(false);
-
-        ui2.setPosition(1, 1);
-        ui2.setWidth(tableWidth);
-        ui2.setHeight(worldHeight);
-        addActor(ui2);
+        lobbyID.setText(lobby.getId());
 
         if (isOwner) {
-
-            TextButton startGameButton = new TextButton("Start Game", skin2);
-            setupButton(ui2, tableWidth, startGameButton);
-            startGameButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    delegate.startGame();
-                }
-            });
-
-            ui2.add().height(10).row();
+            startGameButton.setVisible(true);
         }
-        Label lobbyID = new Label(lobby.getId(), skin2);
-        lobbyID.setWidth(tableWidth);
-        lobbyID.setAlignment(1);
-        lobbyID.setFontScale(8);
-        lobbyID.setWrap(false);
-        ui2.add(lobbyID).width(tableWidth).height(playerLabelHeight).row();
 
         ArrayList<Client> clients = lobby.getClients();
         for (int i = 0; i < clients.size(); i++) {
             addPlayer(clients.get(i).getNick(), i);
         }
-        for (int i = 3; i > clients.size() - 1; i++) {
+        for (int i = 3; i > clients.size() - 1; i--) {
             removePlayer(i);
         }
     }
