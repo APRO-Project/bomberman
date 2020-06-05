@@ -1,6 +1,7 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
 import com.badlogic.gdx.utils.Disposable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -11,13 +12,21 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     private final int height;
     private final Tile[][] tiles;
 
-    public TileMapLayer(int width, int height, Tile[][] tiles) {
-        this.width = width;
-        this.height = height;
+    public TileMapLayer(Tile[][] tiles) {
+        if (!validateArray(tiles)) {
+            throw new IllegalArgumentException("Tile array has to be a rectangular N*M array");
+        }
+
+        this.width = tiles.length;
+        this.height = tiles[0].length;
         this.tiles = tiles;
     }
 
     public Tile getTile(int x, int y) {
+        if (x < 0 || y < 0 || x >= width || y >= height) {
+            return null;
+        }
+
         return tiles[x][y];
     }
 
@@ -59,19 +68,22 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
         return getFlatList().contains(o);
     }
 
+    @NotNull
     @Override
     public Iterator<Tile> iterator() {
         return getFlatList().iterator();
     }
 
+    @NotNull
     @Override
     public Object[] toArray() {
         return getFlatList().toArray();
     }
 
+    @NotNull
     @Override
     @Deprecated
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(@NotNull T[] a) {
         throw new UnsupportedOperationException("Unsupported");
     }
 
@@ -105,7 +117,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@NotNull Collection<?> c) {
         return getFlatList().containsAll(c);
     }
 
@@ -128,7 +140,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         boolean changed = false;
 
         for (int x = 0; x < width; x++) {
@@ -171,5 +183,15 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
             .flatMap(List::stream)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    private static boolean validateArray(Tile[][] array) {
+        if (array.length == 0) {
+            return false;
+        }
+
+        int height = array[0].length;
+
+        return Arrays.stream(array).allMatch(it -> it.length == height);
     }
 }

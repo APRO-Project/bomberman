@@ -41,7 +41,8 @@ public class TileMapFactory {
         Element sourceMap = (Element) loadXmlMap(mapFile);
         Element tilesetSourceElement = (Element) sourceMap.getElementsByTagName("tileset").item(0);
 
-        File tilesetFile = new File(mapFile.getParent() + File.separator + tilesetSourceElement.getAttribute("source"));
+        File tilesetFile = new File(mapFile.getParent() +
+            File.separator + tilesetSourceElement.getAttribute("source"));
 
         NodeList tileset = loadXmlTileset(tilesetFile);
 
@@ -54,14 +55,13 @@ public class TileMapFactory {
         for (int i = 0; i < layers.getLength(); i++) {
             Element element = (Element) layers.item(i);
 
-            Tile[][] tiles = csvStringToTileArray(element.getElementsByTagName("data").item(0).getTextContent(),
-                Integer.parseInt(element.getAttribute("width")),
-                Integer.parseInt(element.getAttribute("height")),
-                tileset,
-                world);
+            int width = Integer.parseInt(element.getAttribute("width"));
+            int height = Integer.parseInt(element.getAttribute("height"));
+            String csvTileData = element.getElementsByTagName("data").item(0).getTextContent();
+            Tile[][] tiles = csvStringToTileArray(csvTileData, width, height, tileset, world);
 
-            TileMapLayer mapLayer = new TileMapLayer(Integer.parseInt(element.getAttribute("width")),
-                Integer.parseInt(element.getAttribute("height")), tiles);
+            TileMapLayer mapLayer = new TileMapLayer(tiles);
+
             switch (element.getAttribute("name")) {
                 case LAYER_BASE:
                     baseLayer = mapLayer;
@@ -132,7 +132,7 @@ public class TileMapFactory {
     private static Tile[][] csvStringToTileArray(String input, int width, int height, NodeList tileset, World world)
         throws InvalidPropertiesFormatException {
         String[] mapStringArray = input.trim().replaceAll("\n", "").split(",");
-        Tile[][] tiles = new Tile[height][width];
+        Tile[][] tiles = new Tile[width][height];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 tiles[x][y] = TileFactory.createTile(getTileById(tileset, mapStringArray[(height - y - 1) * width + x]),
