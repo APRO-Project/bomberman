@@ -9,7 +9,6 @@ import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
@@ -22,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +43,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection)
+    public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 

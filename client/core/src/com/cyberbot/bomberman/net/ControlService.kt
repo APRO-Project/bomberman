@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.net
 
-import com.cyberbot.bomberman.core.models.net.Connection
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.fromJsonOrNull
 import com.google.gson.Gson
@@ -9,10 +8,11 @@ import com.google.gson.JsonParseException
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
-import java.net.InetSocketAddress
+import java.io.IOException
 import java.net.Socket
+import java.net.SocketAddress
 
-class ControlService(private val connection: Connection) : Runnable {
+class ControlService(private val address: SocketAddress) : Runnable {
     val listeners = ArrayList<ClientControlListener>()
 
     private val socket = Socket()
@@ -26,22 +26,34 @@ class ControlService(private val connection: Connection) : Runnable {
 
     override fun run() {
         socket.keepAlive = true
-        socket.connect(InetSocketAddress(connection.address, connection.port))
+        try {
+            socket.connect(address)
+        } catch (e: IOException) {
+            listeners.forEach { it.onConnectionError(e) }
+            return
+        }
 
-        writer = JsonWriter(socket.getOutputStream().writer().buffered())
-        reader = JsonReader(socket.getInputStream().reader().buffered())
+        try {
+            writer = JsonWriter(socket.getOutputStream().writer().buffered())
+            reader = JsonReader(socket.getInputStream().reader().buffered())
 
-        gson = GsonBuilder().registerControlPacketAdapter().create()
+            gson = GsonBuilder().registerControlPacketAdapter().create()
 
-        running = true
+            running = true
 
-        listeners.forEach { it.onClientConnected() }
+            listeners.forEach { it.onClientConnected() }
 
-        while (running) {
-            handleJson()
-            if (socket.isClosed) {
-                running = false
+            while (running) {
+                handleJson()
             }
+        } catch (e: IOException) {
+            listeners.forEach { it.onClientDisconnected() }
+        } finally {
+            writer.close()
+            reader.close()
+            socket.close()
+
+            running = false
         }
     }
 
@@ -55,6 +67,7 @@ class ControlService(private val connection: Connection) : Runnable {
     private fun handleJson() {
         try {
             when (val packet: ControlPacket? = gson.fromJsonOrNull(reader)) {
+                is ClientRegisterResponse -> listeners.forEach { it.onRegisterResponse(packet) }
                 is LobbyUpdate -> listeners.forEach { it.onLobbyUpdate(packet) }
                 is LobbyCreateResponse -> listeners.forEach { it.onLobbyCreate(packet) }
                 is LobbyJoinResponse -> listeners.forEach { it.onLobbyJoin(packet) }

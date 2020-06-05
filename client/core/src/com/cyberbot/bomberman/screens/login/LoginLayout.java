@@ -56,26 +56,17 @@ public class LoginLayout extends Stage {
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
 
-        TextButton loginButton = new TextButton("Login", skin2);
-        setupButton(options, tableWidth, loginButton);
-        loginButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                delegate.login(nicknameField.getText(), passwordField.getText(), ipField.getText());
-            }
-        });
-
         nicknameField = new TextField("Player" + (int) (Math.random() * 9999), skin);
         nicknameField.setAlignment(1);
         nicknameField.setMaxLength(12);
 
         passwordField = new TextField("Password" + (int) (Math.random() * 9999), skin);
         passwordField.setAlignment(1);
-        passwordField.setMaxLength(12);
+        passwordField.setPasswordMode(true);
+        passwordField.setPasswordCharacter('*');
 
-        ipField = new TextField("ip:port" + (int) (Math.random() * 9999), skin);
+        ipField = new TextField("127.0.0.1", skin);
         ipField.setAlignment(1);
-        ipField.setMaxLength(12);
 
         options.add(nicknameField).width(tableWidth).height(buttonHeight).row();
         options.add().height(spaceHeight).row();
@@ -85,6 +76,15 @@ public class LoginLayout extends Stage {
 
         options.add(ipField).width(tableWidth).height(buttonHeight).row();
         options.add().height(spaceHeight).row();
+
+        TextButton loginButton = new TextButton("Login", skin2);
+        setupButton(options, tableWidth, loginButton);
+        loginButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                delegate.login(nicknameField.getText(), passwordField.getText(), ipField.getText());
+            }
+        });
     }
 
     private void setupButton(Table table, float tableWidth, TextButton button) {

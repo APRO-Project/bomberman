@@ -3,6 +3,9 @@ package com.cyberbot.bomberman.core.utils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
@@ -62,5 +65,22 @@ public final class Utils {
             .filter(predicate)
             .findFirst()
             .orElse(null);
+    }
+
+    // From: https://stackoverflow.com/a/2347356/4061413
+    public static InetSocketAddress parseServerString(String s, int defaultPort) throws URISyntaxException {
+        URI uri = new URI("my://" + s);
+        String host = uri.getHost();
+        int port = uri.getPort();
+
+        if (uri.getHost() == null) {
+            throw new URISyntaxException(uri.toString(), "URI must have the host part");
+        }
+
+        if (port == -1) {
+            port = defaultPort;
+        }
+
+        return new InetSocketAddress(host, port);
     }
 }

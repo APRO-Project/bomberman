@@ -1,9 +1,14 @@
 package com.cyberbot.bomberman.net
 
 import com.cyberbot.bomberman.core.models.net.packets.*
+import java.io.IOException
 
 interface ClientControlListener {
     fun onClientConnected()
+
+    fun onConnectionError(e: IOException)
+
+    fun onClientDisconnected()
 
     fun onLobbyCreate(payload: LobbyCreateResponse)
 
@@ -13,5 +18,7 @@ interface ClientControlListener {
 
     fun onGameStart(payload: GameStart)
 
-    fun onError(packet: ErrorResponse)
+    fun onError(payload: ErrorResponse)
+
+    fun onRegisterResponse(payload: ClientRegisterResponse)
 }
