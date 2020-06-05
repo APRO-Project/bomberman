@@ -1,9 +1,11 @@
 package com.cyberbot.bomberman.core.models.items;
 
+import java.io.Serializable;
+
 /**
  * Contains information about the quantity and max quantity of an {@link ItemType}.
  */
-public class ItemStack {
+public class ItemStack implements Serializable {
     public static final int INFINITE_QUANTITY = -1;
 
     protected final ItemType type;

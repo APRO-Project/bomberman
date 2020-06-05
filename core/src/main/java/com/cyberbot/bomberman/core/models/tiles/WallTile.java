@@ -1,9 +1,9 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
+import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 
 /**
@@ -57,17 +57,20 @@ public class WallTile extends PhysicalTile {
          *
          * @param properties Properties source.
          * @return A new instance of the Properties object.
-         * @throws InvalidPropertiesFormatException When some required properties where missing or
-         *                                          of invalid type from the MapProperties.
          */
-        static Properties fromMapProperties(MapProperties properties) throws InvalidPropertiesFormatException {
+
+        static Properties fromProperties(HashMap<String, Object> properties) throws InvalidPropertiesFormatException {
+            float durability = DURABILITY_INFINITE;
             try {
-                return new Properties(
-                    properties.get(DURABILITY, DURABILITY_INFINITE, float.class)
-                );
+                if (properties.containsKey(DURABILITY)) {
+                    durability = (float) properties.get(DURABILITY);
+                }
+                return new Properties(durability);
             } catch (ClassCastException e) {
-                throw new InvalidPropertiesFormatException("The type of '" + DURABILITY + "' property has to be float.");
+                throw new InvalidPropertiesFormatException("Wall tiles have to contain '" +
+                    Properties.DURABILITY + "' float property");
             }
         }
+
     }
 }
