@@ -10,11 +10,12 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import java.io.IOException
 import java.net.Socket
+import java.net.SocketException
 
 class ClientControlService(private val clientSocket: Socket, private val controller: ClientController) : Runnable {
 
     @Volatile
-    private var running = true
+    private var running = false
 
     private var client: Client? = null
 
@@ -29,13 +30,19 @@ class ClientControlService(private val clientSocket: Socket, private val control
             reader = JsonReader(clientSocket.getInputStream().reader().buffered())
             gson = GsonBuilder().registerControlPacketAdapter().create()
 
+            running = true
+
             while (running) {
                 val response = handleJson()
                 response?.let { sendPacket(it) }
             }
         } catch (e: IOException) {
-            running = false
+
         } finally {
+            running = false
+
+            reader.close()
+            writer.close()
             clientSocket.close()
         }
     }
@@ -72,10 +79,16 @@ class ClientControlService(private val clientSocket: Socket, private val control
                 else -> null
             }
         } catch (e: JsonSyntaxException) {
-            e.printStackTrace()
+            // This cursed shenanigans are required,
+            // because Gson catches the IOException and rethrows as JsonSyntaxException
+            // and we still need to ignore the syntax exceptions.
+            // From Gson: "Figure out whether it is indeed right to rethrow this as JsonSyntaxException"
+            if (e.cause is SocketException) {
+                throw e.cause as SocketException
+            }
+
             null
         } catch (e: JsonParseException) {
-            e.printStackTrace()
             null
         }
     }
