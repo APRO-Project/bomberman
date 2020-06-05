@@ -56,12 +56,14 @@ public class LoginLayout extends Stage {
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
 
-        nicknameField = new TextField("Player" + (int) (Math.random() * 9999), skin);
+        nicknameField = new TextField("", skin);
+        nicknameField.setMessageText("Nick");
         nicknameField.setAlignment(1);
         nicknameField.setMaxLength(12);
 
-        passwordField = new TextField("Password" + (int) (Math.random() * 9999), skin);
+        passwordField = new TextField("", skin);
         passwordField.setAlignment(1);
+        passwordField.setMessageText("Password");
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
 
