@@ -12,12 +12,10 @@ public class LobbyScreen extends AbstractScreen {
     private final OrthographicCamera camera;
     private final SpriteBatch batch;
     private final Viewport viewport;
-    private final boolean isOwner;
 
     private final LobbyLayout lobbyLayout;
 
     public LobbyScreen(LobbyInteraction delegate) {
-        this.isOwner = false;
 
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
@@ -26,15 +24,6 @@ public class LobbyScreen extends AbstractScreen {
         viewport = new FitViewport(1920, 1080);
 
         lobbyLayout = new LobbyLayout(viewport, delegate);
-        lobbyLayout.createLobbyUi();
-    }
-
-    public void addPlayer(String nick) {
-        lobbyLayout.addPlayer(nick);
-    }
-
-    public void addPlayer(String nick, int number) {
-        lobbyLayout.addPlayer(nick, number);
     }
 
     public void updateLobby(Lobby lobby, boolean isOwner) {
@@ -52,6 +41,7 @@ public class LobbyScreen extends AbstractScreen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(lobbyLayout);
+        lobbyLayout.createLobbyUi();
     }
 
     @Override
@@ -80,7 +70,7 @@ public class LobbyScreen extends AbstractScreen {
 
     @Override
     public void hide() {
-
+        lobbyLayout.clear();
     }
 
     @Override
