@@ -27,7 +27,7 @@ public abstract class EntitySprite<E extends Entity> implements Updatable, Drawa
 
     @Override
     public void update(float delta) {
-        Vector2 position = entity.getPosition();
+        Vector2 position = entity.getPositionRaw();
         sprite.setPosition(position.x - sprite.getWidth() / 2, position.y - sprite.getHeight() / 2);
     }
 

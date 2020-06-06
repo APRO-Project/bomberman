@@ -109,8 +109,8 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
             PlayerSnapshotPacket packet = snapshotQueue.createSnapshot();
             PlayerState state = new PlayerState(
                 snapshotQueue.getLatestSequence(),
-                localPlayer.getPositionRaw(),
-                localPlayer.getVelocityRaw());
+                localPlayer.getPosition(),
+                localPlayer.getVelocity());
 
             playerStateQueue.addState(state);
 

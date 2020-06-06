@@ -69,10 +69,10 @@ public class PlayerEntity extends Entity {
     }
 
     private PlayerState getState() {
-        if (getVelocity().x == 0 && getVelocity().y == 0)
+        if (getVelocityRaw().x == 0 && getVelocityRaw().y == 0)
             return PlayerState.STANDING;
 
-        if (getVelocity().x != 0 && verticalDirection != null)
+        if (getVelocityRaw().x != 0 && verticalDirection != null)
             return PlayerState.MOVING_SIDE;
 
         if (horizontalDirection == LookingDirection.UP)
@@ -95,20 +95,20 @@ public class PlayerEntity extends Entity {
         body.applyForceToCenter(force.x / PPM, force.y / PPM, true);
     }
 
-    public Vector2 getVelocity() {
+    public Vector2 getVelocityRaw() {
         Vector2 velocity = body.getLinearVelocity();
         return new Vector2(velocity.x * PPM, velocity.y * PPM);
     }
 
-    public Vector2 getVelocityRaw() {
+    public void setVelocityRaw(Vector2 velocity) {
+        body.setLinearVelocity(velocity.x / PPM, velocity.y / PPM);
+    }
+
+    public Vector2 getVelocity() {
         return new Vector2(body.getLinearVelocity());
     }
 
     public void setVelocity(Vector2 velocity) {
-        body.setLinearVelocity(velocity.x / PPM, velocity.y / PPM);
-    }
-
-    public void setVelocityRaw(Vector2 velocity) {
         body.setLinearVelocity(velocity);
     }
 
@@ -145,7 +145,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public PlayerData getData() {
-        return new PlayerData(id, getPositionRaw(), inventory, textureVariant);
+        return new PlayerData(id, getPosition(), inventory, textureVariant);
     }
 
     public enum PlayerState {

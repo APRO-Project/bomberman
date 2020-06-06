@@ -180,10 +180,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         // Disable collision and velocity for the local player, so that the simulated player does not
         // collide with the local player and the local player does not move during the rollback.
         localPlayer.setCollisions(false);
-        localPlayer.setVelocity(Vector2.Zero);
+        localPlayer.setVelocityRaw(Vector2.Zero);
 
         PlayerEntity simulatedPlayer = startingData.createEntity(world);
-        simulatedPlayer.setVelocityRaw(startVelocity);
+        simulatedPlayer.setVelocity(startVelocity);
         PlayerActionController movementController = new PlayerActionController(simulatedPlayer);
         playerStateQueue.clear();
         for (PlayerSnapshotPacket packet : interactionQueue) {
@@ -195,19 +195,19 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             }
 
             PlayerState state = new PlayerState(packet.getSequence(),
-                simulatedPlayer.getPositionRaw(),
-                simulatedPlayer.getVelocity());
+                simulatedPlayer.getPosition(),
+                simulatedPlayer.getVelocityRaw());
 
             playerStateQueue.addState(state);
         }
 
         PlayerData endData = simulatedPlayer.getData();
-        Vector2 resultingVelocity = simulatedPlayer.getVelocityRaw();
+        Vector2 resultingVelocity = simulatedPlayer.getVelocity();
         simulatedPlayer.dispose();
 
         // Restore velocity and collisions
         localPlayer.setCollisions(true);
-        localPlayer.setVelocity(resultingVelocity);
+        localPlayer.setVelocityRaw(resultingVelocity);
 
         return endData;
     }

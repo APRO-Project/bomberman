@@ -66,7 +66,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Update players
         players.forEach(player -> {
-            Vector2 position = player.getPositionRaw();
+            Vector2 position = player.getPosition();
             int x = (int) Math.floor(position.x);
             int y = (int) Math.floor(position.y);
 
@@ -135,12 +135,12 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         bombs.add(bomb);
         onEntityAdded(bomb);
 
-        Vector2 position = executor.getPositionRaw();
+        Vector2 position = executor.getPosition();
         float x = (float) Math.floor(position.x) + 0.5f;
         float y = (float) Math.floor(position.y) + 0.5f;
 
         // Place the bomb on the tile the player's currently at
-        bomb.setPositionRaw(new Vector2(x, y));
+        bomb.setPosition(new Vector2(x, y));
     }
 
     @Override
@@ -204,7 +204,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         bomb.dispose();
 
         int range = (int) bomb.getRange();
-        Vector2 position = bomb.getPositionRaw();
+        Vector2 position = bomb.getPosition();
         int x = (int) position.x;
         int y = (int) position.y;
 
@@ -284,7 +284,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         if (collectible == null) {
             return;
         }
-        collectible.setPosition(tile.getPosition());
+        collectible.setPositionRaw(tile.getPosition());
 
         collectibles.add(collectible);
         onEntityAdded(collectible);
