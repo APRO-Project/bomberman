@@ -1,7 +1,9 @@
 package com.cyberbot.bomberman.core.controllers;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.cyberbot.bomberman.core.models.PlayerState;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.entities.Entity;
@@ -11,7 +13,9 @@ import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.EntityDataPair;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
+import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,29 +25,51 @@ import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener {
     private final int tickRate;
     private final int interpolationDelay = 3;
+    private final float replyInterTime = 0.05f;
+    private final float maxPlayerOffset = 0.15f;
     private final World world;
     private final Map<Long, Entity> entities;
     private final Queue<GameSnapshotPacket> gameSnapshots;
     private final SnapshotQueue interactionQueue;
-    private final PlayerEntity localPlayer;
+    private final PlayerStateQueue playerStateQueue;
     private final List<WorldChangeListener> listeners;
 
-    private GameSnapshotPacket latestPacket;
+    /**
+     * Latest snapshot applied to the world.
+     */
+    private GameSnapshotPacket currentPacket;
+    /**
+     * Next snapshot to be applied to the world, and the one we interpolate towards.
+     */
     private GameSnapshotPacket nextPacket;
+    /**
+     * The latest snapshot received from the server
+     */
+    private GameSnapshotPacket newestPacket;
+
+    private PlayerEntity localPlayer;
 
     private int snapshotLength;
     private float interpFraction;
 
-    public LocalWorldController(World world, int tickRate, SnapshotQueue interactionQueue, PlayerEntity localPlayer) {
+    private PlayerData playerToInterpStart;
+    private PlayerData playerToInterpEnd;
+    private float replayInterpFraction;
+
+    public LocalWorldController(World world, int tickRate, SnapshotQueue interactionQueue,
+                                PlayerStateQueue playerStateQueue, PlayerEntity localPlayer) {
         this.tickRate = tickRate;
         this.world = world;
         this.interactionQueue = interactionQueue;
+        this.playerStateQueue = playerStateQueue;
         this.localPlayer = localPlayer;
         this.entities = new HashMap<>();
         this.gameSnapshots = new ArrayDeque<>();
         this.listeners = new ArrayList<>();
         this.interpFraction = 0;
         this.snapshotLength = 0;
+        this.playerToInterpStart = null;
+        this.playerToInterpEnd = null;
     }
 
     @Override
@@ -55,6 +81,14 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
         // Remove any entities marked for removal
         entities.entrySet().removeIf(it -> it.getValue().isMarkedToRemove());
+
+        if (newestPacket != null) {
+            validateWorld(newestPacket);
+        }
+
+        if (playerToInterpStart != null) {
+            interpolateReply(delta);
+        }
 
         interpolate(delta);
     }
@@ -85,18 +119,27 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         }
 
         if (snapshotChanged) {
-            applySnapshot(latestPacket.getSnapshot(), false);
+            applySnapshot(currentPacket.getSnapshot());
         }
-
 
         float fraction = interpFraction / snapshotLength;
 
-        List<EntityDataPair> updated = getUpdatedEntities(latestPacket.getSnapshot());
+        List<EntityDataPair> updated = getUpdatedEntities(currentPacket.getSnapshot());
         for (EntityDataPair pair : updated) {
             EntityData<?> nextData = nextPacket.getSnapshot().getEntity(pair.getData().getId());
             if (nextData == null) continue;
 
             pair.getEntity().updateFromData(pair.getData(), nextData, fraction);
+        }
+    }
+
+    private void interpolateReply(float delta) {
+        localPlayer.updateFromData(playerToInterpStart, playerToInterpEnd, replayInterpFraction);
+        replayInterpFraction = Math.min(1, replayInterpFraction + delta / replyInterTime);
+
+        if (replayInterpFraction == 1) {
+            playerToInterpStart = null;
+            playerToInterpEnd = null;
         }
     }
 
@@ -113,21 +156,60 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             return false;
         }
 
-        latestPacket = nextPacket;
+        currentPacket = nextPacket;
         nextPacket = gameSnapshots.remove();
-        snapshotLength = nextPacket.getSequence() - latestPacket.getSequence();
+        snapshotLength = nextPacket.getSequence() - currentPacket.getSequence();
 
         snapshotLength = Math.max(Math.min(snapshotLength, interpolationDelay), 0);
 
         return true;
     }
 
-    private void replayMovement() {
-        PlayerActionController movementController = new PlayerActionController(localPlayer);
-        for (List<Action> actions : interactionQueue.userInputStream().collect(Collectors.toList())) {
-            movementController.onActions(actions);
-            world.step(1f / SIM_RATE, 6, 2);
+    /**
+     * Replies any player interactions captured between the latest received snapshot
+     * and now to effectively move the player to the same location as the server will perceive at this moment.
+     * <p>
+     * Creates a new simulated player staring at the <code>startingData</code> to apply the actions to.
+     * After the simulation is completed the player is removed and it's new data returned.
+     *
+     * @param startingData  The data to create the simulated player from.
+     * @param startVelocity The staring velocity of the simulated player.
+     * @return The resulting player data.
+     */
+    private PlayerData replayMovement(PlayerData startingData, Vector2 startVelocity) {
+        // Disable collision and velocity for the local player, so that the simulated player does not
+        // collide with the local player and the local player does not move during the rollback.
+        localPlayer.setCollisions(false);
+        localPlayer.setVelocity(Vector2.Zero);
+
+        PlayerEntity simulatedPlayer = startingData.createEntity(world);
+        simulatedPlayer.setVelocityRaw(startVelocity);
+        PlayerActionController movementController = new PlayerActionController(simulatedPlayer);
+        playerStateQueue.clear();
+        for (PlayerSnapshotPacket packet : interactionQueue) {
+            for (List<Action> actions : packet.getSnapshot().actions) {
+                float delta = 1f / SIM_RATE;
+                movementController.onActions(actions);
+                movementController.update(delta);
+                world.step(delta, 6, 2);
+            }
+
+            PlayerState state = new PlayerState(packet.getSequence(),
+                simulatedPlayer.getPositionRaw(),
+                simulatedPlayer.getVelocity());
+
+            playerStateQueue.addState(state);
         }
+
+        PlayerData endData = simulatedPlayer.getData();
+        Vector2 resultingVelocity = simulatedPlayer.getVelocityRaw();
+        simulatedPlayer.dispose();
+
+        // Restore velocity and collisions
+        localPlayer.setCollisions(true);
+        localPlayer.setVelocity(resultingVelocity);
+
+        return endData;
     }
 
     /**
@@ -135,22 +217,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
      * <p>
      * Requires the Box2D world to not be locked, so it has to be called during an update
      * and not asynchronously.
-     * <p>
-     * When including the local player an effective rollback of the whole world is applied.
-     * This requires the local player to be present in the snapshot, or a {@link NoSuchElementException}
-     * will be thrown at runtime. The caller has to validate that the player is present in the snapshot.
-     * <p>
-     * Usually this method will be used if there is too much discrepancy
-     * between the local player's position at the time of this snapshot and the snapshot,
-     * meaning the local player had to be present in the snapshot anyway.
      *
-     * @param snapshot           Game snapshot to rollback the World to
-     * @param includeLocalPlayer Whether to apply the snapshot to the current player as well
+     * @param snapshot Game snapshot to rollback the World to
      * @throws ConcurrentModificationException When the Box2D world is locked.
      * @throws NoSuchElementException          When includeLocalPlayer was set to <code>true</code> and
      *                                         the local player is not present in the snapshot's entity list.
      */
-    private void applySnapshot(GameSnapshot snapshot, boolean includeLocalPlayer) {
+    private void applySnapshot(GameSnapshot snapshot) {
         if (world.isLocked()) {
             throw new ConcurrentModificationException("Cannot rollback while world is locked");
         }
@@ -167,10 +240,6 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
         // Update all updated entities
         updated.forEach(it -> it.getEntity().updateFromData(it.getData()));
-        if (includeLocalPlayer) {
-            PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
-            localPlayer.updateFromData(playerData);
-        }
 
         // Create and add references to all added entities
         List<Entity> createdEntities = added.stream()
@@ -209,10 +278,37 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         return entities.containsKey(id);
     }
 
+    private void validateWorld(@NotNull GameSnapshotPacket packet) {
+        int sequence = packet.getSequence();
+        PlayerState localState = playerStateQueue.removeUntil(sequence);
+
+        if (localState != null) {
+            validatePlayerPosition(localState, packet.getSnapshot());
+        }
+
+        interactionQueue.removeUntil(sequence);
+    }
+
+    private void validatePlayerPosition(@NotNull PlayerState localState, @NotNull GameSnapshot remoteSnapshot) {
+        PlayerData remotePlayer = (PlayerData) remoteSnapshot.getEntity(localPlayer.getId());
+        if (remotePlayer != null) {
+            Vector2 remotePosition = remotePlayer.getPosition().toVector2();
+            boolean replay = new Vector2(remotePosition).sub(localState.position).len() > maxPlayerOffset;
+
+            if (replay) {
+                playerToInterpStart = localPlayer.getData();
+                playerToInterpEnd = replayMovement(remotePlayer, localState.velocity);
+                replayInterpFraction = 0;
+            }
+
+            int a = 0;
+        }
+    }
+
     @Override
-    public void onNewSnapshot(GameSnapshotPacket snapshot) {
-        interactionQueue.removeUntil(snapshot.getSequence());
-        gameSnapshots.add(snapshot);
+    public void onNewSnapshot(GameSnapshotPacket packet) {
+        gameSnapshots.add(packet);
+        newestPacket = packet;
     }
 
     @Override

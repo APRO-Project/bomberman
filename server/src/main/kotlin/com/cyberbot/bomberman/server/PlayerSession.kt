@@ -7,19 +7,16 @@ import com.cyberbot.bomberman.core.models.entities.PlayerEntity
 import com.cyberbot.bomberman.core.models.net.PlayerSnapshotListener
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import org.apache.commons.collections4.queue.CircularFifoQueue
+import java.util.*
 
 class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32) :
     PlayerSnapshotListener, Updatable {
-    private val actionQueue: CircularFifoQueue<List<Action>> = CircularFifoQueue(queueSize)
+    private val packetQueue: Queue<Pair<Int, Queue<List<Action>>>> = CircularFifoQueue(queueSize)
     private val actionController: PlayerActionController = PlayerActionController(playerEntity)
     var sequence: Int = -1
         private set
 
     private var errors = 0
-
-    fun pollActions(): List<Action> {
-        return actionQueue.poll()
-    }
 
     fun onError() {
         errors++
@@ -34,15 +31,19 @@ class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32)
     }
 
     override fun update(delta: Float) {
-        val actions = actionQueue.poll()
-        if (actions != null) {
-            actionController.onActions(actions)
+        if (packetQueue.isEmpty()) return
+
+        var pair = packetQueue.peek() ?: return
+        while (pair.second.isEmpty()) {
+            sequence = pair.first
+            pair = packetQueue.poll() ?: return
         }
+
+        actionController.onActions(pair.second.poll())
         actionController.update(delta)
     }
 
-    override fun onNewSnapshot(snapshot: PlayerSnapshotPacket) {
-        actionQueue.addAll(snapshot.snapshot.actions)
-        sequence = snapshot.sequence
+    override fun onNewSnapshot(packet: PlayerSnapshotPacket) {
+        packetQueue.add(Pair(packet.sequence, ArrayDeque(packet.snapshot.actions)))
     }
 }

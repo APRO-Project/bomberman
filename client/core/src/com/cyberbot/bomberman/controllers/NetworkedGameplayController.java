@@ -7,7 +7,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.controllers.PlayerActionController;
+import com.cyberbot.bomberman.core.controllers.PlayerStateQueue;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
+import com.cyberbot.bomberman.core.models.PlayerState;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
@@ -41,6 +43,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final TileMap map;
 
     private final SnapshotQueue snapshotQueue;
+    private final PlayerStateQueue playerStateQueue;
     private final NetService netService;
 
     private final ScheduledExecutorService snapshotService;
@@ -56,13 +59,14 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         textureController = new TextureController(map);
 
         snapshotQueue = new SnapshotQueue(player.getId(), 100);
+        playerStateQueue = new PlayerStateQueue(100);
         playerActionController = new PlayerActionController(localPlayer);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);
         inputController.addActionController(playerActionController);
 
-        worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
+        worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, playerStateQueue, localPlayer);
         worldController.addListener(textureController);
 
         textureController.onEntityAdded(localPlayer);
@@ -103,6 +107,13 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private void createAndSendSnapshot() {
         try {
             PlayerSnapshotPacket packet = snapshotQueue.createSnapshot();
+            PlayerState state = new PlayerState(
+                snapshotQueue.getLatestSequence(),
+                localPlayer.getPositionRaw(),
+                localPlayer.getVelocityRaw());
+
+            playerStateQueue.addState(state);
+
             netService.sendPlayerSnapshot(packet);
         } catch (Exception e) {
             Gdx.app.log("Exception", e.toString());

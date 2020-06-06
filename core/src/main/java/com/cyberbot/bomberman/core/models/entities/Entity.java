@@ -75,7 +75,7 @@ public abstract class Entity implements Disposable, Updatable {
      * @return the position of the entity in the Box2D coordinate system.
      */
     public Vector2 getPositionRaw() {
-        return body.getPosition();
+        return new Vector2(body.getPosition()); // Pass by value my ass, 5h wasted here
     }
 
     /**
@@ -111,6 +111,10 @@ public abstract class Entity implements Disposable, Updatable {
         setPositionRaw(data.getPosition().toVector2());
     }
 
+    public void updateFromData(EntityData<?> d1, float fraction) {
+        updateFromData(getData(), d1, fraction);
+    }
+
     public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
         if (d0.getId() != id || d1.getId() != id) {
             throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
@@ -118,6 +122,12 @@ public abstract class Entity implements Disposable, Updatable {
 
         if (fraction > 1 || fraction < 0) {
             throw new IllegalArgumentException("Interpolation fraction has to be in range 0-1");
+        }
+
+        if (fraction == 1) {
+            updateFromData(d1);
+        } else if (fraction == 0) {
+            updateFromData(d0);
         }
 
         final Vector2 pos0 = d0.getPosition().toVector2();

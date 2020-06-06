@@ -17,6 +17,7 @@ public class PlayerEntity extends Entity {
 
     private static final float ANIMATION_DURATION = 0.2f;
 
+    private Fixture fixture;
     private final int textureVariant;
     private final Inventory inventory;
 
@@ -99,12 +100,24 @@ public class PlayerEntity extends Entity {
         return new Vector2(velocity.x * PPM, velocity.y * PPM);
     }
 
+    public Vector2 getVelocityRaw() {
+        return new Vector2(body.getLinearVelocity());
+    }
+
     public void setVelocity(Vector2 velocity) {
         body.setLinearVelocity(velocity.x / PPM, velocity.y / PPM);
     }
 
+    public void setVelocityRaw(Vector2 velocity) {
+        body.setLinearVelocity(velocity);
+    }
+
     public float getMass() {
         return body.getMass();
+    }
+
+    public void setCollisions(boolean enabled) {
+        fixture.setSensor(!enabled);
     }
 
     @Override
@@ -119,7 +132,7 @@ public class PlayerEntity extends Entity {
         CircleShape shape = new CircleShape();
         shape.setRadius(0.49f);
 
-        Fixture fixture = body.createFixture(shape, 1);
+        fixture = body.createFixture(shape, 1);
         body.setUserData(this);
         shape.dispose();
     }

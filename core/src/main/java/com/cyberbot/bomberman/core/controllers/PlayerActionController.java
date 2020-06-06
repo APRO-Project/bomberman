@@ -8,6 +8,7 @@ import com.cyberbot.bomberman.core.models.actions.UseItemAction;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public final class PlayerActionController implements ActionListener, Updatable {
     }
 
     @Override
-    public void onActions(List<Action> actions) {
+    public void onActions(@NotNull List<Action> actions) {
         for (Action action : actions) {
             if (action instanceof UseItemAction) {
                 useItem(((UseItemAction) action).getItemType());
