@@ -13,4 +13,11 @@ public class UseItemAction extends Action {
     public ItemType getItemType() {
         return itemType;
     }
+
+    @Override
+    public String toString() {
+        return "UseItemAction{" +
+            "itemType=" + itemType +
+            '}';
+    }
 }
