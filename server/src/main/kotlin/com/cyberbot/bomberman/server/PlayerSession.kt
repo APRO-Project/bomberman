@@ -29,11 +29,16 @@ class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32)
         errors = 0
     }
 
+    fun addListener(listener: PlayerActionController.Listener) {
+        actionController.addListener(listener)
+    }
+
     override fun update(delta: Float) {
         val actions = actionQueue.poll()
         if (actions != null) {
             actionController.onActions(actions)
         }
+        actionController.update(delta)
     }
 
     override fun onNewSnapshot(snapshot: PlayerSnapshotPacket) {

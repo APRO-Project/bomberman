@@ -43,7 +43,9 @@ class Session(private val socket: GameSocket) {
         check(!gameStarted) { "The game has already started, cannot add clients" }
         val playerEntity = player.createEntity(world)
         gameStateController.addPlayer(playerEntity)
-        clientSessions[connection] = PlayerSession(playerEntity)
+        val playerSession = PlayerSession(playerEntity)
+        clientSessions[connection] = playerSession
+        playerSession.addListener(gameStateController)
     }
 
     fun removeClient(connection: ClientConnection): Boolean {

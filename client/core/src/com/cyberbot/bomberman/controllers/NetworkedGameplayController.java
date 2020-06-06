@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
+import com.cyberbot.bomberman.core.controllers.PlayerActionController;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
@@ -34,6 +35,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private final TextureController textureController;
     private final InputController inputController;
+    private final PlayerActionController playerActionController;
 
     private final LocalWorldController worldController;
     private final TileMap map;
@@ -54,9 +56,11 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         textureController = new TextureController(map);
 
         snapshotQueue = new SnapshotQueue(player.getId(), 100);
+        playerActionController = new PlayerActionController(localPlayer);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);
+        inputController.addActionController(playerActionController);
 
         worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
         worldController.addListener(textureController);
@@ -78,6 +82,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     @Override
     public void update(float delta) {
+        playerActionController.update(delta);
         worldController.update(delta);
         textureController.update(delta);
     }
@@ -92,6 +97,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         map.dispose();
         worldController.dispose();
         snapshotService.shutdown();
+        inputPollService.shutdown();
     }
 
     private void createAndSendSnapshot() {
