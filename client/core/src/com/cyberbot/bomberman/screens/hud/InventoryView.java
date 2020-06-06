@@ -1,12 +1,10 @@
 package com.cyberbot.bomberman.screens.hud;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.items.ItemStack;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.utils.Atlas;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -19,6 +17,7 @@ import java.util.stream.Collectors;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public final class InventoryView extends Table {
+    // TODO: Merge InventoryButton and InventoryItemButton together
 
     private static final List<ItemType> ITEMS;
     private static final List<ItemType> EFFECTS;
@@ -39,13 +38,13 @@ public final class InventoryView extends Table {
     private final ButtonGroup<ImageButton> itemButtonGroup;
     private int currentItem;
 
-    private final PlayerEntity player;
+    private final PlayerData playerData;
 
-    public InventoryView(PlayerEntity player, Skin skin) {
+    public InventoryView(PlayerData playerData, Skin skin) {
         effectButtons = new InventoryButton[5];
         itemButtons = new InventoryItemButton[5];
 
-        this.player = player;
+        this.playerData = playerData;
 
         init(skin);
 
@@ -93,11 +92,11 @@ public final class InventoryView extends Table {
     private boolean scanForInventoryChanges() {
         boolean change = false;
 
-        final ArrayList<ItemStack> effectStacks = player.getInventory().getItems().stream()
+        final ArrayList<ItemStack> effectStacks = playerData.getInventory().getItems().stream()
             .filter(i -> EFFECTS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        final ArrayList<ItemStack> itemStacks = player.getInventory().getItems().stream()
+        final ArrayList<ItemStack> itemStacks = playerData.getInventory().getItems().stream()
             .filter(i -> ITEMS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
@@ -189,7 +188,7 @@ public final class InventoryView extends Table {
         return currentItem == -1 ? null : itemButtons[currentItem].type;
     }
 
-    private void changeCurrentItem(boolean up) {
+    public void changeCurrentItem(boolean up) {
         final int itemCount = (int) Arrays.stream(itemButtons)
             .filter(btn -> btn.type != null)
             .count();
@@ -237,12 +236,12 @@ public final class InventoryView extends Table {
 
         updateCurrentItem();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-            // Item up
-            changeCurrentItem(true);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            // Item down
-            changeCurrentItem(false);
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+//            // Item up
+//            changeCurrentItem(true);
+//        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+//            // Item down
+//            changeCurrentItem(false);
+//        }
     }
 }

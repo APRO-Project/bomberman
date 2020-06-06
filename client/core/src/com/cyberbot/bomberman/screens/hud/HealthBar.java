@@ -6,14 +6,14 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.IntAction;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import java.util.LinkedList;
 
 public class HealthBar extends Actor {
 
-    private final PlayerEntity player;
+    private final PlayerData playerData;
 
     private final NinePatch progressBarEmpty;
     private final NinePatch progressBarFill;
@@ -27,11 +27,11 @@ public class HealthBar extends Actor {
     private final LinkedList<IntAction> animationQueue;
     private IntAction currentAnimation;
 
-    public HealthBar(PlayerEntity player, float width, float height) {
+    public HealthBar(PlayerData playerData, float width, float height) {
         super();
 
-        this.player = player;
-        visiblePlayerHealth = 100;  // TODO: Add health property to PlayerDef
+        this.playerData = playerData;
+        visiblePlayerHealth = 100;  // TODO: Add health property to PlayerData
 
         // Load textures
         progressBarEmpty = new NinePatch(Atlas.getSkinAtlas().findRegion("progress_bar_empty"));

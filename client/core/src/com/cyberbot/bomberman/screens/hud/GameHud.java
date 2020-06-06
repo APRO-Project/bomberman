@@ -10,8 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -21,23 +20,22 @@ public class GameHud extends Stage {
     private Skin skin;
     private Table left;
     private Table right;
-    private PlayerEntity player;
 
     // Left side
-    private final LocalPlayerView localPlayerView;
-    private final InventoryView inventoryView;
+    public final LocalPlayerView localPlayerView;
+    public final InventoryView inventoryView;
 
     // Right side
-    private final TimerView timerView;
-    private final PlayerListView playerListView;
+    public final TimerView timerView;
+    public final PlayerListView playerListView;
 
-    public GameHud(PlayerEntity player, Viewport viewport) {
+    public GameHud(PlayerData playerData, Viewport viewport) {
         super(viewport);
 
         initSkin();
 
-        localPlayerView = new LocalPlayerView(player, skin);
-        inventoryView = new InventoryView(player, skin);
+        localPlayerView = new LocalPlayerView(playerData, skin);
+        inventoryView = new InventoryView(playerData, skin);
         timerView = new TimerView(skin);
         playerListView = new PlayerListView(skin);
     }
@@ -109,9 +107,5 @@ public class GameHud extends Stage {
         skin = new Skin(Atlas.getSkinAtlas());
         skin.add("default_font", font);
         skin.load(Gdx.files.internal("skins/skin.json"));
-    }
-
-    public ItemType getCurrentItem() {
-        return inventoryView.getCurrentItem();
     }
 }

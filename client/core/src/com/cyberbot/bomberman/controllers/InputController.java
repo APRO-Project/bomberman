@@ -7,6 +7,7 @@ import com.cyberbot.bomberman.core.models.actions.MoveAction;
 import com.cyberbot.bomberman.core.models.actions.UseItemAction;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.models.KeyBinds;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +18,12 @@ import java.util.List;
 public final class InputController {
     private final KeyBinds keys;
     private final List<ActionListener> actionListeners;
+    private final GameHud hud;
 
-    public InputController(KeyBinds keys) {
+    public InputController(KeyBinds keys, GameHud hud) {
         this.keys = keys;
         this.actionListeners = new ArrayList<>();
+        this.hud = hud;
     }
 
     public void addActionController(ActionListener controller) {
@@ -31,8 +34,17 @@ public final class InputController {
         final List<Action> actions = new ArrayList<>();
 
         if (Gdx.input.isKeyJustPressed(keys.useItem)) {
-            // TODO: Get selected item from HUD
-            actions.add(new UseItemAction(ItemType.SMALL_BOMB));
+            ItemType selectedItem = hud.inventoryView.getCurrentItem();
+            if (selectedItem != null) {
+                actions.add(new UseItemAction(selectedItem));
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(keys.switchItemDown)) {
+            hud.inventoryView.changeCurrentItem(false);
+        }
+        if (Gdx.input.isKeyJustPressed(keys.switchItemUp)) {
+            hud.inventoryView.changeCurrentItem(true);
         }
 
         int direction = 0;

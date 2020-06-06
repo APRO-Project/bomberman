@@ -18,6 +18,7 @@ import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.net.NetService;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,7 +44,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection)
+    private final GameHud hud;
+
+    public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection, GameHud hud)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
@@ -55,7 +58,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
         snapshotQueue = new SnapshotQueue(player.getId(), 100);
 
-        inputController = new InputController(binds);
+        inputController = new InputController(binds, hud);
         inputController.addActionController(snapshotQueue);
         //inputController.addMovementController(playerMovement);
 
@@ -73,21 +76,25 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         inputPollService.scheduleAtFixedRate(inputController::poll,
             0, 1_000_000 / SIM_RATE, TimeUnit.MICROSECONDS);
 
+        this.hud = hud;
     }
 
     @Override
     public void update(float delta) {
         worldController.update(delta);
         textureController.update(delta);
+        hud.act();
     }
 
     @Override
     public void draw(SpriteBatch batch) {
         textureController.draw(batch);
+        hud.draw();
     }
 
     @Override
     public void dispose() {
+        hud.dispose();
         map.dispose();
         worldController.dispose();
         snapshotService.shutdown();

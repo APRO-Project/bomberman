@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Align;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 
 public final class PlayerListView extends Table {
+    // TODO: Get list of players from somewhere
 
     PlayerEntity[] players;
 
