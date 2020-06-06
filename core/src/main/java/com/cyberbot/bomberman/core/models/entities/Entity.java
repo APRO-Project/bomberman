@@ -108,7 +108,7 @@ public abstract class Entity implements Disposable, Updatable {
             throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
         }
 
-        setPosition(data.getPosition().toVector2());
+        setPositionRaw(data.getPosition().toVector2());
     }
 
     public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
@@ -126,8 +126,23 @@ public abstract class Entity implements Disposable, Updatable {
         // After this operation pos1 holds the delta vector and pos0 the new resulting position
         pos0.mulAdd(pos1.sub(pos0), fraction);
 
-        setPosition(pos0);
+        setPositionRaw(pos0);
     }
 
     public abstract EntityData<? extends Entity> getData();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Entity entity = (Entity) o;
+
+        return id == entity.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

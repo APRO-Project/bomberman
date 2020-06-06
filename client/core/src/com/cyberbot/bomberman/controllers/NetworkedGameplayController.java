@@ -9,7 +9,6 @@ import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
-import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
@@ -22,11 +21,13 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.cyberbot.bomberman.core.utils.Constants.*;
+import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
+import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable {
     private final PlayerEntity localPlayer;
@@ -43,24 +44,24 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath, Connection connection)
+    public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
         World world = new World(new Vector2(0, 0), false);
         map = TileMapFactory.createTileMap(world, mapPath);
         localPlayer = player.createEntity(world);
-        localPlayer.setPosition(new Vector2(1.5f * PPM, 1.5f * PPM));
         textureController = new TextureController(map);
 
         snapshotQueue = new SnapshotQueue(player.getId(), 100);
 
         inputController = new InputController(binds);
         inputController.addActionController(snapshotQueue);
-        //inputController.addMovementController(playerMovement);
 
         worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, localPlayer);
         worldController.addListener(textureController);
+
+        textureController.onEntityAdded(localPlayer);
 
         netService = new NetService(connection, worldController);
         new Thread(netService).start();

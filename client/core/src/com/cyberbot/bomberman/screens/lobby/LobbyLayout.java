@@ -11,140 +11,151 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.controllers.GameScreenController;
-import com.cyberbot.bomberman.screens.ScreenState;
+import com.cyberbot.bomberman.core.models.net.packets.Client;
+import com.cyberbot.bomberman.core.models.net.packets.Lobby;
 import com.cyberbot.bomberman.utils.Atlas;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class LobbyLayout extends Stage {
+    private final float spaceHeight = 0;
 
-    private final float playerLabelHeight = 150;
-    private final float spaceHeight = 10;
-    private final float buttonHeight = 150;
-    private boolean isOwner;
+    private final Label[] playerLabels;
+    private final LobbyInteraction delegate;
 
-    Label[] playerLabels;
-    boolean[] playerEmpty;
+    private final float worldWidth = getViewport().getWorldWidth();
+    private final float worldHeight = getViewport().getWorldHeight();
+    private final float tableWidth = worldWidth / 3;
+    private final Skin skin2;
 
-    final GameScreenController gameScreenController;
+    private Label lobbyId;
+    private TextButton startGameButton;
 
-    public LobbyLayout(Viewport viewport, boolean isOwner, GameScreenController gameScreenController) {
+    public LobbyLayout(Viewport viewport, LobbyInteraction delegate) {
         super(viewport);
-        this.isOwner = isOwner;
-        this.gameScreenController = gameScreenController;
-        playerLabels = new Label[4];
-        playerEmpty = new boolean[4];
-        Arrays.fill(playerEmpty, true);
-    }
-
-    public void createLobbyUi() {
-        Table ui = new Table();
-        ui.setDebug(false);
-
-
-        float worldWidth = getViewport().getWorldWidth();
-        float worldHeight = getViewport().getWorldHeight();
-        float tableWidth = worldWidth / 3;
-
-        ui.setPosition((worldWidth - tableWidth) / 2, 1);
-        ui.setWidth(tableWidth);
-        ui.setHeight(worldHeight);
-        addActor(ui);
-
+        this.delegate = delegate;
+        this.playerLabels = new Label[4];
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
         fontParams.size = 20;
         BitmapFont font = generator.generateFont(fontParams);
 
-        Skin skin2 = new Skin(Atlas.getSkinAtlas());
+        this.skin2 = new Skin(Atlas.getSkinAtlas());
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
+    }
+
+    public void createLobbyUi() {
+        Table ui = new Table();
+        ui.setDebug(false);
+
+        ui.setPosition((worldWidth - tableWidth) / 2, 1);
+        ui.setWidth(tableWidth);
+        ui.setHeight(worldHeight);
+        addActor(ui);
+
         Label title = new Label("Players", skin2);
         title.setWidth(tableWidth);
         title.setAlignment(1);
         title.setFontScale(8);
         title.setWrap(false);
+        float playerLabelHeight = 150;
         ui.add(title).width(tableWidth).height(playerLabelHeight).row();
-        ui.add().height(50).row();
 
-        for (int i = 1; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             Label label = new Label("Empty", skin2);
             label.setWidth(tableWidth);
             label.setAlignment(1);
             label.setFontScale(4);
             label.setWrap(false);
-            playerLabels[i - 1] = label;
+            playerLabels[i] = label;
             ui.add(label).width(tableWidth).height(playerLabelHeight).row();
             ui.add().height(spaceHeight).row();
         }
 
-        if (isOwner) {
-            Table ui2 = new Table();
-            ui2.setDebug(false);
-
-            ui2.setPosition(1, 1);
-            ui2.setWidth(tableWidth);
-            ui2.setHeight(worldHeight);
-            addActor(ui2);
-
-            TextButton createLobby = new TextButton("Start Game", skin2);
-            setupButton(ui2, tableWidth, createLobby);
-            createLobby.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    //TODO add server request
-                    gameScreenController.setGameScreen();
-                }
-            });
-        }
-
-
         Table ui3 = new Table();
         ui3.setDebug(false);
 
-        ui3.setPosition(worldWidth-tableWidth, 1);
+        ui3.setPosition(worldWidth - tableWidth, 1);
         ui3.setWidth(tableWidth);
         ui3.setHeight(worldHeight);
         addActor(ui3);
 
-        TextButton createLobby = new TextButton("Leave", skin2);
-        setupButton(ui3, tableWidth, createLobby);
-        createLobby.addListener(new ClickListener() {
+        TextButton leaveLobbyButton = new TextButton("Leave", skin2);
+        setupButton(ui3, tableWidth, leaveLobbyButton);
+        leaveLobbyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO add server request
-                gameScreenController.setMenuScreen();
+                delegate.leaveLobby();
             }
         });
-    }
 
-    //TODO use public addPlayer api in recieving server request
-    public void addPlayer(String playerName) {
-        for (int i = 0; i < 4; i++) {
-            if (playerEmpty[i]) {
-                playerEmpty[i] = false;
-                playerLabels[i].setText(playerName);
-                return;
+        Table ui2 = new Table();
+        ui2.setDebug(false);
+
+        ui2.setPosition(1, 1);
+        ui2.setWidth(tableWidth);
+        ui2.setHeight(worldHeight);
+        addActor(ui2);
+
+        startGameButton = new TextButton("Start Game", skin2);
+        setupButton(ui2, tableWidth, startGameButton);
+        startGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                delegate.startGame();
+
             }
-        }
-        throw new ArrayIndexOutOfBoundsException("Too many players added");
+        });
+
+        startGameButton.setVisible(false);
+
+        ui.add().height(30).row();
+
+        Label lobbyIDText = new Label("Lobby ID", skin2);
+        lobbyIDText.setWidth(tableWidth);
+        lobbyIDText.setAlignment(1);
+        lobbyIDText.setFontScale(4);
+        lobbyIDText.setWrap(false);
+        ui.add(lobbyIDText).width(tableWidth).height(playerLabelHeight).row();
+
+        lobbyId = new Label("", skin2);
+        lobbyId.setWidth(tableWidth);
+        lobbyId.setAlignment(1);
+        lobbyId.setFontScale(3);
+        lobbyId.setWrap(false);
+        ui.add(lobbyId).width(tableWidth).height(playerLabelHeight).row();
     }
 
-    public void addPlayer(String playername, int number){
-        playerEmpty[number] = false;
+    public void addPlayer(String playername, int number) {
         playerLabels[number].setText(playername);
     }
 
-    public void removePlayer(int number){
-        playerEmpty[number] = true;
+    public void removePlayer(int number) {
         playerLabels[number].setText("Empty");
     }
 
     private void setupButton(Table table, float tableWidth, TextButton button) {
         button.getLabel().setFontScale(4);
+        float buttonHeight = 150;
         table.add(button).width(tableWidth - 50).height(buttonHeight).row();
         table.add().height(spaceHeight).row();
+    }
+
+    public void updateLobby(Lobby lobby, boolean isOwner) {
+        lobbyId.setText(lobby.getId());
+
+        if (isOwner) {
+            startGameButton.setVisible(true);
+        }
+
+        ArrayList<Client> clients = lobby.getClients();
+        for (int i = 0; i < clients.size(); i++) {
+            addPlayer(clients.get(i).getNick(), i);
+        }
+        for (int i = 3; i > clients.size() - 1; i--) {
+            removePlayer(i);
+        }
     }
 }

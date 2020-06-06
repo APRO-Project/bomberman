@@ -8,7 +8,7 @@ import com.cyberbot.bomberman.core.models.net.PlayerSnapshotListener
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import org.apache.commons.collections4.queue.CircularFifoQueue
 
-class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSize: Int = 32) :
+class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32) :
     PlayerSnapshotListener, Updatable {
     private val actionQueue: CircularFifoQueue<List<Action>> = CircularFifoQueue(queueSize)
     private val actionController: PlayerActionController = PlayerActionController(playerEntity)

@@ -5,16 +5,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
-import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.SocketAddress;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -31,10 +29,8 @@ public class GameScreen extends AbstractScreen {
 
     private NetworkedGameplayController gameplayController;
 
-
-    public GameScreen(GameScreenController gameScreenController, final PlayerData playerData, final String mapPath, final Connection connection)
+    public GameScreen(final PlayerData playerData, final String mapPath, final SocketAddress serverAddress)
         throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
-        super(gameScreenController);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
@@ -43,7 +39,7 @@ public class GameScreen extends AbstractScreen {
         b2dr = new Box2DDebugRenderer();
         batch = new SpriteBatch();
 
-        gameplayController = new NetworkedGameplayController(playerData, mapPath, connection);
+        gameplayController = new NetworkedGameplayController(playerData, mapPath, serverAddress);
     }
 
     @Override

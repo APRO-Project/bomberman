@@ -8,21 +8,33 @@ private const val TYPE = "type"
 
 open class ControlPacket
 
-class Client(val id: Long? = null, val nick: String? = null)
-class Lobby(val id: String? = null, val ownerId: Long? = null, val clients: MutableList<Client> = ArrayList())
+class Client(val id: Long? = null, val nick: String? = null, val password: String? = null)
+class Lobby(val id: String? = null, var ownerId: Long? = null, clients: List<Client> = ArrayList()) {
+    val clients = ArrayList(clients)
 
-class ClientRegisterRequest(val nick: String? = null) : ControlPacket()
+    companion object {
+        fun stripIds(lobby: Lobby): Lobby {
+            val clients = lobby.clients.map { Client(nick = it.nick) }
+            return Lobby(id = lobby.id, clients = clients)
+        }
+    }
+}
+
+class ClientRegisterRequest(val nick: String? = null, val password: String? = null) : ControlPacket()
 class ClientRegisterResponse(val success: Boolean? = null, val client: Client? = null) : ControlPacket()
 
 class LobbyCreateRequest : ControlPacket()
-class LobbyCreateResponse(success: Boolean? = null, val id: String? = null) : ControlPacket()
+class LobbyCreateResponse(val success: Boolean? = null, val id: String? = null) : ControlPacket()
 
 class LobbyJoinRequest(val id: String? = null) : ControlPacket()
 class LobbyJoinResponse(val success: Boolean? = null) : ControlPacket()
 
+class LobbyLeaveRequest : ControlPacket()
+
 class GameStartRequest : ControlPacket()
 
-class LobbyUpdate(val timestamp: Long? = null, val lobby: Lobby = Lobby()) : ControlPacket()
+class LobbyUpdate(val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) : ControlPacket()
+
 class GameStart(val port: Int, val playerInit: PlayerData) : ControlPacket()
 
 class ErrorResponse(val error: String? = null) : ControlPacket()
@@ -37,6 +49,8 @@ fun GsonBuilder.registerControlPacketAdapter(): GsonBuilder {
 
     adapter.registerSubtype(LobbyJoinRequest::class.java, "lobby_join_request")
     adapter.registerSubtype(LobbyJoinResponse::class.java, "lobby_join_response")
+
+    adapter.registerSubtype(LobbyLeaveRequest::class.java, "lobby_leave")
 
     adapter.registerSubtype(GameStartRequest::class.java, "game_start_request")
 

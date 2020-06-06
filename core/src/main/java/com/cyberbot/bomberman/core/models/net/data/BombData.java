@@ -17,7 +17,7 @@ public class BombData extends EntityData<BombEntity> {
     public BombEntity createEntity(World world) {
         BombDef def = new BombDef(-1, -1, -1, textureVariant);
         BombEntity bombEntity = new BombEntity(world, def, id);
-        bombEntity.setPosition(position.toVector2());
+        bombEntity.setPositionRaw(position.toVector2());
         return bombEntity;
     }
 }

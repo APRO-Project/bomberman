@@ -40,7 +40,7 @@ public class CollectibleEntity extends Entity {
 
     @Override
     public CollectibleData getData() {
-        return new CollectibleData(id, getPosition(), itemType);
+        return new CollectibleData(id, getPositionRaw(), itemType);
     }
 
     public ItemType getItemType() {

@@ -3,14 +3,15 @@ package com.cyberbot.bomberman.server
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.cyberbot.bomberman.core.controllers.GameStateController
+import com.cyberbot.bomberman.core.models.net.SerializationUtils
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
-import com.cyberbot.bomberman.core.models.tiles.TileMap
+import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.DatagramPacket
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
@@ -18,19 +19,17 @@ class Session(private val socket: GameSocket) {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
     private val gameStateController: GameStateController
     private val world: World = World(Vector2(0F, 0F), false)
-    private val simulationService: ScheduledExecutorService
-    private val tickService: ScheduledExecutorService
-    private var lastUpdate: Long
-    var gameStarted: Boolean
+    private val simulationService = ScheduledThreadPoolExecutor(1)
+    private val tickService = ScheduledThreadPoolExecutor(1)
+    private var lastUpdate = System.currentTimeMillis()
+    var gameStarted: Boolean = false
         private set
 
     init {
-        val map = TileMap(world, "./map/bomberman_main.tmx")
+        val mapPath = Thread.currentThread().contextClassLoader.getResource("map/bomberman_main.tmx")
+            ?: throw FileNotFoundException("Map file not found")
+        val map = TileMapFactory.createTileMap(world, mapPath.path)
         gameStateController = GameStateController(world, map)
-        gameStarted = false
-        lastUpdate = System.currentTimeMillis()
-        simulationService = ScheduledThreadPoolExecutor(1)
-        tickService = ScheduledThreadPoolExecutor(1)
     }
 
     fun onSnapshot(connection: ClientConnection, packet: PlayerSnapshotPacket): Boolean {
@@ -72,7 +71,7 @@ class Session(private val socket: GameSocket) {
 
         return clientSessions.entries.associateBy({ it.value }, {
             val packet = GameSnapshotPacket(it.value.sequence, snapshot)
-            val payload = packet.toByteArray()
+            val payload = SerializationUtils.serialize(packet)
             DatagramPacket(payload, payload.size, it.key.address, it.key.port)
         })
     }
@@ -80,6 +79,7 @@ class Session(private val socket: GameSocket) {
     fun startGame() {
         check(!gameStarted) { "The game has already been started" }
         gameStarted = true
+
         scheduleSimulationUpdates()
         scheduleTickUpdates()
     }
@@ -93,9 +93,13 @@ class Session(private val socket: GameSocket) {
     private fun scheduleSimulationUpdates() {
         simulationService.scheduleAtFixedRate(
             {
-                val t0 = System.currentTimeMillis()
-                update((t0 - lastUpdate) / 1000f)
-                lastUpdate = t0
+                try {
+                    val t0 = System.currentTimeMillis()
+                    update((t0 - lastUpdate) / 1000f)
+                    lastUpdate = t0
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             },
             0,
             1000000 / Constants.SIM_RATE.toLong(),
@@ -104,8 +108,8 @@ class Session(private val socket: GameSocket) {
     }
 
     private fun scheduleTickUpdates() {
-        simulationService.scheduleAtFixedRate(
-            { tick() },
+        tickService.scheduleAtFixedRate(
+            this::tick,
             0,
             1000000 / Constants.TICK_RATE.toLong(),
             TimeUnit.MICROSECONDS

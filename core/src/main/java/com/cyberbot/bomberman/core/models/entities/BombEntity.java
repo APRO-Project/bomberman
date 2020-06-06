@@ -71,7 +71,7 @@ public class BombEntity extends Entity {
 
     @Override
     public BombData getData() {
-        return new BombData(id, getPosition(), textureVariant);
+        return new BombData(id, getPositionRaw(), textureVariant);
     }
 
     public float getRange() {
