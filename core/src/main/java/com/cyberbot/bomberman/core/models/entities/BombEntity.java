@@ -11,8 +11,8 @@ import com.cyberbot.bomberman.core.models.net.data.BombData;
  * A bomb entity.
  */
 public class BombEntity extends Entity {
-
     private final float power;
+    private final float powerDropoff;
     private final float range;
     private final float detonationTime;
     private final int textureVariant;
@@ -29,6 +29,7 @@ public class BombEntity extends Entity {
         this.timeLeft = def.detonationTime;
         textureVariant = def.textureVariant;
         this.blown = false;
+        powerDropoff = def.powerDropOff;
     }
 
     @Override
@@ -92,5 +93,9 @@ public class BombEntity extends Entity {
 
     public int getTextureVariant() {
         return textureVariant;
+    }
+
+    public float getPowerDropoff() {
+        return powerDropoff;
     }
 }

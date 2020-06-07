@@ -53,7 +53,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         bombs.forEach(bomb -> {
             if (bomb.isBlown()) {
                 onBombExploded(bomb);
-                bomb.markToRemove();
             }
         });
 
@@ -183,24 +182,31 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
     private void onBombExploded(BombEntity bomb) {
         onEntityRemoved(bomb);
+        bomb.markToRemove();
         bomb.dispose();
 
-        int range = (int) bomb.getRange();
+        float bombRange = bomb.getRange();
+        int range = (int) bombRange;
         Vector2 position = bomb.getPosition();
         int x = (int) position.x;
         int y = (int) position.y;
 
-        float powerRight = bomb.getPower();
-        float powerLeft = bomb.getPower();
-        float powerUp = bomb.getPower();
-        float powerDown = bomb.getPower();
+        float bombPower = bomb.getPower();
+        float powerRight = bombPower;
+        float powerLeft = bombPower;
+        float powerUp = bombPower;
+        float powerDown = bombPower;
 
         TileMapLayer walls = map.getWalls();
 
         // Right
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x + i, y);
+
+            damagePlayers(x + i, y, (int) powerRight);
             powerRight = damageTile(tile, powerRight);
+            powerRight = Math.max(0, powerRight - bomb.getPowerDropoff());
+
             if (powerRight == 0) {
                 break;
             }
@@ -209,7 +215,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         // Left
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x - i, y);
+
+            damagePlayers(x - i, y, (int) powerLeft);
             powerLeft = damageTile(tile, powerLeft);
+            powerLeft = Math.max(0, powerLeft - bomb.getPowerDropoff());
+
             if (powerLeft == 0) {
                 break;
             }
@@ -218,7 +228,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         // Up
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y + i);
+
+            damagePlayers(x, y + i, (int) powerUp);
             powerUp = damageTile(tile, powerUp);
+            powerUp = Math.max(0, powerUp - bomb.getPowerDropoff());
+
             if (powerUp == 0) {
                 break;
             }
@@ -227,11 +241,29 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         // Down
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y - i);
+
+            damagePlayers(x, y - i, (int) powerDown);
             powerDown = damageTile(tile, powerDown);
+            powerDown = Math.max(0, powerDown - bomb.getPowerDropoff());
+
             if (powerDown == 0) {
                 break;
             }
         }
+    }
+
+    private void damagePlayers(int x, int y, int dmg) {
+        players.stream().filter(playerEntity ->
+            {
+                Vector2 playerPosition = playerEntity.getPosition();
+                return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
+            }
+        ).forEach(playerEntity -> playerEntity.subtractHp(dmg));
+        players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
+            playerEntity.markToRemove();
+            playerEntity.dispose();
+            onEntityRemoved(playerEntity);
+        });
     }
 
     /**
@@ -242,20 +274,15 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
      * @return The power left after the action
      */
     private float damageTile(Tile tile, float power) {
+        float remainingPower = power;
         if (tile instanceof WallTile) {
-            WallTile.Properties props = ((WallTile) tile).getProperties();
-            float durability = props.durability;
-            if (durability == WallTile.Properties.DURABILITY_INFINITE) {
-                return 0;
-            }
-
-            if (power >= durability) {
+            remainingPower = ((WallTile) tile).subtractDurability(power);
+            if (((WallTile) tile).isDestroyed()) {
                 destroyTile(tile);
-                return power - durability;
             }
         }
 
-        return power - WallTile.Properties.POWER_DROPOFF;
+        return remainingPower;
     }
 
     private void destroyTile(Tile tile) {

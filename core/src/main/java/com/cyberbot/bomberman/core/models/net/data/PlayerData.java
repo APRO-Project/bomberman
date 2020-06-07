@@ -9,11 +9,13 @@ import com.cyberbot.bomberman.core.models.items.Inventory;
 public class PlayerData extends EntityData<PlayerEntity> {
     private final int textureVariant;
     private final Inventory inventory;
+    private final int hp;
 
-    public PlayerData(long id, Vector2 position, Inventory inventory, int textureVariant) {
+    public PlayerData(long id, Vector2 position, Inventory inventory, int textureVariant, int hp) {
         super(id, position);
         this.textureVariant = textureVariant;
         this.inventory = inventory;
+        this.hp = hp;
     }
 
     public Inventory getInventory() {
@@ -22,9 +24,13 @@ public class PlayerData extends EntityData<PlayerEntity> {
 
     @Override
     public PlayerEntity createEntity(World world) {
-        PlayerDef def = new PlayerDef(textureVariant, inventory);
+        PlayerDef def = new PlayerDef(textureVariant, inventory, hp);
         PlayerEntity playerEntity = new PlayerEntity(world, def, id);
         playerEntity.setPosition(position.toVector2());
         return playerEntity;
+    }
+
+    public int getHp() {
+        return hp;
     }
 }

@@ -34,6 +34,19 @@ public class PlayerEntity extends Entity {
     private LookingDirection verticalDirection;
     private LookingDirection horizontalDirection;
 
+    private int hp;
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void addHp(int value) {
+        hp = Math.min(100, hp + value);
+    }
+
+    public void subtractHp(int value) {
+        hp = Math.max(0, hp - value);
+    }
 
     public PlayerEntity(World world, PlayerDef def, long id) {
         super(world, id);
@@ -46,6 +59,7 @@ public class PlayerEntity extends Entity {
         dragMultiplier = def.dragModifier;
         maxSpeedMultiplier = def.maxSpeedModifier;
         textureVariant = def.textureVariant;
+        hp = def.hp;
     }
 
     public void updateFromEnvironment(TileMap map) {
@@ -136,6 +150,10 @@ public class PlayerEntity extends Entity {
         fixture.setSensor(!enabled);
     }
 
+    public boolean isDead() {
+        return hp == 0;
+    }
+
     @Override
     public void createBody(World world) {
         BodyDef def = new BodyDef();
@@ -161,7 +179,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public PlayerData getData() {
-        return new PlayerData(id, getPosition(), inventory, textureVariant);
+        return new PlayerData(id, getPosition(), inventory, textureVariant, hp);
     }
 
     public enum PlayerState {
