@@ -36,6 +36,8 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     private String username;
     private String password;
 
+    private AbstractScreen currentScreen;
+
     public ScreenController(final Game game) {
         this(game, 8038);
     }
@@ -51,7 +53,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
         this.lobby = new LobbyScreen(this);
         this.login = new LoginScreen(this);
 
-        game.setScreen(login);
+        setScreen(login);
     }
 
     @Override
@@ -66,7 +68,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void leaveLobby() {
-        game.setScreen(menu);
+        setScreen(menu);
         controlService.sendPacket(new LobbyLeaveRequest());
     }
 
@@ -77,6 +79,12 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void login(String username, String password, String host) {
+
+        if (username.equals("")) {
+            showError("Nickname can't be empty");
+            return;
+        }
+
         try {
             serverAddress = Utils.parseServerString(host, defaultPort);
             controlService = new ControlService(serverAddress);
@@ -87,7 +95,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             this.password = password;
         } catch (URISyntaxException e) {
             Gdx.app.log("ControlService", "Invalid uri: " + e.getMessage());
-            login.showError("Login Unsuccessful");
+            showError("Login unsuccessful");
         }
     }
 
@@ -101,14 +109,14 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onConnectionError(@NotNull IOException e) {
         Gdx.app.log("ControlService", "Unable to connect: " + e.getMessage());
-        ((AbstractScreen) game.getScreen()).showError("No server connection");
+        showError("No server connection");
     }
 
     @Override
     public void onClientDisconnected() {
         Gdx.app.log("ControlService", "Disconnected");
-        Gdx.app.postRunnable(() -> game.setScreen(login));
-        ((AbstractScreen) game.getScreen()).showError("Client disconnected");
+        Gdx.app.postRunnable(() -> setScreen(login));
+        showError("Client disconnected");
     }
 
     @Override
@@ -117,10 +125,10 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             Long id = payload.getClient() != null ? payload.getClient().getId() : null;
             Gdx.app.log("ControlService", "Client registered, assigned id: " + id);
 
-            Gdx.app.postRunnable(() -> game.setScreen(menu));
+            Gdx.app.postRunnable(() -> setScreen(menu));
         } else {
             Gdx.app.log("ControlService", "Register failed");
-            ((AbstractScreen) game.getScreen()).showError("Failed to register");
+            showError("Failed to register");
         }
     }
 
@@ -130,17 +138,17 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             sendLobbyJoinRequest(payload.getId());
         } else {
             Gdx.app.log("ControlService", "Unable to create lobby");
-            ((AbstractScreen) game.getScreen()).showError("Failed to create lobby");
+            showError("Failed to create lobby");
         }
     }
 
     @Override
     public void onLobbyJoin(@NotNull LobbyJoinResponse payload) {
         if (payload.getSuccess() != null && payload.getSuccess()) { // No comment needed, one word - Java
-            Gdx.app.postRunnable(() -> game.setScreen(lobby));
+            Gdx.app.postRunnable(() -> setScreen(lobby));
         } else {
             Gdx.app.log("ControlService", "Unable to join lobby");
-            ((AbstractScreen) game.getScreen()).showError("Failed to join to lobby");
+            showError("Failed to join to lobby");
         }
     }
 
@@ -166,11 +174,11 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
                     "./map/bomberman_main.tmx",
                     new InetSocketAddress(serverAddress.getAddress(), payload.getPort())
                 );
-                game.setScreen(gameScreen);
+                setScreen(gameScreen);
 
             } catch (IOException | MissingLayersException | ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
-                ((AbstractScreen) game.getScreen()).showError("Failed to start game");
+                showError("Failed to start game");
             }
         });
     }
@@ -180,7 +188,16 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
         Gdx.app.log("ControlService", payload.getError());
     }
 
+    private void showError(String message) {
+        currentScreen.showError(message);
+    }
+
     private void sendLobbyJoinRequest(String lobbyId) {
         controlService.sendPacket(new LobbyJoinRequest(lobbyId));
+    }
+
+    private void setScreen(AbstractScreen screen) {
+        currentScreen = screen;
+        game.setScreen(screen);
     }
 }

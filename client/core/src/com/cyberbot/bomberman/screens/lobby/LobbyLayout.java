@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class LobbyLayout extends Stage {
 
     final Skin skin;
-    private final float spaceHeight = 0;
+    private final float spaceHeight = 14;
 
     private final Label[] playerLabels;
     private final LobbyInteraction delegate;
@@ -59,21 +59,23 @@ public class LobbyLayout extends Stage {
         Label title = new Label("Players", skin2);
         title.setWidth(tableWidth);
         title.setAlignment(1);
-        title.setFontScale(8);
+        title.setFontScale(1.5f);
         title.setWrap(false);
-        float playerLabelHeight = 150;
+        float playerLabelHeight = 6;
         ui.add(title).width(tableWidth).height(playerLabelHeight).row();
+        ui.add().height(spaceHeight * 2).row();
 
         for (int i = 0; i < 4; i++) {
             Label label = new Label("Empty", skin2);
             label.setWidth(tableWidth);
             label.setAlignment(1);
-            label.setFontScale(4);
+            label.setFontScale(1);
             label.setWrap(false);
             playerLabels[i] = label;
             ui.add(label).width(tableWidth).height(playerLabelHeight).row();
             ui.add().height(spaceHeight).row();
         }
+        ui.add().height(spaceHeight).row();
 
         Table ui3 = new Table();
         ui3.setDebug(false);
@@ -84,6 +86,7 @@ public class LobbyLayout extends Stage {
         addActor(ui3);
 
         TextButton leaveLobbyButton = new TextButton("Leave", skin2);
+        leaveLobbyButton.getLabel().setFontScale(0.85f);
         setupButton(ui3, tableWidth, leaveLobbyButton);
         leaveLobbyButton.addListener(new ClickListener() {
             @Override
@@ -101,6 +104,7 @@ public class LobbyLayout extends Stage {
         addActor(ui2);
 
         startGameButton = new TextButton("Start Game", skin2);
+        startGameButton.getLabel().setFontScale(0.85f);
         setupButton(ui2, tableWidth, startGameButton);
         startGameButton.addListener(new ClickListener() {
             @Override
@@ -112,19 +116,20 @@ public class LobbyLayout extends Stage {
 
         startGameButton.setVisible(false);
 
-        ui.add().height(30).row();
+        ui.add().height(6).row();
 
         Label lobbyIDText = new Label("Lobby ID", skin2);
         lobbyIDText.setWidth(tableWidth);
         lobbyIDText.setAlignment(1);
-        lobbyIDText.setFontScale(4);
+        lobbyIDText.setFontScale(1.2f);
         lobbyIDText.setWrap(false);
         ui.add(lobbyIDText).width(tableWidth).height(playerLabelHeight).row();
+        ui.add().height(spaceHeight * 2).row();
 
         lobbyId = new Label("", skin2);
         lobbyId.setWidth(tableWidth);
         lobbyId.setAlignment(1);
-        lobbyId.setFontScale(3);
+        lobbyId.setFontScale(1);
         lobbyId.setWrap(false);
         ui.add(lobbyId).width(tableWidth).height(playerLabelHeight).row();
     }
@@ -138,9 +143,8 @@ public class LobbyLayout extends Stage {
     }
 
     private void setupButton(Table table, float tableWidth, TextButton button) {
-        button.getLabel().setFontScale(4);
-        float buttonHeight = 150;
-        table.add(button).width(tableWidth - 50).height(buttonHeight).row();
+        float buttonHeight = 30;
+        table.add(button).width(tableWidth - 10).height(buttonHeight).row();
         table.add().height(spaceHeight).row();
     }
 
