@@ -35,7 +35,7 @@ public final class PlayerListView extends Table {
         int emptySlotIndex = -1;
 
         for(int i = 0; i < players.length; ++i) {
-            if(players[i] != null) {
+            if(players[i] == null) {
                 emptySlotIndex = i;
                 break;
             }
@@ -48,7 +48,7 @@ public final class PlayerListView extends Table {
 
         players[emptySlotIndex] = new ImmutablePair<>(name, id);
 
-        labels[emptySlotIndex].left.setText(String.valueOf(emptySlotIndex));
+        labels[emptySlotIndex].left.setText((emptySlotIndex + 1) + ".");
         labels[emptySlotIndex].right.setText(name);
     }
 
