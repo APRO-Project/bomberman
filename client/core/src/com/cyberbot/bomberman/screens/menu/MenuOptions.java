@@ -21,10 +21,9 @@ public class MenuOptions extends Stage {
         super(viewport);
         this.delegate = delegate;
         skin = new Skin(Gdx.files.internal("skins/clean-crispy/skin/clean-crispy-ui.json"));
-        skin.getFont("font").getData().setScale(5);
     }
 
-    private final float buttonHeight = 150;
+    private final float buttonHeight = 30;
 
     public void createMenuOptions() {
         Table options = new Table();
@@ -49,7 +48,15 @@ public class MenuOptions extends Stage {
         skin2.add("default_font", font);
         skin2.load(Gdx.files.internal("skins/skin.json"));
 
+        Label title = new Label("Boomerman", skin2);
+        title.setWidth(tableWidth);
+        title.setAlignment(1);
+        title.setFontScale(1.8f);
+        options.add(title).width(tableWidth).height(6).row();
+        options.add().height(30).row();
+
         TextButton createLobby = new TextButton("Create Lobby", skin2);
+        createLobby.getLabel().setFontScale(0.85f);
         setupButton(options, tableWidth, createLobby);
         createLobby.addListener(new ClickListener() {
             @Override
@@ -59,6 +66,7 @@ public class MenuOptions extends Stage {
         });
 
         TextButton joinLobby = new TextButton("Join Lobby", skin2);
+        joinLobby.getLabel().setFontScale(0.85f);
         setupButton(options, tableWidth, joinLobby);
         joinLobby.addListener(new ClickListener() {
             @Override
@@ -75,9 +83,8 @@ public class MenuOptions extends Stage {
     }
 
     private void setupButton(Table table, float tableWidth, TextButton button) {
-        button.getLabel().setFontScale(4);
         table.add(button).width(tableWidth).height(buttonHeight).row();
-        float spaceHeight = 10;
+        float spaceHeight = 2;
         table.add().height(spaceHeight).row();
     }
 

@@ -23,8 +23,8 @@ public class MenuScreen extends AbstractScreen {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
 
-        camera.setToOrtho(false, 1920, 1080);
-        viewport = new FitViewport(1920, 1080);
+        camera.setToOrtho(false, 384, 216);
+        viewport = new FitViewport(384, 216);
         background = new Texture("./textures/menu_bg.png");
 
         menuOptions = new MenuOptions(viewport, delegate);
@@ -54,7 +54,7 @@ public class MenuScreen extends AbstractScreen {
         super.render(delta);
 
         batch.begin();
-        batch.draw(background, 0 ,0,1920f,1080f);
+        batch.draw(background, 0, 0, 384, 216);
         batch.end();
         menuOptions.draw();
 

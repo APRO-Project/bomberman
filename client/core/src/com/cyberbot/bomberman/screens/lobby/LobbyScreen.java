@@ -20,8 +20,8 @@ public class LobbyScreen extends AbstractScreen {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
 
-        camera.setToOrtho(false, 1920, 1080);
-        viewport = new FitViewport(1920, 1080);
+        camera.setToOrtho(false, 384, 216);
+        viewport = new FitViewport(384, 216);
 
         lobbyLayout = new LobbyLayout(viewport, delegate);
     }

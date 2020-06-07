@@ -77,6 +77,12 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void login(String username, String password, String host) {
+
+        if (username.equals("")) {
+            ((AbstractScreen) game.getScreen()).showError("Nickname can't be empty");
+            return;
+        }
+
         try {
             serverAddress = Utils.parseServerString(host, defaultPort);
             controlService = new ControlService(serverAddress);
@@ -87,7 +93,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             this.password = password;
         } catch (URISyntaxException e) {
             Gdx.app.log("ControlService", "Invalid uri: " + e.getMessage());
-            login.showError("Login Unsuccessful");
+            ((AbstractScreen) game.getScreen()).showError("Login unsuccessful");
         }
     }
 
