@@ -64,17 +64,10 @@ class ClientControlService(private val clientSocket: Socket, private val control
             val packet: ControlPacket? = gson.fromJsonOrNull(reader)
 
             if (client == null && packet !is ClientRegisterRequest) {
-                ErrorResponse("First packet should be a register packet")
+                sendPacket(ErrorResponse("First packet should be a register packet"))
             }
 
-            // TODO: Should be a single interface method with when in the delegate
-            when (packet) {
-                is ClientRegisterRequest -> controller.onClientRegister(packet, this)
-                is LobbyCreateRequest -> controller.onLobbyCreate(packet, this)
-                is LobbyJoinRequest -> controller.onLobbyJoin(packet, this)
-                is LobbyLeaveRequest -> controller.onLobbyLeave(this)
-                is GameStartRequest -> controller.onGameStart(packet, this)
-            }
+            packet?.let { controller.onPacket(it, this) }
         } catch (e: JsonSyntaxException) {
             // This cursed shenanigans are required,
             // because Gson catches the IOException and rethrows as JsonSyntaxException
