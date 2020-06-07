@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO: Add tiles
 public class GameSnapshot implements Serializable {
     private final Map<Long, EntityData<?>> entities;
     private final Map<Integer, WallTileData> walls;

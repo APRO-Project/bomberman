@@ -1,9 +1,11 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.control
 
 import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
+import com.cyberbot.bomberman.server.session.Session
+import com.cyberbot.bomberman.server.session.SessionService
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -15,7 +17,8 @@ class ServerService(
     private val port: Int,
     private val maxLobbyCount: Int = 5,
     private val lobbyIdLength: Int = 5,
-    private val maxPlayersPerLobby: Int = 4
+    private val maxPlayersPerLobby: Int = 4,
+    private val maxPlayerNickLength: Int = 20
 ) : ClientController, Runnable, Logging {
     private val sessions = HashMap<String, SessionService>()
     private val clientHandlers = HashMap<Client, ClientControlService>()
@@ -43,11 +46,28 @@ class ServerService(
         }
     }
 
-    override fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
+    override fun onPacket(payload: ControlPacket, service: ClientControlService) {
+        when (payload) {
+            is ClientRegisterRequest -> onClientRegister(payload, service)
+            is LobbyCreateRequest -> onLobbyCreate(payload, service)
+            is LobbyJoinRequest -> onLobbyJoin(payload, service)
+            is LobbyLeaveRequest -> onLobbyLeave(service)
+            is GameStartRequest -> onGameStart(payload, service)
+            else -> logger.error { "Unsupported packet type ${payload.javaClass.simpleName}" }
+        }
+    }
+
+    override fun onClientDisconnected(service: ClientControlService) {
+        logger.info { "Client disconnected: ${service.client?.id}" }
+        clientHandlers.remove(service.client)
+        removeClientFromLobby(service.client)
+    }
+
+    private fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
         service.apply {
             logger.debug { "Client register request: ${request.nick}" }
             val nick = request.nick
-            if (nick == null) {
+            if (nick == null || nick.isBlank() || nick.length > maxPlayerNickLength) {
                 sendPacket(ClientRegisterResponse(false))
                 return
             }
@@ -74,7 +94,7 @@ class ServerService(
         }
     }
 
-    override fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
+    private fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
         service.apply {
             if (lobbies.size < maxLobbyCount) {
                 val lobby = createLobby(client!!)
@@ -91,10 +111,10 @@ class ServerService(
         }
     }
 
-    override fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
+    private fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
         service.apply {
             val lobby = lobbies[request.id]
-            if (lobby == null) {
+            if (lobby == null || lobby.locked) {
                 sendPacket(LobbyJoinResponse(false))
                 return
             }
@@ -113,11 +133,11 @@ class ServerService(
         }
     }
 
-    override fun onLobbyLeave(service: ClientControlService) {
+    private fun onLobbyLeave(service: ClientControlService) {
         removeClientFromLobby(service.client)
     }
 
-    override fun onGameStart(request: GameStartRequest, service: ClientControlService) {
+    private fun onGameStart(request: GameStartRequest, service: ClientControlService) {
         val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
@@ -132,16 +152,11 @@ class ServerService(
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
-            clientHandlers[c]!!.sendPacket(GameStart(session.port, data))
+            clientHandlers[c]!!.sendPacket(GameStart(session.port, data, lobby))
         }
+        lobby.locked = true
 
         Thread(session, "Session Thread - ${session.port}").start()
-    }
-
-    override fun onClientDisconnected(service: ClientControlService) {
-        logger.info { "Client disconnected: ${service.client?.id}" }
-        clientHandlers.remove(service.client)
-        removeClientFromLobby(service.client)
     }
 
     private fun removeClientFromLobby(client: Client?) {
@@ -166,7 +181,7 @@ class ServerService(
     }
 
     private fun notifyLobbyChange(lobby: Lobby) {
-        val strippedLobby = Lobby.stripIds(lobby)
+        val strippedLobby = Lobby.stripPasswords(lobby)
         val lobbyUpdate = LobbyUpdate(strippedLobby, false)
 
         lobby.clients
