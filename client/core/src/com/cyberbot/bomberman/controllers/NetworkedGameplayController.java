@@ -7,17 +7,14 @@ import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
-import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.net.NetService;
 import com.cyberbot.bomberman.screens.hud.GameHud;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -47,8 +44,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private final GameHud hud;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection, GameHud hud)
-        throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
+    public NetworkedGameplayController(PlayerData player, String mapPath,
+                                       SocketAddress connection, GameHud hud)
+        throws MapLoadException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
         world = new World(new Vector2(0, 0), false);

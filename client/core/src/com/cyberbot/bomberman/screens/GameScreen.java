@@ -7,12 +7,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
-import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.screens.hud.GameHud;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.net.SocketAddress;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -30,8 +27,9 @@ public class GameScreen extends AbstractScreen {
 
     private final NetworkedGameplayController gameplayController;
 
-    public GameScreen(final PlayerData playerData, final String mapPath, final SocketAddress serverAddress)
-        throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
+    public GameScreen(final PlayerData playerData,
+                      final String mapPath, final SocketAddress serverAddress)
+        throws MapLoadException {
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
