@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.controllers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -22,6 +21,8 @@ import java.net.SocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
@@ -40,6 +41,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private final World world;
 
+    private final ReentrantLock worldUpdateLock;
+    private final Condition worldUpdatedCondition;
+
     public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
@@ -57,6 +61,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         netService = new NetService(connection, worldController);
         new Thread(netService).start();
 
+        worldUpdateLock = new ReentrantLock();
+        worldUpdatedCondition = worldUpdateLock.newCondition();
+
         snapshotService = new ScheduledThreadPoolExecutor(1);
         snapshotService.scheduleAtFixedRate(this::createAndSendSnapshot,
             0, 1_000_000 / TICK_RATE, TimeUnit.MICROSECONDS);
@@ -68,7 +75,14 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     @Override
     public void update(float delta) {
-        worldController.update(delta);
+        try {
+            worldUpdateLock.lock();
+            worldController.update(delta);
+            worldUpdatedCondition.signalAll();
+        } finally {
+            worldUpdateLock.unlock();
+        }
+
         textureController.update(delta);
     }
 
@@ -91,12 +105,16 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private void createAndSendSnapshot() {
         try {
+            try {
+                worldUpdateLock.lock();
+                worldUpdatedCondition.await();
+            } finally {
+                worldUpdateLock.unlock();
+            }
+
             netService.sendPlayerSnapshot(worldController.createSnapshot());
-        } catch (Exception e) {
-            // Exceptions thrown in ScheduledThreadPoolExecutor have to be rethrown in the main thread
-            Gdx.app.postRunnable(() -> {
-                throw e;
-            });
+        } catch (Exception ignored) {
+
         }
     }
 }
