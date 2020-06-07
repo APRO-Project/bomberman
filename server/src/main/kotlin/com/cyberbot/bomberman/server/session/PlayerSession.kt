@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.session
 
 import com.cyberbot.bomberman.core.controllers.PlayerActionController
 import com.cyberbot.bomberman.core.models.Updatable

@@ -1,8 +1,9 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.session
 
 import com.cyberbot.bomberman.core.models.net.SerializationUtils
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
+import com.cyberbot.bomberman.server.models.ClientConnection
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.DatagramPacket
@@ -19,7 +20,8 @@ class SessionService(port: Int = 0, private val bufferSize: Int = 4096) : GameSo
 
     @Volatile
     private var running = false
-    private val session: Session = Session(this)
+    private val session: Session =
+        Session(this)
 
     fun addClient(clientId: Long, playerData: PlayerData) {
         check(!session.gameStarted) { "The game has already been started, unable to add clients." }

@@ -10,12 +10,14 @@ open class ControlPacket
 
 class Client(val id: Long? = null, val nick: String? = null, val password: String? = null)
 class Lobby(val id: String? = null, var ownerId: Long? = null, clients: List<Client> = ArrayList()) {
+    @Transient
+    var locked = false
     val clients = ArrayList(clients)
 
     companion object {
-        fun stripIds(lobby: Lobby): Lobby {
-            val clients = lobby.clients.map { Client(nick = it.nick) }
-            return Lobby(id = lobby.id, clients = clients)
+        fun stripPasswords(lobby: Lobby): Lobby {
+            val clients = lobby.clients.map { Client(it.id, it.nick) }
+            return Lobby(lobby.id, lobby.ownerId, clients)
         }
     }
 }
@@ -35,7 +37,7 @@ class GameStartRequest : ControlPacket()
 
 class LobbyUpdate(val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) : ControlPacket()
 
-class GameStart(val port: Int, val playerInit: PlayerData) : ControlPacket()
+class GameStart(val port: Int? = null, val playerInit: PlayerData? = null, val lobby: Lobby = Lobby()) : ControlPacket()
 
 class ErrorResponse(val error: String? = null) : ControlPacket()
 

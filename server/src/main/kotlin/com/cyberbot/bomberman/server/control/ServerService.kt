@@ -1,9 +1,11 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.control
 
 import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
+import com.cyberbot.bomberman.server.session.Session
+import com.cyberbot.bomberman.server.session.SessionService
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -15,7 +17,8 @@ class ServerService(
     private val port: Int,
     private val maxLobbyCount: Int = 5,
     private val lobbyIdLength: Int = 5,
-    private val maxPlayersPerLobby: Int = 4
+    private val maxPlayersPerLobby: Int = 4,
+    private val maxPlayerNickLength: Int = 20
 ) : ClientController, Runnable, Logging {
     private val sessions = HashMap<String, SessionService>()
     private val clientHandlers = HashMap<Client, ClientControlService>()
@@ -47,7 +50,7 @@ class ServerService(
         service.apply {
             logger.debug { "Client register request: ${request.nick}" }
             val nick = request.nick
-            if (nick == null) {
+            if (nick == null || nick.isBlank() || nick.length > maxPlayerNickLength) {
                 sendPacket(ClientRegisterResponse(false))
                 return
             }
@@ -94,7 +97,7 @@ class ServerService(
     override fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
         service.apply {
             val lobby = lobbies[request.id]
-            if (lobby == null) {
+            if (lobby == null || lobby.locked) {
                 sendPacket(LobbyJoinResponse(false))
                 return
             }
@@ -128,12 +131,16 @@ class ServerService(
 
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
-            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i)
+            val data = PlayerData(
+                id,
+                Session.getPlayerSpawnPosition(i), Inventory(), i
+            )
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
-            clientHandlers[c]!!.sendPacket(GameStart(session.port, data))
+            clientHandlers[c]!!.sendPacket(GameStart(session.port, data, lobby))
         }
+        lobby.locked = true
 
         Thread(session, "Session Thread - ${session.port}").start()
     }
@@ -166,7 +173,7 @@ class ServerService(
     }
 
     private fun notifyLobbyChange(lobby: Lobby) {
-        val strippedLobby = Lobby.stripIds(lobby)
+        val strippedLobby = Lobby.stripPasswords(lobby)
         val lobbyUpdate = LobbyUpdate(strippedLobby, false)
 
         lobby.clients

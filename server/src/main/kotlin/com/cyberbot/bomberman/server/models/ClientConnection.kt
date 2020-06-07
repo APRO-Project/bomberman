@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.models
 
 import java.net.DatagramPacket
 import java.net.InetAddress
