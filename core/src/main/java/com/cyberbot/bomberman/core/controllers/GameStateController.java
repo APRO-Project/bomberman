@@ -263,16 +263,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
      */
     private float damageTile(Tile tile, float power) {
         if (tile instanceof WallTile) {
-            WallTile.Properties props = ((WallTile) tile).getProperties();
-            float durability = props.durability;
-            if (durability == WallTile.Properties.DURABILITY_INFINITE) {
-                return 0;
-            }
-
-            if (power >= durability) {
+            float remainingPower = ((WallTile) tile).subtractDurability(power);
+            if (((WallTile) tile).isDestroyed()) {
                 destroyTile(tile);
-                return power - durability;
             }
+            return remainingPower;
         }
 
         return power - WallTile.Properties.POWER_DROPOFF;

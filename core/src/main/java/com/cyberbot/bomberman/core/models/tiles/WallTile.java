@@ -15,10 +15,12 @@ import java.util.InvalidPropertiesFormatException;
  */
 public class WallTile extends PhysicalTile {
     private final Properties properties;
+    private float durability;
 
     public WallTile(World world, String textureName, Properties properties, int x, int y) {
         super(world, textureName, x, y);
         this.properties = properties;
+        this.durability = properties.durability;
     }
 
     @Override
@@ -36,6 +38,20 @@ public class WallTile extends PhysicalTile {
         return new WallTileData(x, y, textureName, properties);
     }
 
+    public float subtractDurability(float power) {
+        if (durability == Properties.DURABILITY_INFINITE) {
+            return 0;
+        }
+
+        float remainingPower = Math.max(0, power - durability);
+        durability = Math.max(0, durability - power);
+        return remainingPower;
+    }
+
+    public boolean isDestroyed() {
+        return durability == 0;
+    }
+
     public Properties getProperties() {
         return properties;
     }
@@ -45,7 +61,7 @@ public class WallTile extends PhysicalTile {
      */
     public static class Properties implements Serializable {
         public static final float DURABILITY_INFINITE = -1;
-        public static final float POWER_DROPOFF = 0.5f; // TODO: Move the property to the bomb entity
+        public static final float POWER_DROPOFF = 5f; // TODO: Move the property to the bomb entity
 
         static final String DURABILITY = "durability";
 
