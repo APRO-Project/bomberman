@@ -97,7 +97,7 @@ class ServerService(
     override fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
         service.apply {
             val lobby = lobbies[request.id]
-            if (lobby == null) {
+            if (lobby == null || lobby.locked) {
                 sendPacket(LobbyJoinResponse(false))
                 return
             }
@@ -138,8 +138,9 @@ class ServerService(
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
-            clientHandlers[c]!!.sendPacket(GameStart(session.port, data))
+            clientHandlers[c]!!.sendPacket(GameStart(session.port, data, lobby))
         }
+        lobby.locked = true
 
         Thread(session, "Session Thread - ${session.port}").start()
     }
