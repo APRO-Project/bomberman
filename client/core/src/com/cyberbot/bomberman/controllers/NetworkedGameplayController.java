@@ -6,14 +6,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
-import com.cyberbot.bomberman.core.controllers.PlayerActionController;
-import com.cyberbot.bomberman.core.controllers.PlayerStateQueue;
-import com.cyberbot.bomberman.core.controllers.SnapshotQueue;
-import com.cyberbot.bomberman.core.models.PlayerState;
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
-import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
@@ -33,17 +27,12 @@ import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable {
-    private final PlayerEntity localPlayer;
-
     private final TextureController textureController;
     private final InputController inputController;
-    private final PlayerActionController playerActionController;
 
     private final LocalWorldController worldController;
     private final TileMap map;
 
-    private final SnapshotQueue snapshotQueue;
-    private final PlayerStateQueue playerStateQueue;
     private final NetService netService;
 
     private final ScheduledExecutorService snapshotService;
@@ -55,21 +44,13 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
         World world = new World(new Vector2(0, 0), false);
         map = TileMapFactory.createTileMap(world, mapPath);
-        localPlayer = player.createEntity(world);
         textureController = new TextureController(map);
 
-        snapshotQueue = new SnapshotQueue(player.getId(), 100);
-        playerStateQueue = new PlayerStateQueue(100);
-        playerActionController = new PlayerActionController(localPlayer);
+        worldController = new LocalWorldController(world, TICK_RATE, player);
+        worldController.addListener(textureController, true);
 
         inputController = new InputController(binds);
-        inputController.addActionController(snapshotQueue);
-        inputController.addActionController(playerActionController);
-
-        worldController = new LocalWorldController(world, TICK_RATE, snapshotQueue, playerStateQueue, localPlayer);
-        worldController.addListener(textureController);
-
-        textureController.onEntityAdded(localPlayer);
+        inputController.addActionController(worldController);
 
         netService = new NetService(connection, worldController);
         new Thread(netService).start();
@@ -86,7 +67,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     @Override
     public void update(float delta) {
-        playerActionController.update(delta);
         worldController.update(delta);
         textureController.update(delta);
     }
@@ -106,17 +86,12 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private void createAndSendSnapshot() {
         try {
-            PlayerSnapshotPacket packet = snapshotQueue.createSnapshot();
-            PlayerState state = new PlayerState(
-                snapshotQueue.getLatestSequence(),
-                localPlayer.getPosition(),
-                localPlayer.getVelocity());
-
-            playerStateQueue.addState(state);
-
-            netService.sendPlayerSnapshot(packet);
+            netService.sendPlayerSnapshot(worldController.createSnapshot());
         } catch (Exception e) {
-            Gdx.app.log("Exception", e.toString());
+            // Exceptions thrown in ScheduledThreadPoolExecutor have to be rethrown in the main thread
+            Gdx.app.postRunnable(() -> {
+                throw e;
+            });
         }
     }
 }

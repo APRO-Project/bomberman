@@ -22,16 +22,22 @@ import java.util.stream.Collectors;
 
 import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 
-public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener {
+public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener, ActionListener {
     private final int tickRate;
     private final int interpolationDelay = 3;
     private final float replyInterTime = 0.05f;
     private final float maxPlayerOffset = 0.15f;
+
     private final World world;
     private final Map<Long, Entity> entities;
+
     private final Queue<GameSnapshotPacket> gameSnapshots;
-    private final SnapshotQueue interactionQueue;
+
+    private final PlayerActionController playerActionController;
+    private final SnapshotQueue snapshotQueue;
     private final PlayerStateQueue playerStateQueue;
+    private final PlayerEntity localPlayer;
+
     private final List<WorldChangeListener> listeners;
 
     /**
@@ -47,7 +53,6 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
      */
     private GameSnapshotPacket newestPacket;
 
-    private PlayerEntity localPlayer;
 
     private int snapshotLength;
     private float interpFraction;
@@ -56,13 +61,19 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private PlayerData playerToInterpEnd;
     private float replayInterpFraction;
 
-    public LocalWorldController(World world, int tickRate, SnapshotQueue interactionQueue,
-                                PlayerStateQueue playerStateQueue, PlayerEntity localPlayer) {
+    public LocalWorldController(World world, int tickRate, PlayerData playerData) {
+        this(world, tickRate, playerData, tickRate * 4);
+    }
+
+    public LocalWorldController(World world, int tickRate, PlayerData playerData, int bufferSize) {
         this.tickRate = tickRate;
         this.world = world;
-        this.interactionQueue = interactionQueue;
-        this.playerStateQueue = playerStateQueue;
-        this.localPlayer = localPlayer;
+        this.localPlayer = playerData.createEntity(world);
+
+        this.playerActionController = new PlayerActionController(localPlayer);
+        this.snapshotQueue = new SnapshotQueue(localPlayer.getId(), bufferSize);
+        this.playerStateQueue = new PlayerStateQueue(bufferSize);
+
         this.entities = new HashMap<>();
         this.gameSnapshots = new ArrayDeque<>();
         this.listeners = new ArrayList<>();
@@ -74,6 +85,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     @Override
     public void update(float delta) {
+        playerActionController.update(delta);
+
         world.step(delta, 6, 2);
 
         // Update all entities
@@ -93,8 +106,36 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         interpolate(delta);
     }
 
+    @Override
+    public void onActions(List<Action> actions) {
+        playerActionController.onActions(actions);
+        snapshotQueue.onActions(actions);
+    }
+
+    @Override
+    public void onNewSnapshot(GameSnapshotPacket packet) {
+        gameSnapshots.add(packet);
+        newestPacket = packet;
+    }
+
+    @Override
+    public void dispose() {
+        entities.values().forEach(Entity::dispose);
+        localPlayer.dispose();
+        world.dispose();
+    }
+
+
     public void addListener(WorldChangeListener listener) {
+        addListener(listener, false);
+    }
+
+    public void addListener(WorldChangeListener listener, boolean sendExisting) {
         listeners.add(listener);
+        if (sendExisting) {
+            listener.onEntityAdded(localPlayer);
+            entities.values().forEach(listener::onEntityAdded);
+        }
     }
 
     public void removeListener(WorldChangeListener listener) {
@@ -103,6 +144,18 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     public void clearListeners() {
         listeners.clear();
+    }
+
+    public PlayerSnapshotPacket createSnapshot() {
+        PlayerSnapshotPacket packet = snapshotQueue.createSnapshot();
+        PlayerState state = new PlayerState(
+            snapshotQueue.getLatestSequence(),
+            localPlayer.getPosition(),
+            localPlayer.getVelocity());
+
+        playerStateQueue.addState(state);
+
+        return packet;
     }
 
     private void interpolate(float delta) {
@@ -186,7 +239,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         simulatedPlayer.setVelocity(startVelocity);
         PlayerActionController movementController = new PlayerActionController(simulatedPlayer);
         playerStateQueue.clear();
-        for (PlayerSnapshotPacket packet : interactionQueue) {
+        for (PlayerSnapshotPacket packet : snapshotQueue) {
             for (List<Action> actions : packet.getSnapshot().actions) {
                 float delta = 1f / SIM_RATE;
                 movementController.onActions(actions);
@@ -213,7 +266,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     /**
-     * Applies a given snapshot to the current Box2D world by adding, updating and removing entities as needed.
+     * Applies a given snapshot to the current Box2D world by adding,
+     * updating and removing entities and tiles as needed.
      * <p>
      * Requires the Box2D world to not be locked, so it has to be called during an update
      * and not asynchronously.
@@ -225,7 +279,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
      */
     private void applySnapshot(GameSnapshot snapshot) {
         if (world.isLocked()) {
-            throw new ConcurrentModificationException("Cannot rollback while world is locked");
+            throw new ConcurrentModificationException("Cannot apply snapshot while world is locked");
         }
 
         List<Entity> removed = getRemovedEntities(snapshot);
@@ -286,7 +340,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             validatePlayerPosition(localState, packet.getSnapshot());
         }
 
-        interactionQueue.removeUntil(sequence);
+        snapshotQueue.removeUntil(sequence);
     }
 
     private void validatePlayerPosition(@NotNull PlayerState localState, @NotNull GameSnapshot remoteSnapshot) {
@@ -300,19 +354,6 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
                 playerToInterpEnd = replayMovement(remotePlayer, localState.velocity);
                 replayInterpFraction = 0;
             }
-
-            int a = 0;
         }
-    }
-
-    @Override
-    public void onNewSnapshot(GameSnapshotPacket packet) {
-        gameSnapshots.add(packet);
-        newestPacket = packet;
-    }
-
-    @Override
-    public void dispose() {
-        world.dispose();
     }
 }
