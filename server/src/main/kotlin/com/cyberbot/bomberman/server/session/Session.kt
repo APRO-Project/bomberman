@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.session
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
@@ -9,6 +9,7 @@ import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
+import com.cyberbot.bomberman.server.models.ClientConnection
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.DatagramPacket
@@ -66,6 +67,7 @@ class Session(private val socket: GameSocket) {
         worldUpdateLock.withLock {
             worldUpdatedCondition.await()
         }
+
         for ((session, packet) in getUpdatePackets()) {
             try {
                 socket.send(packet)

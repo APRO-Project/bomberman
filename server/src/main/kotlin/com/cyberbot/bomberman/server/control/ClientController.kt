@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.control
 
 import com.cyberbot.bomberman.core.models.net.packets.ClientRegisterRequest
 import com.cyberbot.bomberman.core.models.net.packets.GameStartRequest

@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.control
 
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.fromJsonOrNull

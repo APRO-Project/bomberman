@@ -1,4 +1,4 @@
-package com.cyberbot.bomberman.server
+package com.cyberbot.bomberman.server.session
 
 import java.io.IOException
 import java.net.DatagramPacket
