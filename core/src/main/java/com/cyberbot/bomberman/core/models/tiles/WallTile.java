@@ -61,7 +61,6 @@ public class WallTile extends PhysicalTile {
      */
     public static class Properties implements Serializable {
         public static final float DURABILITY_INFINITE = -1;
-        public static final float POWER_DROPOFF = 5f; // TODO: Move the property to the bomb entity
 
         static final String DURABILITY = "durability";
 

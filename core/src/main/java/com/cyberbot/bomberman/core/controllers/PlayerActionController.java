@@ -56,7 +56,7 @@ public final class PlayerActionController implements ActionListener, Updatable {
         switch (itemType) {
             case SMALL_BOMB:
                 // TODO: Load a proper texture variant
-                BombDef def = new BombDef(10, 2, 3, player.getTextureVariant());
+                BombDef def = new BombDef(10, 5, 2, 3, player.getTextureVariant());
                 listeners.forEach(l -> l.onBombPlaced(def, player));
         }
     }
