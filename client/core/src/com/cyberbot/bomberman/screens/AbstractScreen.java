@@ -8,6 +8,8 @@ public abstract class AbstractScreen implements Screen {
 
     public abstract void update(float delta);
 
+    public abstract void showError(String msg);
+
     @Override
     public void render(float delta) {
         update(delta);

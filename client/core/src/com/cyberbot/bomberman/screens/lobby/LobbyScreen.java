@@ -39,6 +39,11 @@ public class LobbyScreen extends AbstractScreen {
     }
 
     @Override
+    public void showError(String msg) {
+        lobbyLayout.showError(msg);
+    }
+
+    @Override
     public void show() {
         Gdx.input.setInputProcessor(lobbyLayout);
         lobbyLayout.createLobbyUi();

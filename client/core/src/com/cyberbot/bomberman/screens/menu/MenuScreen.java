@@ -40,6 +40,11 @@ public class MenuScreen extends AbstractScreen {
     }
 
     @Override
+    public void showError(String msg) {
+        menuOptions.showError(msg);
+    }
+
+    @Override
     public void show() {
         Gdx.input.setInputProcessor(menuOptions);
     }

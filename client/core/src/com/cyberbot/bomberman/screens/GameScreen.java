@@ -60,6 +60,11 @@ public class GameScreen extends AbstractScreen {
     }
 
     @Override
+    public void showError(String msg) {
+
+    }
+
+    @Override
     public void render(float delta) {
         super.render(delta);
 
