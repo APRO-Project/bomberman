@@ -8,6 +8,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.tiles.FloorTile;
+import com.cyberbot.bomberman.core.models.tiles.Tile;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -21,8 +24,8 @@ public class PlayerEntity extends Entity {
     private final int textureVariant;
     private final Inventory inventory;
 
-    private float dragModifier;
-    private float maxSpeedModifier;
+    private float dragMultiplier;
+    private float maxSpeedMultiplier;
 
     private PlayerState currentState;
     private PlayerState previousState;
@@ -39,25 +42,33 @@ public class PlayerEntity extends Entity {
         verticalDirection = LookingDirection.RIGHT;
         horizontalDirection = null;
         inventory = def.inventory;
-        dragModifier = def.dragModifier;
-        maxSpeedModifier = def.maxSpeedModifier;
+        dragMultiplier = def.dragModifier;
+        maxSpeedMultiplier = def.maxSpeedModifier;
         textureVariant = def.textureVariant;
     }
 
-    public float getDragModifier() {
-        return dragModifier;
+    public void updateFromEnvironment(TileMap map) {
+        Vector2 position = getPosition();
+        int x = (int) Math.floor(position.x);
+        int y = (int) Math.floor(position.y);
+
+        Tile tile = map.getFloor().getTile(x, y);
+        if (tile instanceof FloorTile) {
+            FloorTile.Properties properties = ((FloorTile) tile).getProperties();
+            dragMultiplier = properties.dragMultiplier;
+            maxSpeedMultiplier = properties.maxSpeedMultiplier;
+        } else {
+            dragMultiplier = 1;
+            maxSpeedMultiplier = 1;
+        }
     }
 
-    public void setDragModifier(float dragModifier) {
-        this.dragModifier = dragModifier;
+    public float getDragMultiplier() {
+        return dragMultiplier;
     }
 
-    public float getMaxSpeedModifier() {
-        return maxSpeedModifier * inventory.getMovementSpeedMultiplier();
-    }
-
-    public void setMaxSpeedModifier(float maxSpeedModifier) {
-        this.maxSpeedModifier = maxSpeedModifier;
+    public float getMaxSpeedMultiplier() {
+        return maxSpeedMultiplier * inventory.getMovementSpeedMultiplier();
     }
 
     public int getTextureVariant() {

@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.cyberbot.bomberman.core.models.net.data.PhysicalTileData;
 
 /**
  * An abstract base class for tiles that should contain a Box2D body.
@@ -30,6 +31,8 @@ public abstract class PhysicalTile extends Tile implements Disposable {
      * Implementations of this method should create an appropriate fixture and assign it to the body.
      */
     protected abstract void createFixture();
+
+    public abstract PhysicalTileData<?> getData();
 
     @Override
     public void dispose() {

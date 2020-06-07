@@ -11,10 +11,14 @@ import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.GameSnapshotListener;
 import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.EntityDataPair;
+import com.cyberbot.bomberman.core.models.net.data.PhysicalTileData;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
+import com.cyberbot.bomberman.core.models.tiles.PhysicalTile;
+import com.cyberbot.bomberman.core.models.tiles.Tile;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -26,10 +30,12 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private final int tickRate;
     private final int interpolationDelay = 3;
     private final float replyInterTime = 0.05f;
-    private final float maxPlayerOffset = 0.15f;
+    private final float maxPlayerOffset = 0.2f;
 
     private final World world;
-    private final Map<Long, Entity> entities;
+    private final TileMap map;
+    private final HashMap<Long, Entity> entities;
+    private final HashMap<Integer, PhysicalTile> walls;
 
     private final Queue<GameSnapshotPacket> gameSnapshots;
 
@@ -61,13 +67,14 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private PlayerData playerToInterpEnd;
     private float replayInterpFraction;
 
-    public LocalWorldController(World world, int tickRate, PlayerData playerData) {
-        this(world, tickRate, playerData, tickRate * 4);
+    public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData) {
+        this(world, map, tickRate, playerData, tickRate * 4);
     }
 
-    public LocalWorldController(World world, int tickRate, PlayerData playerData, int bufferSize) {
+    public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData, int bufferSize) {
         this.tickRate = tickRate;
         this.world = world;
+        this.map = map;
         this.localPlayer = playerData.createEntity(world);
 
         this.playerActionController = new PlayerActionController(localPlayer);
@@ -75,6 +82,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         this.playerStateQueue = new PlayerStateQueue(bufferSize);
 
         this.entities = new HashMap<>();
+        this.walls = map.getWalls().stream()
+            .filter(it -> it instanceof PhysicalTile)   /* Y U do dis Java... */
+            .collect(Collectors.toMap(Tile::hashCode, it -> (PhysicalTile) it, (prev, next) -> next, HashMap::new));
+
         this.gameSnapshots = new ArrayDeque<>();
         this.listeners = new ArrayList<>();
         this.interpFraction = 0;
@@ -85,9 +96,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     @Override
     public void update(float delta) {
+        world.step(delta, 6, 2);
         playerActionController.update(delta);
 
-        world.step(delta, 6, 2);
+        localPlayer.updateFromEnvironment(map);
 
         // Update all entities
         entities.forEach((key, entity) -> entity.update(delta));
@@ -282,6 +294,12 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             throw new ConcurrentModificationException("Cannot apply snapshot while world is locked");
         }
 
+        applySnapshotToEntities(snapshot);
+
+        applySnapshotToWalls(snapshot);
+    }
+
+    private void applySnapshotToEntities(GameSnapshot snapshot) {
         List<Entity> removed = getRemovedEntities(snapshot);
         List<EntityData<?>> added = getAddedEntityData(snapshot);
         List<EntityDataPair> updated = getUpdatedEntities(snapshot);
@@ -307,6 +325,25 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         listeners.forEach(l -> createdEntities.forEach(l::onEntityAdded));
     }
 
+    private void applySnapshotToWalls(GameSnapshot snapshot) {
+        List<PhysicalTile> removed = getRemovedWalls(snapshot);
+        List<PhysicalTileData<?>> added = getAddedWallData(snapshot);
+
+        removed.forEach(it -> {
+            walls.remove(it.hashCode());
+            map.removeWall(it.getX(), it.getY());
+        });
+
+        List<PhysicalTile> createdTiles = added.stream()
+            .map(it -> it.createTile(world))
+            .collect(Collectors.toList());
+
+        createdTiles.forEach(it -> {
+            walls.put(it.hashCode(), it);
+            map.addWall(it);
+        });
+    }
+
     private List<Entity> getRemovedEntities(GameSnapshot snapshot) {
         return entities.entrySet().stream()
             .filter(it -> !snapshot.hasEntity(it.getKey()))
@@ -327,6 +364,22 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             .map(it -> new EntityDataPair(entities.get(it.getKey()), it.getValue()))
             .collect(Collectors.toList());
     }
+
+    private List<PhysicalTile> getRemovedWalls(GameSnapshot snapshot) {
+        return walls.entrySet().stream()
+            .filter(it -> !snapshot.hasWall(it.getKey()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+    }
+
+    private List<PhysicalTileData<?>> getAddedWallData(GameSnapshot snapshot) {
+        return snapshot.getWalls().entrySet().stream()
+            .filter(it -> !walls.containsKey(it.getKey()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+    }
+
+    // TODO: Create TileDataPair and get updated tiles when variable tile damage is introduced
 
     private boolean hasEntity(long id) {
         return entities.containsKey(id);

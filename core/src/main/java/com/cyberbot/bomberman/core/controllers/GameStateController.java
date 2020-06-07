@@ -8,16 +8,13 @@ import com.cyberbot.bomberman.core.models.defs.BombDef;
 import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.items.ItemType;
-import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -65,21 +62,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
 
         // Update players
-        players.forEach(player -> {
-            Vector2 position = player.getPosition();
-            int x = (int) Math.floor(position.x);
-            int y = (int) Math.floor(position.y);
-
-            Tile tile = map.getFloor().getTile(x, y);
-            if (tile instanceof FloorTile) {
-                FloorTile.Properties properties = ((FloorTile) tile).getProperties();
-                player.setDragModifier(properties.dragMultiplier);
-                player.setMaxSpeedModifier(properties.maxSpeedMultiplier);
-            } else {
-                player.setDragModifier(1);
-                player.setMaxSpeedModifier(1);
-            }
-        });
+        players.forEach(player -> player.updateFromEnvironment(map));
     }
 
     @Override
@@ -111,8 +94,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     public GameSnapshot createSnapshot() {
-        Map<Long, EntityData<?>> entities = entityStream().collect(Collectors.toMap(Entity::getId, Entity::getData));
-        return new GameSnapshot(entities);
+        return new GameSnapshot(entityStream(), map.getWalls().stream());
     }
 
     public long generateEntityId() {
@@ -284,7 +266,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         if (collectible == null) {
             return;
         }
-        collectible.setPositionRaw(tile.getPosition());
+        collectible.setPositionRaw(tile.getPositionRaw());
 
         collectibles.add(collectible);
         onEntityAdded(collectible);

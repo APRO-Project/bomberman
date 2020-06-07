@@ -10,10 +10,9 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * The position of the tiles index from (0, 0) and follow the euclidean coordinate system.
  */
 public class Tile {
-
-    private final String textureName;
-    private final int x;
-    private final int y;
+    protected final String textureName;
+    protected final int x;
+    protected final int y;
 
     public Tile(String textureName, int x, int y) {
         this.textureName = textureName;
@@ -39,7 +38,25 @@ public class Tile {
      * @return the position in the pixel coordinate system
      * @see Constants#PPM
      */
-    public Vector2 getPosition() {
+    public Vector2 getPositionRaw() {
         return new Vector2((x + 0.5f) * PPM, (y + 0.5f) * PPM);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tile tile = (Tile) o;
+
+        if (x != tile.x) return false;
+        return y == tile.y;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = x;
+        result = 31 * result + y;
+        return result;
     }
 }

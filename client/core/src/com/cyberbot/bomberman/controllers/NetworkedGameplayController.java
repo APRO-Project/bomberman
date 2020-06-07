@@ -38,15 +38,17 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
+    private final World world;
+
     public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
-        World world = new World(new Vector2(0, 0), false);
+        world = new World(new Vector2(0, 0), false);
         map = TileMapFactory.createTileMap(world, mapPath);
         textureController = new TextureController(map);
 
-        worldController = new LocalWorldController(world, TICK_RATE, player);
+        worldController = new LocalWorldController(world, map, TICK_RATE, player);
         worldController.addListener(textureController, true);
 
         inputController = new InputController(binds);
@@ -62,7 +64,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         inputPollService = new ScheduledThreadPoolExecutor(1);
         inputPollService.scheduleAtFixedRate(inputController::poll,
             0, 1_000_000 / SIM_RATE, TimeUnit.MICROSECONDS);
-
     }
 
     @Override
@@ -82,6 +83,10 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         worldController.dispose();
         snapshotService.shutdown();
         inputPollService.shutdown();
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     private void createAndSendSnapshot() {
