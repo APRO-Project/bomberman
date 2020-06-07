@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/core/bomberman.client.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client/core/bomberman.client.core.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/core/bomberman.client.core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/client/core/bomberman.client.core.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/desktop/bomberman.client.desktop.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client/desktop/bomberman.client.desktop.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/desktop/bomberman.client.desktop.test.iml" filepath="$PROJECT_DIR$/.idea/modules/client/desktop/bomberman.client.desktop.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/bomberman.client.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client/bomberman.client.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/bomberman.client.test.iml" filepath="$PROJECT_DIR$/.idea/modules/client/bomberman.client.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/bomberman.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/bomberman.core.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/bomberman.core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/bomberman.core.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/bomberman.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/bomberman.server.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/bomberman.server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/server/bomberman.server.test.iml" />
     </modules>
   </component>
 </project>
