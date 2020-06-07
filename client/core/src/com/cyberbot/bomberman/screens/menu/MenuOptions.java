@@ -20,7 +20,7 @@ public class MenuOptions extends Stage {
     public MenuOptions(Viewport viewport, MenuInteraction delegate) {
         super(viewport);
         this.delegate = delegate;
-        skin = new Skin(Gdx.files.internal("skins\\clean-crispy\\skin\\clean-crispy-ui.json"));
+        skin = new Skin(Gdx.files.internal("skins/clean-crispy/skin/clean-crispy-ui.json"));
         skin.getFont("font").getData().setScale(5);
     }
 

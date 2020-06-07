@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,7 +18,7 @@ import java.net.SocketAddress;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class GameScreen extends AbstractScreen {
-    private final static int VIEWPORT_WIDTH = 15;
+    private final static int VIEWPORT_WIDTH = 30;
     private final static int VIEWPORT_HEIGHT = 15;
 
     private final OrthographicCamera camera;
@@ -39,7 +40,10 @@ public class GameScreen extends AbstractScreen {
         b2dr = new Box2DDebugRenderer();
         batch = new SpriteBatch();
 
-        gameplayController = new NetworkedGameplayController(playerData, mapPath, serverAddress);
+        GameHud hud = new GameHud(playerData, viewport);
+        hud.createHud(15);
+
+        gameplayController = new NetworkedGameplayController(playerData, mapPath, serverAddress, hud);
     }
 
     @Override
@@ -52,7 +56,7 @@ public class GameScreen extends AbstractScreen {
         gameplayController.update(delta);
 
         camera.update();
-        batch.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0));
     }
 
     @Override
@@ -68,7 +72,9 @@ public class GameScreen extends AbstractScreen {
         gameplayController.draw(batch);
         batch.end();
 
-        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().scl(PPM));
+        gameplayController.getHud().draw();
+
+        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0).scl(PPM));
     }
 
     @Override
