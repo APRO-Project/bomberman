@@ -13,6 +13,7 @@ import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory;
 import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.net.NetService;
+import com.cyberbot.bomberman.screens.hud.GameHud;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,7 +45,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ReentrantLock worldUpdateLock;
     private final Condition worldUpdatedCondition;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection)
+    private final GameHud hud;
+
+    public NetworkedGameplayController(PlayerData player, String mapPath, SocketAddress connection, GameHud hud)
         throws MissingLayersException, IOException, ParserConfigurationException, SAXException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
@@ -55,7 +58,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         worldController = new LocalWorldController(world, map, TICK_RATE, player);
         worldController.addListener(textureController, true);
 
-        inputController = new InputController(binds);
+        this.hud = hud;
+
+        inputController = new InputController(binds, this.hud);
         inputController.addActionController(worldController);
 
         netService = new NetService(connection, worldController);
@@ -84,6 +89,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         }
 
         textureController.update(delta);
+        hud.act(delta);
     }
 
     @Override
@@ -97,6 +103,11 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         worldController.dispose();
         snapshotService.shutdown();
         inputPollService.shutdown();
+        hud.dispose();
+    }
+
+    public GameHud getHud() {
+        return hud;
     }
 
     public World getWorld() {

@@ -235,13 +235,5 @@ public final class InventoryView extends Table {
             rearrangeButtons();
 
         updateCurrentItem();
-
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-//            // Item up
-//            changeCurrentItem(true);
-//        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-//            // Item down
-//            changeCurrentItem(false);
-//        }
     }
 }
