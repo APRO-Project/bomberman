@@ -16,6 +16,10 @@ public class PlayerData extends EntityData<PlayerEntity> {
         this.inventory = inventory;
     }
 
+    public Inventory getInventory() {
+        return inventory;
+    }
+
     @Override
     public PlayerEntity createEntity(World world) {
         PlayerDef def = new PlayerDef(textureVariant, inventory);
