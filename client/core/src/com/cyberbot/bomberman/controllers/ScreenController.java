@@ -164,13 +164,20 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onGameStart(@NotNull GameStart payload) {
         Gdx.app.log("ControlService", "Starting the game");
+
+        if(payload.getPort() == null) {
+            showError("Server has sent null port");
+            return;
+        }
+
         Gdx.app.postRunnable(() -> {
             try {
 
                 final GameScreen gameScreen = new GameScreen(
                     payload.getPlayerInit(),
                     "./map/bomberman_main.tmx",
-                    new InetSocketAddress(serverAddress.getAddress(), payload.getPort())
+                    new InetSocketAddress(serverAddress.getAddress(), payload.getPort()),
+                    payload.getLobby()
                 );
                 setScreen(gameScreen);
 

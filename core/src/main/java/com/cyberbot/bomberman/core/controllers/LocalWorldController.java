@@ -42,6 +42,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private final PlayerActionController playerActionController;
     private final SnapshotQueue snapshotQueue;
     private final PlayerStateQueue playerStateQueue;
+
     private final PlayerEntity localPlayer;
 
     private final List<WorldChangeListener> listeners;
@@ -50,6 +51,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
      * Latest snapshot applied to the world.
      */
     private GameSnapshotPacket currentPacket;
+
     /**
      * Next snapshot to be applied to the world, and the one we interpolate towards.
      */
@@ -59,14 +61,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
      */
     private GameSnapshotPacket newestPacket;
 
-
     private int snapshotLength;
-    private float interpFraction;
 
+    private float interpFraction;
     private PlayerData playerToInterpStart;
+
     private PlayerData playerToInterpEnd;
     private float replayInterpFraction;
-
     public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData) {
         this(world, map, tickRate, playerData, tickRate * 4);
     }
@@ -116,6 +117,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         }
 
         interpolate(delta);
+    }
+
+    public PlayerEntity getLocalPlayer() {
+        return localPlayer;
     }
 
     @Override
@@ -295,8 +300,12 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             throw new ConcurrentModificationException("Cannot apply snapshot while world is locked");
         }
 
-        applySnapshotToEntities(snapshot);
+        // FIXME: Czek for nul egzepszyn
 
+        PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
+        localPlayer.setHp(playerData.getHp());
+
+        applySnapshotToEntities(snapshot);
         applySnapshotToWalls(snapshot);
     }
 

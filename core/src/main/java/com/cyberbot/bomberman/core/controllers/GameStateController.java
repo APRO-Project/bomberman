@@ -199,6 +199,8 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         TileMapLayer walls = map.getWalls();
 
+        damagePlayers(x, y, (int) (bombPower * 2));
+
         // Right
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x + i, y);
@@ -252,13 +254,13 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         }
     }
 
-    private void damagePlayers(int x, int y, int dmg) {
+    private void damagePlayers(int x, int y, int power) {
         players.stream().filter(playerEntity ->
             {
                 Vector2 playerPosition = playerEntity.getPosition();
                 return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
             }
-        ).forEach(playerEntity -> playerEntity.subtractHp(dmg));
+        ).forEach(playerEntity -> playerEntity.subtractHp(power));
         players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
             playerEntity.markToRemove();
             playerEntity.dispose();

@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.models.Updatable;
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -42,8 +43,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ReentrantLock worldUpdateLock;
     private final Condition worldUpdatedCondition;
 
-    private final GameHud hud;
-
     public NetworkedGameplayController(PlayerData player, String mapPath,
                                        SocketAddress connection, GameHud hud)
         throws MapLoadException {
@@ -55,10 +54,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
         worldController = new LocalWorldController(world, map, TICK_RATE, player);
         worldController.addListener(textureController, true);
+        worldController.addListener(hud, true);
 
-        this.hud = hud;
-
-        inputController = new InputController(binds, this.hud);
+        inputController = new InputController(binds, hud);
         inputController.addActionController(worldController);
 
         netService = new NetService(connection, worldController);
@@ -87,7 +85,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         }
 
         textureController.update(delta);
-        hud.act(delta);
     }
 
     @Override
@@ -101,11 +98,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         worldController.dispose();
         snapshotService.shutdown();
         inputPollService.shutdown();
-        hud.dispose();
-    }
-
-    public GameHud getHud() {
-        return hud;
     }
 
     public World getWorld() {
@@ -125,5 +117,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         } catch (Exception ignored) {
 
         }
+    }
+
+    public PlayerEntity getLocalPlayer() {
+        return worldController.getLocalPlayer();
     }
 }

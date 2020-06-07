@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.net.packets.Client;
+import com.cyberbot.bomberman.core.models.net.packets.Lobby;
 import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.screens.hud.GameHud;
 
@@ -27,8 +29,10 @@ public class GameScreen extends AbstractScreen {
 
     private final NetworkedGameplayController gameplayController;
 
+    private final GameHud hud;
+
     public GameScreen(final PlayerData playerData,
-                      final String mapPath, final SocketAddress serverAddress)
+                      final String mapPath, final SocketAddress serverAddress, final Lobby lobby)
         throws MapLoadException {
 
         camera = new OrthographicCamera();
@@ -38,10 +42,27 @@ public class GameScreen extends AbstractScreen {
         b2dr = new Box2DDebugRenderer();
         batch = new SpriteBatch();
 
-        GameHud hud = new GameHud(playerData, viewport);
+        hud = new GameHud(viewport);
         hud.createHud(15);
 
         gameplayController = new NetworkedGameplayController(playerData, mapPath, serverAddress, hud);
+
+        final Client localClient = lobby.getClients().stream()
+            .filter(c -> c.getId() != null && c.getId() == playerData.getId())
+            .findFirst()
+            .orElse(null);
+
+        if(localClient == null) {
+            showError("Couldn't find local client in lobby");
+            return;
+        }
+
+        hud.setLocalPlayerName(localClient.getNick());
+        hud.setLocalPlayerEntity(gameplayController.getLocalPlayer());
+
+        lobby.getClients().stream()
+            .filter(c -> c.getId() != null && c.getId() != playerData.getId())
+            .forEach(c -> hud.addToPlayerList(c.getNick(), c.getId()));
     }
 
     @Override
@@ -52,6 +73,7 @@ public class GameScreen extends AbstractScreen {
     @Override
     public void update(float delta) {
         gameplayController.update(delta);
+        hud.act(delta);
 
         camera.update();
         batch.setProjectionMatrix(camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0));
@@ -70,9 +92,9 @@ public class GameScreen extends AbstractScreen {
         gameplayController.draw(batch);
         batch.end();
 
-        gameplayController.getHud().draw();
+        hud.draw();
 
-        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0).scl(PPM));
+//        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0).scl(PPM));
     }
 
     @Override
@@ -99,6 +121,7 @@ public class GameScreen extends AbstractScreen {
     public void dispose() {
         batch.dispose();
         gameplayController.dispose();
+        hud.dispose();
         b2dr.dispose();
     }
 }

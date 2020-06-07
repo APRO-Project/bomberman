@@ -10,12 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
+import com.cyberbot.bomberman.core.models.entities.Entity;
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
-public class GameHud extends Stage {
+public class GameHud extends Stage implements WorldChangeListener {
 
     private Skin skin;
     private Table left;
@@ -29,13 +31,15 @@ public class GameHud extends Stage {
     public final TimerView timerView;
     public final PlayerListView playerListView;
 
-    public GameHud(PlayerData playerData, Viewport viewport) {
+    private PlayerEntity localPlayerEntity;
+
+    public GameHud(Viewport viewport) {
         super(viewport);
 
         initSkin();
 
-        localPlayerView = new LocalPlayerView(playerData, skin);
-        inventoryView = new InventoryView(playerData, skin);
+        localPlayerView = new LocalPlayerView(skin);
+        inventoryView = new InventoryView(skin);
         timerView = new TimerView(skin);
         playerListView = new PlayerListView(skin);
     }
@@ -107,5 +111,29 @@ public class GameHud extends Stage {
         skin = new Skin(Atlas.getSkinAtlas());
         skin.add("default_font", font);
         skin.load(Gdx.files.internal("skins/skin.json"));
+    }
+
+    public void setLocalPlayerEntity(PlayerEntity entity) {
+        localPlayerEntity = entity;
+        inventoryView.setPlayerEntity(entity);
+        localPlayerView.setPlayerEntity(entity);
+    }
+
+    public void setLocalPlayerName(String name) {
+        localPlayerView.setPlayerName(name);
+    }
+
+    public void addToPlayerList(String name, long id) {
+        playerListView.addPlayer(name, id);
+    }
+
+    @Override
+    public void onEntityAdded(Entity entity) { }
+
+    @Override
+    public void onEntityRemoved(Entity entity) {
+        if(entity instanceof PlayerEntity && entity.getId() != localPlayerEntity.getId()) {
+            playerListView.onPlayerDeath((PlayerEntity) entity);
+        }
     }
 }

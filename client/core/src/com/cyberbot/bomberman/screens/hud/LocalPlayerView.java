@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
-import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -16,13 +16,12 @@ public final class LocalPlayerView extends Table {
     private final Label playerName;
     private final HealthBar healthBar;
 
-    public LocalPlayerView(PlayerData playerData, Skin skin) {
-        // TODO: Get avatar and name from player data
-        playerAvatar = new Image(Atlas.getInstance().findRegion("Player_bbb_idle_front"));
-        playerName = new Label("James", skin);
+    public LocalPlayerView(Skin skin) {
+        playerAvatar = new Image(Atlas.getSkinAtlas().findRegion("placeholder"));
+        playerName = new Label("", skin);
         playerName.setAlignment(Align.center);
 
-        healthBar = new HealthBar(playerData, playerAvatar.getWidth() * 2, PPM / 2);
+        healthBar = new HealthBar(playerAvatar.getWidth() * 2, PPM / 2);
 
         add(playerAvatar)
             .padBottom(5)
@@ -35,5 +34,14 @@ public final class LocalPlayerView extends Table {
             .row();
 
         add(healthBar);
+    }
+
+    public void setPlayerEntity(PlayerEntity entity) {
+        healthBar.setPlayerEntity(entity);
+        // TODO: Get player avatar from player entity
+    }
+
+    public void setPlayerName(String name) {
+        playerName.setText(name);
     }
 }

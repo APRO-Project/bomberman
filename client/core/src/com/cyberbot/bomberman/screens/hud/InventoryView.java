@@ -2,9 +2,9 @@ package com.cyberbot.bomberman.screens.hud;
 
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.core.models.items.ItemStack;
 import com.cyberbot.bomberman.core.models.items.ItemType;
-import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.utils.Atlas;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -38,13 +38,13 @@ public final class InventoryView extends Table {
     private final ButtonGroup<ImageButton> itemButtonGroup;
     private int currentItem;
 
-    private final PlayerData playerData;
+    private PlayerEntity playerEntity;
 
-    public InventoryView(PlayerData playerData, Skin skin) {
+    public InventoryView(Skin skin) {
         effectButtons = new InventoryButton[5];
         itemButtons = new InventoryItemButton[5];
 
-        this.playerData = playerData;
+        this.playerEntity = null;
 
         init(skin);
 
@@ -57,8 +57,6 @@ public final class InventoryView extends Table {
         itemButtonGroup.setUncheckLast(true);
 
         currentItem = -1;
-        scanForInventoryChanges();
-        changeCurrentItem(true);
     }
 
     public void init(Skin skin) {
@@ -89,14 +87,18 @@ public final class InventoryView extends Table {
         add(items).expandX();
     }
 
+    public void setPlayerEntity(PlayerEntity entity) {
+        playerEntity = entity;
+    }
+
     private boolean scanForInventoryChanges() {
         boolean change = false;
 
-        final ArrayList<ItemStack> effectStacks = playerData.getInventory().getItems().stream()
+        final ArrayList<ItemStack> effectStacks = playerEntity.getInventory().getItems().stream()
             .filter(i -> EFFECTS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
-        final ArrayList<ItemStack> itemStacks = playerData.getInventory().getItems().stream()
+        final ArrayList<ItemStack> itemStacks = playerEntity.getInventory().getItems().stream()
             .filter(i -> ITEMS.contains(i.getItemType()))
             .collect(Collectors.toCollection(ArrayList::new));
 
@@ -231,7 +233,7 @@ public final class InventoryView extends Table {
     public void act(float delta) {
         super.act(delta);
 
-        if (scanForInventoryChanges())
+        if (playerEntity != null && scanForInventoryChanges())
             rearrangeButtons();
 
         updateCurrentItem();
