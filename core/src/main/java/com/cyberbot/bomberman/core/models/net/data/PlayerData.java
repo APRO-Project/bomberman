@@ -27,8 +27,4 @@ public class PlayerData extends EntityData<PlayerEntity> {
         playerEntity.setPosition(position.toVector2());
         return playerEntity;
     }
-
-    public Inventory getInventory() {
-         return inventory;
-    }
 }
