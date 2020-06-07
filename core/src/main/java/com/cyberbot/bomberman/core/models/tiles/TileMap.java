@@ -74,6 +74,11 @@ public class TileMap implements Disposable {
         listeners.forEach(listener -> listener.onWallRemoved(tile));
     }
 
+    public void addWall(Tile tile) {
+        wallsLayer.add(tile);
+        listeners.forEach(listener -> listener.onWallAdded(tile));
+    }
+
     @Override
     public void dispose() {
         baseLayer.dispose();

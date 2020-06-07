@@ -20,7 +20,7 @@ public class PlayerData extends EntityData<PlayerEntity> {
     public PlayerEntity createEntity(World world) {
         PlayerDef def = new PlayerDef(textureVariant, inventory);
         PlayerEntity playerEntity = new PlayerEntity(world, def, id);
-        playerEntity.setPositionRaw(position.toVector2());
+        playerEntity.setPosition(position.toVector2());
         return playerEntity;
     }
 }

@@ -34,7 +34,7 @@ public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
             animationDirection = 1;
         }
 
-        Vector2 position = entity.getPosition();
+        Vector2 position = entity.getPositionRaw();
         float x = position.x - sprite.getWidth() / 2;
         float y = position.y - sprite.getHeight() / 2;
 

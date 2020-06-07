@@ -26,7 +26,7 @@ public class NetService implements Runnable {
         try {
             socket = new DatagramSocket();
             socket.connect(address);
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[1024 * 16];
             for (; ; ) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);

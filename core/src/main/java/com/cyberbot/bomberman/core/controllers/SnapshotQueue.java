@@ -3,7 +3,6 @@ package com.cyberbot.bomberman.core.controllers;
 import com.cyberbot.bomberman.core.models.actions.Action;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
-import com.cyberbot.bomberman.core.utils.Utils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +19,7 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshotPac
 
     public SnapshotQueue(long clientId, int bufferSize) {
         this.queue = new CircularFifoQueue<>(bufferSize);
-        this.latestSequence = 0;
+        this.latestSequence = 100;
         this.currentSnapshot = new PlayerSnapshot();
         this.clientId = clientId;
     }
@@ -30,17 +29,25 @@ public class SnapshotQueue implements ActionListener, Iterable<PlayerSnapshotPac
         currentSnapshot.actions.add(actions);
     }
 
-    public int removeUntil(int latestSequence) {
-        int removed = 0;
-        while (queue.size() > 0 && Utils.isSequenceNext(latestSequence, queue.peek().getSequence())) {
-            removed++;
-            queue.remove();
+    public PlayerSnapshotPacket removeUntil(int latestSequence) {
+        if (latestSequence == -1) {
+            return null;
         }
+
+        PlayerSnapshotPacket removed = null;
+        while (queue.size() > 0 && latestSequence >= queue.peek().getSequence()) {
+            removed = queue.remove();
+        }
+
         return removed;
     }
 
     public int size() {
         return queue.size();
+    }
+
+    public int maxSize() {
+        return queue.maxSize();
     }
 
     public Integer getOldestSequence() {

@@ -54,7 +54,7 @@ public abstract class Entity implements Disposable, Updatable {
      *
      * @see Constants#PPM
      */
-    public void setPosition(Vector2 position) {
+    public void setPositionRaw(Vector2 position) {
         body.setTransform(position.x / PPM, position.y / PPM, 0);
     }
 
@@ -64,7 +64,7 @@ public abstract class Entity implements Disposable, Updatable {
      * @return the position of the entity in the pixel coordinate system
      * @see Constants#PPM
      */
-    public Vector2 getPosition() {
+    public Vector2 getPositionRaw() {
         Vector2 position = body.getPosition();
         return new Vector2(position.x * PPM, position.y * PPM);
     }
@@ -74,14 +74,14 @@ public abstract class Entity implements Disposable, Updatable {
      *
      * @return the position of the entity in the Box2D coordinate system.
      */
-    public Vector2 getPositionRaw() {
-        return body.getPosition();
+    public Vector2 getPosition() {
+        return new Vector2(body.getPosition()); // Pass by value my ass, 5h wasted here
     }
 
     /**
      * Sets the position of the entity in the Box2D coordinate system.
      */
-    public void setPositionRaw(Vector2 position) {
+    public void setPosition(Vector2 position) {
         body.setTransform(position, 0);
     }
 
@@ -108,7 +108,11 @@ public abstract class Entity implements Disposable, Updatable {
             throw new IllegalArgumentException("Provided data is not meant for this entity, ids do not match");
         }
 
-        setPositionRaw(data.getPosition().toVector2());
+        setPosition(data.getPosition().toVector2());
+    }
+
+    public void updateFromData(EntityData<?> d1, float fraction) {
+        updateFromData(getData(), d1, fraction);
     }
 
     public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
@@ -120,13 +124,19 @@ public abstract class Entity implements Disposable, Updatable {
             throw new IllegalArgumentException("Interpolation fraction has to be in range 0-1");
         }
 
+        if (fraction == 1) {
+            updateFromData(d1);
+        } else if (fraction == 0) {
+            updateFromData(d0);
+        }
+
         final Vector2 pos0 = d0.getPosition().toVector2();
         final Vector2 pos1 = d1.getPosition().toVector2();
 
         // After this operation pos1 holds the delta vector and pos0 the new resulting position
         pos0.mulAdd(pos1.sub(pos0), fraction);
 
-        setPositionRaw(pos0);
+        setPosition(pos0);
     }
 
     public abstract EntityData<? extends Entity> getData();
@@ -144,5 +154,13 @@ public abstract class Entity implements Disposable, Updatable {
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
+    }
+
+    @Override
+    public String toString() {
+        return "Entity{" +
+            "id=" + id +
+            "position=" + getPosition() +
+            '}';
     }
 }

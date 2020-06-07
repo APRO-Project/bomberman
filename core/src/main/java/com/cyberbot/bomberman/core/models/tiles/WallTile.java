@@ -2,7 +2,9 @@ package com.cyberbot.bomberman.core.models.tiles;
 
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.cyberbot.bomberman.core.models.net.data.WallTileData;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 
@@ -29,6 +31,11 @@ public class WallTile extends PhysicalTile {
         shape.dispose();
     }
 
+    @Override
+    public WallTileData getData() {
+        return new WallTileData(x, y, textureName, properties);
+    }
+
     public Properties getProperties() {
         return properties;
     }
@@ -36,7 +43,7 @@ public class WallTile extends PhysicalTile {
     /**
      * Properties of the wall tile type.
      */
-    public static class Properties {
+    public static class Properties implements Serializable {
         public static final float DURABILITY_INFINITE = -1;
         public static final float POWER_DROPOFF = 0.5f; // TODO: Move the property to the bomb entity
 

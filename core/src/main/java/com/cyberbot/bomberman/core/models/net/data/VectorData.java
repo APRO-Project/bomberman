@@ -5,12 +5,17 @@ import com.badlogic.gdx.math.Vector2;
 import java.io.Serializable;
 
 public class VectorData implements Serializable {
-    public final float x;
-    public final float y;
+    public float x;
+    public float y;
 
     public VectorData(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    public void add(Vector2 vector2) {
+        x += vector2.x;
+        y += vector2.y;
     }
 
     public Vector2 toVector2() {

@@ -63,7 +63,7 @@ public class GameScreen extends AbstractScreen {
         gameplayController.draw(batch);
         batch.end();
 
-        //b2dr.render(world, camera.combined.cpy().scl(PPM));
+        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().scl(PPM));
     }
 
     @Override

@@ -55,29 +55,29 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public int size() {
-        return getFlatList().size();
+        return asFlatList().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return getFlatList().isEmpty();
+        return asFlatList().isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return getFlatList().contains(o);
+        return asFlatList().contains(o);
     }
 
     @NotNull
     @Override
     public Iterator<Tile> iterator() {
-        return getFlatList().iterator();
+        return asFlatList().iterator();
     }
 
     @NotNull
     @Override
     public Object[] toArray() {
-        return getFlatList().toArray();
+        return asFlatList().toArray();
     }
 
     @NotNull
@@ -118,7 +118,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public boolean containsAll(@NotNull Collection<?> c) {
-        return getFlatList().containsAll(c);
+        return asFlatList().containsAll(c);
     }
 
     @Override
@@ -174,10 +174,10 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public void forEach(Consumer<? super Tile> action) {
-        getFlatList().forEach(action);
+        asFlatList().forEach(action);
     }
 
-    private List<Tile> getFlatList() {
+    public List<Tile> asFlatList() {
         return Arrays.stream(tiles)
             .map(Arrays::asList)
             .flatMap(List::stream)

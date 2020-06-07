@@ -14,6 +14,8 @@ import java.io.IOException
 import java.net.DatagramPacket
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class Session(private val socket: GameSocket) {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
@@ -24,6 +26,9 @@ class Session(private val socket: GameSocket) {
     private var lastUpdate = System.currentTimeMillis()
     var gameStarted: Boolean = false
         private set
+
+    private val worldUpdateLock = ReentrantLock()
+    private val worldUpdatedCondition = worldUpdateLock.newCondition()
 
     init {
         val mapPath = Thread.currentThread().contextClassLoader.getResource("map/bomberman_main.tmx")
@@ -43,7 +48,9 @@ class Session(private val socket: GameSocket) {
         check(!gameStarted) { "The game has already started, cannot add clients" }
         val playerEntity = player.createEntity(world)
         gameStateController.addPlayer(playerEntity)
-        clientSessions[connection] = PlayerSession(playerEntity)
+        val playerSession = PlayerSession(playerEntity)
+        clientSessions[connection] = playerSession
+        playerSession.addListener(gameStateController)
     }
 
     fun removeClient(connection: ClientConnection): Boolean {
@@ -56,6 +63,9 @@ class Session(private val socket: GameSocket) {
     }
 
     private fun tick() {
+        worldUpdateLock.withLock {
+            worldUpdatedCondition.await()
+        }
         for ((session, packet) in getUpdatePackets()) {
             try {
                 socket.send(packet)
@@ -118,7 +128,11 @@ class Session(private val socket: GameSocket) {
 
     @Synchronized
     private fun update(delta: Float) {
-        world.step(delta, 6, 2)
+        worldUpdateLock.withLock {
+            world.step(delta, 6, 2)
+            worldUpdatedCondition.signalAll()
+        }
+
         for (session in clientSessions.values) {
             session.update(delta)
         }
