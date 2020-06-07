@@ -10,12 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
+import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
-public class GameHud extends Stage {
+public class GameHud extends Stage implements WorldChangeListener {
 
     private Skin skin;
     private Table left;
@@ -28,6 +30,8 @@ public class GameHud extends Stage {
     // Right side
     public final TimerView timerView;
     public final PlayerListView playerListView;
+
+    private PlayerEntity localPlayerEntity;
 
     public GameHud(Viewport viewport) {
         super(viewport);
@@ -110,11 +114,26 @@ public class GameHud extends Stage {
     }
 
     public void setLocalPlayerEntity(PlayerEntity entity) {
+        localPlayerEntity = entity;
         inventoryView.setPlayerEntity(entity);
         localPlayerView.setPlayerEntity(entity);
     }
 
     public void setLocalPlayerName(String name) {
         localPlayerView.setPlayerName(name);
+    }
+
+    public void addToPlayerList(String name, long id) {
+        playerListView.addPlayer(name, id);
+    }
+
+    @Override
+    public void onEntityAdded(Entity entity) { }
+
+    @Override
+    public void onEntityRemoved(Entity entity) {
+        if(entity instanceof PlayerEntity && entity.getId() != localPlayerEntity.getId()) {
+            playerListView.onPlayerDeath((PlayerEntity) entity);
+        }
     }
 }

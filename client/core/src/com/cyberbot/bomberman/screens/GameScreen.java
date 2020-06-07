@@ -61,6 +61,10 @@ public class GameScreen extends AbstractScreen {
 
         hud.setLocalPlayerName(localClient.getNick());
         hud.setLocalPlayerEntity(gameplayController.getLocalPlayer());
+
+        lobby.getClients().stream()
+            .filter(c -> c.getId() != null && c.getId() != playerData.getId())
+            .forEach(c -> hud.addToPlayerList(c.getNick(), c.getId()));
     }
 
     @Override

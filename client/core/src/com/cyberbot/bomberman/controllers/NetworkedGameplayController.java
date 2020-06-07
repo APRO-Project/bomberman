@@ -56,6 +56,7 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
         worldController = new LocalWorldController(world, map, TICK_RATE, player);
         worldController.addListener(textureController, true);
+        worldController.addListener(hud, true);
 
         inputController = new InputController(binds, hud);
         inputController.addActionController(worldController);
