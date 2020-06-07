@@ -27,7 +27,7 @@ public class GameScreen extends AbstractScreen {
 
     private final SpriteBatch batch;
 
-    private NetworkedGameplayController gameplayController;
+    private final NetworkedGameplayController gameplayController;
 
     public GameScreen(final PlayerData playerData, final String mapPath, final SocketAddress serverAddress)
         throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
@@ -53,6 +53,11 @@ public class GameScreen extends AbstractScreen {
 
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+    }
+
+    @Override
+    public void showError(String msg) {
+
     }
 
     @Override

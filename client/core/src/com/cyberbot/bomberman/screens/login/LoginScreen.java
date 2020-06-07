@@ -19,10 +19,14 @@ public class LoginScreen extends AbstractScreen {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
 
-        camera.setToOrtho(false, 1920, 1080);
-        viewport = new FitViewport(1920, 1080);
+        camera.setToOrtho(false, 384, 216);
+        viewport = new FitViewport(384, 216);
 
         loginLayout = new LoginLayout(viewport, delegate);
+    }
+
+    public void showError(String msg) {
+        loginLayout.showError(msg);
     }
 
     @Override

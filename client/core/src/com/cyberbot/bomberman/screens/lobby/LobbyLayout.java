@@ -1,14 +1,12 @@
 package com.cyberbot.bomberman.screens.lobby;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.core.models.net.packets.Client;
@@ -18,6 +16,8 @@ import com.cyberbot.bomberman.utils.Atlas;
 import java.util.ArrayList;
 
 public class LobbyLayout extends Stage {
+
+    final Skin skin;
     private final float spaceHeight = 0;
 
     private final Label[] playerLabels;
@@ -35,6 +35,7 @@ public class LobbyLayout extends Stage {
         super(viewport);
         this.delegate = delegate;
         this.playerLabels = new Label[4];
+        skin = new Skin(Gdx.files.internal("skins/clean-crispy/skin/clean-crispy-ui.json"));
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skins/8bit_regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter fontParams = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -157,5 +158,14 @@ public class LobbyLayout extends Stage {
         for (int i = 3; i > clients.size() - 1; i--) {
             removePlayer(i);
         }
+    }
+
+    public void showError(String msg) {
+        Dialog dialog = new Dialog("Error", skin);
+        dialog.text(msg);
+        dialog.setMovable(false);
+        dialog.button("Ok");
+        dialog.key(Input.Keys.ENTER, true);
+        dialog.show(this);
     }
 }

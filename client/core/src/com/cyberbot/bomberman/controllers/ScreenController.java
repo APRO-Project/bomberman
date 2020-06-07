@@ -7,6 +7,7 @@ import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.utils.Utils;
 import com.cyberbot.bomberman.net.ClientControlListener;
 import com.cyberbot.bomberman.net.ControlService;
+import com.cyberbot.bomberman.screens.AbstractScreen;
 import com.cyberbot.bomberman.screens.GameScreen;
 import com.cyberbot.bomberman.screens.lobby.LobbyInteraction;
 import com.cyberbot.bomberman.screens.lobby.LobbyScreen;
@@ -86,7 +87,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             this.password = password;
         } catch (URISyntaxException e) {
             Gdx.app.log("ControlService", "Invalid uri: " + e.getMessage());
-            // TODO: Show error
+            login.showError("Login Unsuccessful");
         }
     }
 
@@ -100,14 +101,14 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     @Override
     public void onConnectionError(@NotNull IOException e) {
         Gdx.app.log("ControlService", "Unable to connect: " + e.getMessage());
-        // TODO: Show error
+        ((AbstractScreen) game.getScreen()).showError("No server connection");
     }
 
     @Override
     public void onClientDisconnected() {
         Gdx.app.log("ControlService", "Disconnected");
         Gdx.app.postRunnable(() -> game.setScreen(login));
-        // TODO: Show error
+        ((AbstractScreen) game.getScreen()).showError("Client disconnected");
     }
 
     @Override
@@ -119,7 +120,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             Gdx.app.postRunnable(() -> game.setScreen(menu));
         } else {
             Gdx.app.log("ControlService", "Register failed");
-            // TODO: Show error
+            ((AbstractScreen) game.getScreen()).showError("Failed to register");
         }
     }
 
@@ -129,7 +130,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             sendLobbyJoinRequest(payload.getId());
         } else {
             Gdx.app.log("ControlService", "Unable to create lobby");
-            // TODO: Show error to the user
+            ((AbstractScreen) game.getScreen()).showError("Failed to create lobby");
         }
     }
 
@@ -139,7 +140,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
             Gdx.app.postRunnable(() -> game.setScreen(lobby));
         } else {
             Gdx.app.log("ControlService", "Unable to join lobby");
-            // TODO: Show error to the user
+            ((AbstractScreen) game.getScreen()).showError("Failed to join to lobby");
         }
     }
 
@@ -169,7 +170,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
             } catch (IOException | MissingLayersException | ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
-                // TODO: Show error to the user
+                ((AbstractScreen) game.getScreen()).showError("Failed to start game");
             }
         });
     }
