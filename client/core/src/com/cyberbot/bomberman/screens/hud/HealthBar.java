@@ -31,7 +31,7 @@ public class HealthBar extends Actor {
         super();
 
         this.playerEntity = null;
-        visiblePlayerHealth = 100;  // TODO: Add health property to PlayerEntity
+        visiblePlayerHealth = 100;
 
         // Load textures
         progressBarEmpty = new NinePatch(Atlas.getSkinAtlas().findRegion("progress_bar_empty"));
@@ -43,8 +43,9 @@ public class HealthBar extends Actor {
     }
 
     private void updatePlayerHealth() {
-        // TODO: Change end to playerEntity.getHP() when it's implemented
-        addHealthAnimation(actualCurrentHealth(), actualCurrentHealth());
+        if(playerEntity != null) {
+            addHealthAnimation(actualCurrentHealth(), playerEntity.getHp());
+        }
     }
 
     private void addHealthAnimation(int start, int end) {
@@ -65,9 +66,7 @@ public class HealthBar extends Actor {
     public void act(float delta) {
         super.act(delta);
 
-        if(playerEntity != null) {
-            updatePlayerHealth();
-        }
+        updatePlayerHealth();
 
         if(currentAnimation == null) {
             if(!animationQueue.isEmpty()) {

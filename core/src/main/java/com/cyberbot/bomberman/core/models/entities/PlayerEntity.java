@@ -40,6 +40,14 @@ public class PlayerEntity extends Entity {
         return hp;
     }
 
+    public void setHp(int hp) {
+        if(hp < 0 || hp > 100) {
+            throw new IllegalArgumentException("HP value must be between 0 and 100");
+        }
+
+        this.hp = hp;
+    }
+
     public void addHp(int value) {
         hp = Math.min(100, hp + value);
     }

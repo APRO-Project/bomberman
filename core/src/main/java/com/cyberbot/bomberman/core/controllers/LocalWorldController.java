@@ -300,8 +300,12 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             throw new ConcurrentModificationException("Cannot apply snapshot while world is locked");
         }
 
-        applySnapshotToEntities(snapshot);
+        // FIXME: Czek for nul egzepszyn
 
+        PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
+        localPlayer.setHp(playerData.getHp());
+
+        applySnapshotToEntities(snapshot);
         applySnapshotToWalls(snapshot);
     }
 

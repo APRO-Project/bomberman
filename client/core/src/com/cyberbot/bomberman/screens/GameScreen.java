@@ -9,7 +9,6 @@ import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.Client;
 import com.cyberbot.bomberman.core.models.net.packets.Lobby;
-import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
 import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.screens.hud.GameHud;
 
@@ -95,7 +94,7 @@ public class GameScreen extends AbstractScreen {
 
         hud.draw();
 
-        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0).scl(PPM));
+//        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().translate(VIEWPORT_WIDTH / 4f * PPM, 0, 0).scl(PPM));
     }
 
     @Override
