@@ -8,6 +8,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
+import com.cyberbot.bomberman.core.models.tiles.FloorTile;
+import com.cyberbot.bomberman.core.models.tiles.Tile;
+import com.cyberbot.bomberman.core.models.tiles.TileMap;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
@@ -17,11 +20,12 @@ public class PlayerEntity extends Entity {
 
     private static final float ANIMATION_DURATION = 0.2f;
 
+    private Fixture fixture;
     private final int textureVariant;
     private final Inventory inventory;
 
-    private float dragModifier;
-    private float maxSpeedModifier;
+    private float dragMultiplier;
+    private float maxSpeedMultiplier;
 
     private PlayerState currentState;
     private PlayerState previousState;
@@ -38,25 +42,33 @@ public class PlayerEntity extends Entity {
         verticalDirection = LookingDirection.RIGHT;
         horizontalDirection = null;
         inventory = def.inventory;
-        dragModifier = def.dragModifier;
-        maxSpeedModifier = def.maxSpeedModifier;
+        dragMultiplier = def.dragModifier;
+        maxSpeedMultiplier = def.maxSpeedModifier;
         textureVariant = def.textureVariant;
     }
 
-    public float getDragModifier() {
-        return dragModifier;
+    public void updateFromEnvironment(TileMap map) {
+        Vector2 position = getPosition();
+        int x = (int) Math.floor(position.x);
+        int y = (int) Math.floor(position.y);
+
+        Tile tile = map.getFloor().getTile(x, y);
+        if (tile instanceof FloorTile) {
+            FloorTile.Properties properties = ((FloorTile) tile).getProperties();
+            dragMultiplier = properties.dragMultiplier;
+            maxSpeedMultiplier = properties.maxSpeedMultiplier;
+        } else {
+            dragMultiplier = 1;
+            maxSpeedMultiplier = 1;
+        }
     }
 
-    public void setDragModifier(float dragModifier) {
-        this.dragModifier = dragModifier;
+    public float getDragMultiplier() {
+        return dragMultiplier;
     }
 
-    public float getMaxSpeedModifier() {
-        return maxSpeedModifier * inventory.getMovementSpeedMultiplier();
-    }
-
-    public void setMaxSpeedModifier(float maxSpeedModifier) {
-        this.maxSpeedModifier = maxSpeedModifier;
+    public float getMaxSpeedMultiplier() {
+        return maxSpeedMultiplier * inventory.getMovementSpeedMultiplier();
     }
 
     public int getTextureVariant() {
@@ -68,10 +80,10 @@ public class PlayerEntity extends Entity {
     }
 
     private PlayerState getState() {
-        if (getVelocity().x == 0 && getVelocity().y == 0)
+        if (getVelocityRaw().x == 0 && getVelocityRaw().y == 0)
             return PlayerState.STANDING;
 
-        if (getVelocity().x != 0 && verticalDirection != null)
+        if (getVelocityRaw().x != 0 && verticalDirection != null)
             return PlayerState.MOVING_SIDE;
 
         if (horizontalDirection == LookingDirection.UP)
@@ -94,17 +106,29 @@ public class PlayerEntity extends Entity {
         body.applyForceToCenter(force.x / PPM, force.y / PPM, true);
     }
 
-    public Vector2 getVelocity() {
+    public Vector2 getVelocityRaw() {
         Vector2 velocity = body.getLinearVelocity();
         return new Vector2(velocity.x * PPM, velocity.y * PPM);
     }
 
-    public void setVelocity(Vector2 velocity) {
+    public void setVelocityRaw(Vector2 velocity) {
         body.setLinearVelocity(velocity.x / PPM, velocity.y / PPM);
+    }
+
+    public Vector2 getVelocity() {
+        return new Vector2(body.getLinearVelocity());
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        body.setLinearVelocity(velocity);
     }
 
     public float getMass() {
         return body.getMass();
+    }
+
+    public void setCollisions(boolean enabled) {
+        fixture.setSensor(!enabled);
     }
 
     @Override
@@ -119,7 +143,7 @@ public class PlayerEntity extends Entity {
         CircleShape shape = new CircleShape();
         shape.setRadius(0.49f);
 
-        Fixture fixture = body.createFixture(shape, 1);
+        fixture = body.createFixture(shape, 1);
         body.setUserData(this);
         shape.dispose();
     }

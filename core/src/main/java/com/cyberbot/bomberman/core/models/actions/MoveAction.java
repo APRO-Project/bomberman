@@ -20,4 +20,11 @@ public class MoveAction extends Action {
     public int getDirection() {
         return direction;
     }
+
+    @Override
+    public String toString() {
+        return "MoveAction{" +
+            "direction=" + direction +
+            '}';
+    }
 }

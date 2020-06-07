@@ -5,21 +5,19 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.controllers.GameScreenController;
 import com.cyberbot.bomberman.controllers.NetworkedGameplayController;
-import com.cyberbot.bomberman.core.models.net.Connection;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
-import com.cyberbot.bomberman.screens.hud.GameHud;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.SocketAddress;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class GameScreen extends AbstractScreen {
-    private final static int VIEWPORT_WIDTH = 30;
+    private final static int VIEWPORT_WIDTH = 15;
     private final static int VIEWPORT_HEIGHT = 15;
 
     private final OrthographicCamera camera;
@@ -31,9 +29,8 @@ public class GameScreen extends AbstractScreen {
 
     private NetworkedGameplayController gameplayController;
 
-    public GameScreen(GameScreenController gameScreenController, final PlayerData playerData, final String mapPath, final Connection connection)
+    public GameScreen(final PlayerData playerData, final String mapPath, final SocketAddress serverAddress)
         throws IOException, MissingLayersException, ParserConfigurationException, SAXException {
-        super(gameScreenController);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, VIEWPORT_WIDTH * PPM, VIEWPORT_HEIGHT * PPM);
@@ -42,10 +39,7 @@ public class GameScreen extends AbstractScreen {
         b2dr = new Box2DDebugRenderer();
         batch = new SpriteBatch();
 
-        GameHud hud = new GameHud(playerData, viewport);
-        hud.createHud(VIEWPORT_WIDTH);
-
-        gameplayController = new NetworkedGameplayController(playerData, mapPath, connection, hud);
+        gameplayController = new NetworkedGameplayController(playerData, mapPath, serverAddress);
     }
 
     @Override
@@ -69,7 +63,7 @@ public class GameScreen extends AbstractScreen {
         gameplayController.draw(batch);
         batch.end();
 
-        //b2dr.render(world, camera.combined.cpy().scl(PPM));
+        b2dr.render(gameplayController.getWorld(), camera.combined.cpy().scl(PPM));
     }
 
     @Override

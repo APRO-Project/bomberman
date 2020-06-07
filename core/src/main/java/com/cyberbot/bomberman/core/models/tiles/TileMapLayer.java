@@ -1,6 +1,7 @@
 package com.cyberbot.bomberman.core.models.tiles;
 
 import com.badlogic.gdx.utils.Disposable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -11,13 +12,21 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     private final int height;
     private final Tile[][] tiles;
 
-    public TileMapLayer(int width, int height, Tile[][] tiles) {
-        this.width = width;
-        this.height = height;
+    public TileMapLayer(Tile[][] tiles) {
+        if (!validateArray(tiles)) {
+            throw new IllegalArgumentException("Tile array has to be a rectangular N*M array");
+        }
+
+        this.width = tiles.length;
+        this.height = tiles[0].length;
         this.tiles = tiles;
     }
 
     public Tile getTile(int x, int y) {
+        if (x < 0 || y < 0 || x >= width || y >= height) {
+            return null;
+        }
+
         return tiles[x][y];
     }
 
@@ -46,32 +55,35 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public int size() {
-        return getFlatList().size();
+        return asFlatList().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return getFlatList().isEmpty();
+        return asFlatList().isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return getFlatList().contains(o);
+        return asFlatList().contains(o);
     }
 
+    @NotNull
     @Override
     public Iterator<Tile> iterator() {
-        return getFlatList().iterator();
+        return asFlatList().iterator();
     }
 
+    @NotNull
     @Override
     public Object[] toArray() {
-        return getFlatList().toArray();
+        return asFlatList().toArray();
     }
 
+    @NotNull
     @Override
     @Deprecated
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(@NotNull T[] a) {
         throw new UnsupportedOperationException("Unsupported");
     }
 
@@ -105,8 +117,8 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
-        return getFlatList().containsAll(c);
+    public boolean containsAll(@NotNull Collection<?> c) {
+        return asFlatList().containsAll(c);
     }
 
     @Override
@@ -128,7 +140,7 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         boolean changed = false;
 
         for (int x = 0; x < width; x++) {
@@ -162,14 +174,24 @@ public class TileMapLayer implements Disposable, Collection<Tile> {
 
     @Override
     public void forEach(Consumer<? super Tile> action) {
-        getFlatList().forEach(action);
+        asFlatList().forEach(action);
     }
 
-    private List<Tile> getFlatList() {
+    public List<Tile> asFlatList() {
         return Arrays.stream(tiles)
             .map(Arrays::asList)
             .flatMap(List::stream)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    private static boolean validateArray(Tile[][] array) {
+        if (array.length == 0) {
+            return false;
+        }
+
+        int height = array[0].length;
+
+        return Arrays.stream(array).allMatch(it -> it.length == height);
     }
 }

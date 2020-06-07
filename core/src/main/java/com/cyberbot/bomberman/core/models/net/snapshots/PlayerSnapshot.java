@@ -5,7 +5,8 @@ import com.cyberbot.bomberman.core.models.actions.Action;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class PlayerSnapshot {
+// TODO: Remove java.io.Serializable when own serialization is completed
+public final class PlayerSnapshot implements java.io.Serializable {
     public final List<List<Action>> actions;
 
     public PlayerSnapshot() {

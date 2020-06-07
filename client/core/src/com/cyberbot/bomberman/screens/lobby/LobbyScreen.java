@@ -1,39 +1,33 @@
-package com.cyberbot.bomberman.screens;
+package com.cyberbot.bomberman.screens.lobby;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.cyberbot.bomberman.Client;
-import com.cyberbot.bomberman.controllers.GameScreenController;
-import com.cyberbot.bomberman.screens.menu.MenuOptions;
+import com.cyberbot.bomberman.core.models.net.packets.Lobby;
+import com.cyberbot.bomberman.screens.AbstractScreen;
 
-public class MenuScreen extends AbstractScreen {
-
-    private final Texture background;
-
+public class LobbyScreen extends AbstractScreen {
     private final OrthographicCamera camera;
     private final SpriteBatch batch;
     private final Viewport viewport;
 
+    private final LobbyLayout lobbyLayout;
 
-    MenuOptions menuOptions;
-
-    public MenuScreen(GameScreenController gameScreenController) {
-        super(gameScreenController);
+    public LobbyScreen(LobbyInteraction delegate) {
 
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
 
         camera.setToOrtho(false, 1920, 1080);
         viewport = new FitViewport(1920, 1080);
-        background = new Texture("./textures/menu_bg.png");
 
-        menuOptions = new MenuOptions(viewport, gameScreenController);
-        menuOptions.createMenuOptions();
-        Gdx.input.setInputProcessor(menuOptions);
+        lobbyLayout = new LobbyLayout(viewport, delegate);
+    }
+
+    public void updateLobby(Lobby lobby, boolean isOwner) {
+        lobbyLayout.updateLobby(lobby, isOwner);
     }
 
     @Override
@@ -41,12 +35,13 @@ public class MenuScreen extends AbstractScreen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-        menuOptions.act(delta);
+        lobbyLayout.act(delta);
     }
 
     @Override
     public void show() {
-
+        Gdx.input.setInputProcessor(lobbyLayout);
+        lobbyLayout.createLobbyUi();
     }
 
     @Override
@@ -54,10 +49,8 @@ public class MenuScreen extends AbstractScreen {
         super.render(delta);
 
         batch.begin();
-        batch.draw(background, 0 ,0,1920f,1080f);
         batch.end();
-        menuOptions.draw();
-
+        lobbyLayout.draw();
     }
 
     @Override
@@ -77,12 +70,12 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void hide() {
-
+        lobbyLayout.clear();
     }
 
     @Override
     public void dispose() {
-        menuOptions.dispose();
+        lobbyLayout.dispose();
         batch.dispose();
     }
 }
