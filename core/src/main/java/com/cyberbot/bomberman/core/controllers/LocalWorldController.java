@@ -28,9 +28,9 @@ import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 
 public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener, ActionListener {
     private final int tickRate;
-    private final int interpolationDelay = 3;
+    private final int interpolationDelay = 2;
     private final float replyInterTime = 0.05f;
-    private final float maxPlayerOffset = 0.2f;
+    private final float maxPlayerOffset = 0.5f;
 
     private final World world;
     private final TileMap map;
@@ -388,6 +388,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     private void validateWorld(@NotNull GameSnapshotPacket packet) {
         int sequence = packet.getSequence();
+
         PlayerState localState = playerStateQueue.removeUntil(sequence);
 
         // Do not attempt to validate player while it's position is still being interpolated from a previous replay
@@ -400,9 +401,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     private void validatePlayerPosition(@NotNull PlayerState localState, @NotNull GameSnapshot remoteSnapshot) {
         PlayerData remotePlayer = (PlayerData) remoteSnapshot.getEntity(localPlayer.getId());
+
         if (remotePlayer != null) {
+            localPlayer.setInventory(remotePlayer.getInventory());
             Vector2 remotePosition = remotePlayer.getPosition().toVector2();
-            boolean replay = new Vector2(remotePosition).sub(localState.position).len() > maxPlayerOffset;
+            float delta = new Vector2(remotePosition).sub(localState.position).len();
+            float velocityModifier = Math.max(2.5f, localState.velocity.len()) / PlayerEntity.MAX_VELOCITY;
+            boolean replay = delta > maxPlayerOffset * velocityModifier;
 
             if (replay) {
                 playerToInterpStart = localPlayer.getData();
