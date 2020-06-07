@@ -13,9 +13,9 @@ class Lobby(val id: String? = null, var ownerId: Long? = null, clients: List<Cli
     val clients = ArrayList(clients)
 
     companion object {
-        fun stripIds(lobby: Lobby): Lobby {
-            val clients = lobby.clients.map { Client(nick = it.nick) }
-            return Lobby(id = lobby.id, clients = clients)
+        fun stripPasswords(lobby: Lobby): Lobby {
+            val clients = lobby.clients.map { Client(it.id, it.nick) }
+            return Lobby(lobby.id, lobby.ownerId, clients)
         }
     }
 }

@@ -172,7 +172,7 @@ class ServerService(
     }
 
     private fun notifyLobbyChange(lobby: Lobby) {
-        val strippedLobby = Lobby.stripIds(lobby)
+        val strippedLobby = Lobby.stripPasswords(lobby)
         val lobbyUpdate = LobbyUpdate(strippedLobby, false)
 
         lobby.clients
