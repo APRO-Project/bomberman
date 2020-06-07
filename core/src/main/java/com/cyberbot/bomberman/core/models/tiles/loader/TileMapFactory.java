@@ -29,13 +29,9 @@ public class TileMapFactory {
      * @param world the world to bind the body to.
      * @param path  map folder path. Should contain map.xml and tileset.xml files.
      * @return created {@link TileMap TileMap}.
-     * @throws IOException                  missing file or read error.
-     * @throws MissingLayersException       missing essential map layers.
-     * @throws ParserConfigurationException {@link DocumentBuilder DOM parser} exception.
-     * @throws SAXException                 {@link DocumentBuilder DOM parser} exception.
+     * @throws MapLoadException When there was a problem loading the map
      */
-    public static TileMap createTileMap(World world, String path) throws IOException,
-        MissingLayersException, ParserConfigurationException, SAXException { // TODO: Better map exception handling
+    public static TileMap createTileMap(World world, String path) throws MapLoadException {
         File mapFile = new File(path);
 
         Element sourceMap = (Element) loadXmlMap(mapFile);
@@ -58,7 +54,12 @@ public class TileMapFactory {
             int width = Integer.parseInt(element.getAttribute("width"));
             int height = Integer.parseInt(element.getAttribute("height"));
             String csvTileData = element.getElementsByTagName("data").item(0).getTextContent();
-            Tile[][] tiles = csvStringToTileArray(csvTileData, width, height, tileset, world);
+            Tile[][] tiles;
+            try {
+                tiles = csvStringToTileArray(csvTileData, width, height, tileset, world);
+            } catch (InvalidPropertiesFormatException e) {
+                throw new MapLoadException(e);
+            }
 
             TileMapLayer mapLayer = new TileMapLayer(tiles);
 
@@ -78,7 +79,11 @@ public class TileMapFactory {
             }
         }
 
-        return new TileMap(baseLayer, floorLayer, wallsLayer);
+        try {
+            return new TileMap(baseLayer, floorLayer, wallsLayer);
+        } catch (MissingLayersException e) {
+            throw new MapLoadException(e);
+        }
     }
 
     /**
@@ -86,17 +91,19 @@ public class TileMapFactory {
      *
      * @param inputFile map.xml file
      * @return map.xml root {@link Node Node}
-     * @throws IOException                  missing file or read error.
-     * @throws ParserConfigurationException {@link DocumentBuilder DOM parser} exception.
-     * @throws SAXException                 {@link DocumentBuilder DOM parser} exception.
+     * @throws MapLoadException When there was an error loading the map.
      */
-    private static Node loadXmlMap(File inputFile) throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(inputFile);
-        document.getDocumentElement().normalize();
+    private static Node loadXmlMap(File inputFile) throws MapLoadException {
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(inputFile);
+            document.getDocumentElement().normalize();
 
-        return document.getDocumentElement();
+            return document.getDocumentElement();
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new MapLoadException(e);
+        }
     }
 
     /**
@@ -104,28 +111,29 @@ public class TileMapFactory {
      *
      * @param inputFile tileset.xml file.
      * @return {@link NodeList NodeList} containing elements named "tile"
-     * @throws IOException                  missing file or read error.
-     * @throws ParserConfigurationException {@link DocumentBuilder DOM parser} exception.
-     * @throws SAXException                 {@link DocumentBuilder DOM parser} exception.
+     * @throws MapLoadException When there was an error loading the map.
      */
-    private static NodeList loadXmlTileset(File inputFile) throws IOException, ParserConfigurationException,
-        SAXException {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(inputFile);
-        document.getDocumentElement().normalize();
+    private static NodeList loadXmlTileset(File inputFile) throws MapLoadException {
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(inputFile);
+            document.getDocumentElement().normalize();
+            return document.getElementsByTagName("tile");
 
-        return document.getElementsByTagName("tile");
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            throw new MapLoadException(e);
+        }
     }
 
     /**
      * Parses CSV map String and builds {@link Tile Tile[][]}.
      *
-     * @param input   map CSV String.
-     * @param width   map width.
-     * @param height  map height.
+     * @param input   Map CSV String.
+     * @param width   Map width.
+     * @param height  Map height.
      * @param tileset {@link NodeList NodeList} of tiles.
-     * @param world   the world to bind the body to.
+     * @param world   The world to bind the body to.
      * @return {@link Tile Tile[][]}.
      * @throws InvalidPropertiesFormatException thrown on misdefined tile properties.
      */

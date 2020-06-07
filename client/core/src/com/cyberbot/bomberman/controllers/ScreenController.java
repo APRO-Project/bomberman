@@ -3,7 +3,7 @@ package com.cyberbot.bomberman.controllers;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.cyberbot.bomberman.core.models.net.packets.*;
-import com.cyberbot.bomberman.core.models.tiles.MissingLayersException;
+import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.core.utils.Utils;
 import com.cyberbot.bomberman.net.ClientControlListener;
 import com.cyberbot.bomberman.net.ControlService;
@@ -16,9 +16,7 @@ import com.cyberbot.bomberman.screens.login.LoginScreen;
 import com.cyberbot.bomberman.screens.menu.MenuInteraction;
 import com.cyberbot.bomberman.screens.menu.MenuScreen;
 import org.jetbrains.annotations.NotNull;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
@@ -183,7 +181,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
                 );
                 setScreen(gameScreen);
 
-            } catch (IOException | MissingLayersException | ParserConfigurationException | SAXException e) {
+            } catch (MapLoadException e) {
                 e.printStackTrace();
                 showError("Failed to start game");
             }

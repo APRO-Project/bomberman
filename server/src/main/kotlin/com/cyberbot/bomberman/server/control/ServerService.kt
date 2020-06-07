@@ -46,7 +46,24 @@ class ServerService(
         }
     }
 
-    override fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
+    override fun onPacket(payload: ControlPacket, service: ClientControlService) {
+        when (payload) {
+            is ClientRegisterRequest -> onClientRegister(payload, service)
+            is LobbyCreateRequest -> onLobbyCreate(payload, service)
+            is LobbyJoinRequest -> onLobbyJoin(payload, service)
+            is LobbyLeaveRequest -> onLobbyLeave(service)
+            is GameStartRequest -> onGameStart(payload, service)
+            else -> logger.error { "Unsupported packet type ${payload.javaClass.simpleName}" }
+        }
+    }
+
+    override fun onClientDisconnected(service: ClientControlService) {
+        logger.info { "Client disconnected: ${service.client?.id}" }
+        clientHandlers.remove(service.client)
+        removeClientFromLobby(service.client)
+    }
+
+    private fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
         service.apply {
             logger.debug { "Client register request: ${request.nick}" }
             val nick = request.nick
@@ -77,7 +94,7 @@ class ServerService(
         }
     }
 
-    override fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
+    private fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
         service.apply {
             if (lobbies.size < maxLobbyCount) {
                 val lobby = createLobby(client!!)
@@ -94,7 +111,7 @@ class ServerService(
         }
     }
 
-    override fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
+    private fun onLobbyJoin(request: LobbyJoinRequest, service: ClientControlService) {
         service.apply {
             val lobby = lobbies[request.id]
             if (lobby == null || lobby.locked) {
@@ -116,11 +133,11 @@ class ServerService(
         }
     }
 
-    override fun onLobbyLeave(service: ClientControlService) {
+    private fun onLobbyLeave(service: ClientControlService) {
         removeClientFromLobby(service.client)
     }
 
-    override fun onGameStart(request: GameStartRequest, service: ClientControlService) {
+    private fun onGameStart(request: GameStartRequest, service: ClientControlService) {
         val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
@@ -131,10 +148,7 @@ class ServerService(
 
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
-            val data = PlayerData(
-                id,
-                Session.getPlayerSpawnPosition(i), Inventory(), i
-            )
+            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i, 100)
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
@@ -143,12 +157,6 @@ class ServerService(
         lobby.locked = true
 
         Thread(session, "Session Thread - ${session.port}").start()
-    }
-
-    override fun onClientDisconnected(service: ClientControlService) {
-        logger.info { "Client disconnected: ${service.client?.id}" }
-        clientHandlers.remove(service.client)
-        removeClientFromLobby(service.client)
     }
 
     private fun removeClientFromLobby(client: Client?) {

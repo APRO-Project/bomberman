@@ -34,14 +34,14 @@
         <properties>
             <property name="texture" value="Box1"/>
             <property name="tile_type" value="wall"/>
-            <property name="durability" value="1" type="float"/>
+            <property name="durability" value="10" type="float"/>
         </properties>
     </tile>
     <tile id="5">
         <properties>
             <property name="texture" value="Box2"/>
             <property name="tile_type" value="wall"/>
-            <property name="durability" value="1" type="float"/>
+            <property name="durability" value="20" type="float"/>
         </properties>
     </tile>
     <tile id="6">
