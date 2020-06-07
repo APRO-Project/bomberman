@@ -256,6 +256,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
                 float delta = 1f / SIM_RATE;
                 movementController.onActions(actions);
                 movementController.update(delta);
+                simulatedPlayer.updateFromEnvironment(map);
                 world.step(delta, 6, 2);
             }
 
@@ -389,7 +390,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         int sequence = packet.getSequence();
         PlayerState localState = playerStateQueue.removeUntil(sequence);
 
-        if (localState != null) {
+        // Do not attempt to validate player while it's position is still being interpolated from a previous replay
+        if (localState != null && playerToInterpEnd == null) {
             validatePlayerPosition(localState, packet.getSnapshot());
         }
 
