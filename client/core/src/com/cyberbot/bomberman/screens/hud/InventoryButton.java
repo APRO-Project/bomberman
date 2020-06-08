@@ -18,7 +18,7 @@ public class InventoryButton extends Actor {
     private final Stack mainWidget;
     private final Label labelQuantity;
 
-    private final ImageButton button;
+    private final Button button;
     private final TextureRegionDrawable region;
 
     public InventoryButton(ItemType type, Skin skin) {
@@ -27,11 +27,9 @@ public class InventoryButton extends Actor {
 
         region = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("placeholder"));
 
-        ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-        buttonStyle.imageUp = region;
+        Button.ButtonStyle buttonStyle = new Button.ButtonStyle();
         buttonStyle.checked = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("button_checked"));
-
-        button = new ImageButton(buttonStyle);
+        button = new Button(buttonStyle);
 
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = skin.get("default_font", BitmapFont.class);
@@ -42,12 +40,13 @@ public class InventoryButton extends Actor {
         labelQuantity.setFontScale(0.5f);
 
         Container<Label> labelContainer = new Container<>(labelQuantity);
-        labelContainer.align(Align.bottomRight)
-            .pad(1);
+        labelContainer.align(Align.bottomRight).pad(1);
 
         mainWidget = new Stack();
-        mainWidget.add(button);
+        mainWidget.add(new Image(region));
         mainWidget.add(labelContainer);
+
+        button.add(mainWidget).pad(8).align(Align.center);
     }
 
     public void updateDrawable() {
@@ -96,10 +95,10 @@ public class InventoryButton extends Actor {
     }
 
     public Actor getMainWidget() {
-        return mainWidget;
+        return button;
     }
 
-    public ImageButton getButton() {
+    public Button getButton() {
         return button;
     }
 

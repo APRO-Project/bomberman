@@ -35,7 +35,7 @@ public final class InventoryView extends Table {
 
     private final InventoryButton[] effectButtons;
     private final InventoryButton[] itemButtons;
-    private final ButtonGroup<ImageButton> itemButtonGroup;
+    private final ButtonGroup<Button> itemButtonGroup;
     private int currentItem;
 
     private PlayerEntity playerEntity;
@@ -69,8 +69,13 @@ public final class InventoryView extends Table {
             effectButtons[i] = new InventoryButton(null, skin);
             itemButtons[i] = new InventoryButton(null, skin);
 
-            effects.add(effectButtons[i].getMainWidget()).padBottom(PPM / 2).row();
-            items.add(itemButtons[i].getMainWidget()).padBottom(PPM / 2).row();
+            float pad = PPM / 2;
+            if(i == MAX_SLOTS - 1) {
+                pad = 0;
+            }
+
+            effects.add(effectButtons[i].getMainWidget()).padBottom(pad).row();
+            items.add(itemButtons[i].getMainWidget()).padBottom(pad).row();
         }
 
         add(inventoryLabel)
@@ -83,7 +88,6 @@ public final class InventoryView extends Table {
             .fillY()
             .minWidth(2)
             .prefWidth(2);
-
         add(items).expandX();
     }
 
