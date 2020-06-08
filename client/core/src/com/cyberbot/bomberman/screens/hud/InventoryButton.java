@@ -1,20 +1,29 @@
 package com.cyberbot.bomberman.screens.hud;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class InventoryButton extends Actor {
 
-    protected ImageButton button;
-    protected TextureRegionDrawable region;
     ItemType type;
+    private int quantity;
 
-    public InventoryButton(ItemType type) {
+    private final Stack mainWidget;
+    private final Label labelQuantity;
+
+    private final ImageButton button;
+    private final TextureRegionDrawable region;
+
+    public InventoryButton(ItemType type, Skin skin) {
         this.type = type;
+        quantity = 0;
 
         region = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("placeholder"));
 
@@ -23,6 +32,22 @@ public class InventoryButton extends Actor {
         buttonStyle.checked = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("button_checked"));
 
         button = new ImageButton(buttonStyle);
+
+        Label.LabelStyle style = new Label.LabelStyle();
+        style.font = skin.get("default_font", BitmapFont.class);
+        style.fontColor = skin.get("white", Color.class);
+        style.background = new TextureRegionDrawable(Atlas.getSkinAtlas().findRegion("label_background"));
+
+        labelQuantity = new Label(null, style);
+        labelQuantity.setFontScale(0.5f);
+
+        Container<Label> labelContainer = new Container<>(labelQuantity);
+        labelContainer.align(Align.bottomRight)
+            .pad(1);
+
+        mainWidget = new Stack();
+        mainWidget.add(button);
+        mainWidget.add(labelContainer);
     }
 
     public void updateDrawable() {
@@ -50,8 +75,20 @@ public class InventoryButton extends Actor {
         }
     }
 
+    public void setQuantity(int updatedQuantity) {
+        quantity = updatedQuantity;
+        if(!isEmpty())
+            labelQuantity.setText(String.valueOf(quantity));
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
     public void makeEmpty() {
         type = null;
+        quantity = 0;
+        labelQuantity.setText(null);
     }
 
     public boolean isEmpty() {
@@ -59,11 +96,15 @@ public class InventoryButton extends Actor {
     }
 
     public Actor getMainWidget() {
+        return mainWidget;
+    }
+
+    public ImageButton getButton() {
         return button;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        button.draw(batch, parentAlpha);
+        mainWidget.draw(batch, parentAlpha);
     }
 }
