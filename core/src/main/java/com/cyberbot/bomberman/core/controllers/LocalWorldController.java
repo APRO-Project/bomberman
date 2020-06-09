@@ -45,6 +45,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     private PlayerEntity localPlayer;
     private boolean playerAlive;
+    private final HashMap<Long, Boolean> playersAlive;
 
     private final List<WorldChangeListener> listeners;
 
@@ -96,6 +97,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         this.playerToInterpStart = null;
         this.playerToInterpEnd = null;
         this.playerAlive = true;
+        this.playersAlive = new HashMap<>();
     }
 
     @Override
@@ -349,8 +351,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         createdEntities.forEach(it -> entities.put(it.getId(), it));
 
         // Notify any listeners about changes
-        listeners.forEach(l -> removed.forEach(l::onEntityRemoved));
-        listeners.forEach(l -> createdEntities.forEach(l::onEntityAdded));
+        removed.forEach(this::onEntityRemoved);
+        createdEntities.forEach(this::onEntityAdded);
+
+        updated.stream()
+            .map(EntityDataPair::getEntity)
+            .filter(it -> it instanceof PlayerEntity && playersAlive.get(it.getId()) && ((PlayerEntity) it).isDead())
+            .forEach(it -> onPlayerDied((PlayerEntity) it));
     }
 
     private void applySnapshotToWalls(GameSnapshot snapshot) {
@@ -370,6 +377,19 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             walls.put(it.hashCode(), it);
             map.addWall(it);
         });
+    }
+
+    private void onEntityAdded(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityAdded(entity));
+    }
+
+    private void onEntityRemoved(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityRemoved(entity));
+    }
+
+    private void onPlayerDied(PlayerEntity entity) {
+        playersAlive.put(entity.getId(), false);
+        listeners.forEach(listener -> listener.onPlayerDied(entity));
     }
 
     private List<Entity> getRemovedEntities(GameSnapshot snapshot) {

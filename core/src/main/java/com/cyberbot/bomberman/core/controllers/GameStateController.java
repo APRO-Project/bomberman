@@ -62,6 +62,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Update players
         players.forEach(player -> player.updateFromEnvironment(map));
+
+        players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
+            playerEntity.dispose();
+            onPlayerDied(playerEntity);
+        });
     }
 
     @Override
@@ -265,11 +270,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
                 return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
             }
         ).forEach(playerEntity -> playerEntity.takeDamage(power));
-
-        players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
-            playerEntity.dispose();
-            onPlayerDied(playerEntity);
-        });
     }
 
     /**
