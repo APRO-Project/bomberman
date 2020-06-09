@@ -9,27 +9,34 @@ import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
+import com.cyberbot.bomberman.core.utils.scheduleAtFixedRate
 import com.cyberbot.bomberman.server.models.ClientConnection
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.DatagramPacket
+import java.util.*
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 import kotlin.concurrent.withLock
 
-class Session(private val socket: GameSocket) {
+class Session(private val socket: GameSocket, private val gameStopDelay: Long = 5000) {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
     private val gameStateController: GameStateController
     private val world: World = World(Vector2(0F, 0F), false)
     private val simulationService = ScheduledThreadPoolExecutor(1)
     private val tickService = ScheduledThreadPoolExecutor(1)
     private var lastUpdate = System.currentTimeMillis()
+    private val worldUpdateLock = ReentrantLock()
+
+    private val worldUpdatedCondition = worldUpdateLock.newCondition()
+
+    var gameFinished = false
+        private set
     var gameStarted: Boolean = false
         private set
-
-    private val worldUpdateLock = ReentrantLock()
-    private val worldUpdatedCondition = worldUpdateLock.newCondition()
 
     init {
         val mapPath = Thread.currentThread().contextClassLoader.getResource("map/bomberman_main.tmx")
@@ -47,8 +54,10 @@ class Session(private val socket: GameSocket) {
 
     fun addClient(connection: ClientConnection, player: PlayerData) {
         check(!gameStarted) { "The game has already started, cannot add clients" }
+
         val playerEntity = player.createEntity(world)
         gameStateController.addPlayer(playerEntity)
+
         val playerSession = PlayerSession(playerEntity)
         clientSessions[connection] = playerSession
         playerSession.addListener(gameStateController)
@@ -98,35 +107,39 @@ class Session(private val socket: GameSocket) {
 
     private fun stopGame() {
         check(gameStarted) { "The game has not yet been started" }
+
         simulationService.shutdown()
         tickService.shutdown()
+
+        simulationService.awaitTermination(500, TimeUnit.MILLISECONDS)
+        tickService.awaitTermination(500, TimeUnit.MILLISECONDS)
+
+        gameStateController.dispose()
+        world.dispose()
+
         socket.gameStopped()
     }
 
     private fun scheduleSimulationUpdates() {
-        simulationService.scheduleAtFixedRate(
-            {
-                try {
-                    val t0 = System.currentTimeMillis()
-                    update((t0 - lastUpdate) / 1000f)
-                    lastUpdate = t0
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            },
-            0,
-            1000000 / Constants.SIM_RATE.toLong(),
-            TimeUnit.MICROSECONDS
-        )
+        simulationService.scheduleAtFixedRate(1000000L / Constants.SIM_RATE, 0, TimeUnit.MICROSECONDS) {
+            try {
+                val t0 = System.currentTimeMillis()
+                update((t0 - lastUpdate) / 1000f)
+                lastUpdate = t0
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun scheduleTickUpdates() {
-        tickService.scheduleAtFixedRate(
-            this::tick,
-            0,
-            1000000 / Constants.TICK_RATE.toLong(),
-            TimeUnit.MICROSECONDS
-        )
+        tickService.scheduleAtFixedRate(1000000L / Constants.TICK_RATE, 0, TimeUnit.MICROSECONDS) {
+            try {
+                tick()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     @Synchronized
@@ -137,13 +150,12 @@ class Session(private val socket: GameSocket) {
         }
 
         clientSessions.values.removeIf { it.isPlayerDead() }
-        if (clientSessions.isEmpty()) {
-            stopGame()
+        if (!gameFinished && clientSessions.isEmpty()) {
+            gameFinished = true
+            Timer().schedule(gameStopDelay) { stopGame() }
         }
 
-        for (session in clientSessions.values) {
-            session.update(delta)
-        }
+        clientSessions.map { it.value }.forEach { it.update(delta) }
         gameStateController.update(delta)
     }
 

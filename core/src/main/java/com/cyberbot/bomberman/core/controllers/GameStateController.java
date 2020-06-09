@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -58,22 +59,25 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Remove any entities that have been marked to be removed
         Stream.of(players, collectibles, bombs)
-            .forEach(it -> it.removeIf(Entity::isMarkedToRemove));
+            .forEach(list -> list.removeIf(Entity::isMarkedToRemove));
+
+        // Dispose any entities that have not yet been disposed and are marked for removal
+        entityStream()
+            .filter(Predicate.not(Entity::isRemoved).and(Entity::isMarkedToRemove))
+            .forEach(this::onEntityRemoved);
 
         // Update players
         players.forEach(player -> player.updateFromEnvironment(map));
 
-        players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
-            playerEntity.dispose();
-            onPlayerDied(playerEntity);
-        });
+        players.stream()
+            .filter(Predicate.not(PlayerEntity::isRemoved).and(PlayerEntity::isDead))
+            .forEach(this::onPlayerDied);
     }
 
     @Override
     public void dispose() {
         map.dispose();
-        bombs.forEach(Entity::dispose);
-        players.forEach(PlayerEntity::dispose);
+        entityStream().filter(Predicate.not(Entity::isRemoved)).forEach(this::onEntityRemoved);
     }
 
     public void addPlayer(PlayerEntity player) {
@@ -182,17 +186,17 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     private void onEntityRemoved(Entity entity) {
+        entity.dispose();
         listeners.forEach(listener -> listener.onEntityRemoved(entity));
     }
 
     private void onPlayerDied(PlayerEntity entity) {
+        entity.dispose();
         listeners.forEach(listener -> listener.onPlayerDied(entity));
     }
 
     private void onBombExploded(BombEntity bomb) {
-        onEntityRemoved(bomb);
         bomb.markToRemove();
-        bomb.dispose();
 
         float bombRange = bomb.getRange();
         int range = (int) bombRange;
@@ -318,7 +322,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             }
 
             other.markToRemove();
-            onEntityRemoved(other);
         }
     }
 }
