@@ -147,7 +147,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         }
 
         if (other instanceof PlayerEntity) {
-            return; //throw new RuntimeException("Contact detected between two PlayerEntities");
+            return;
         }
 
         handleContact(player, other);
@@ -178,6 +178,10 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
     private void onEntityRemoved(Entity entity) {
         listeners.forEach(listener -> listener.onEntityRemoved(entity));
+    }
+
+    private void onPlayerDied(PlayerEntity entity) {
+        listeners.forEach(listener -> listener.onPlayerDied(entity));
     }
 
     private void onBombExploded(BombEntity bomb) {
@@ -263,9 +267,8 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         ).forEach(playerEntity -> playerEntity.takeDamage(power));
 
         players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
-            playerEntity.markToRemove();
             playerEntity.dispose();
-            onEntityRemoved(playerEntity);
+            onPlayerDied(playerEntity);
         });
     }
 
