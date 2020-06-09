@@ -199,13 +199,13 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         TileMapLayer walls = map.getWalls();
 
-        damagePlayers(x, y, (int) (bombPower * 2));
+        damagePlayers(x, y, (bombPower * 2));
 
         // Right
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x + i, y);
 
-            damagePlayers(x + i, y, (int) powerRight);
+            damagePlayers(x + i, y, powerRight);
             powerRight = damageTile(tile, powerRight);
             powerRight = Math.max(0, powerRight - bomb.getPowerDropoff());
 
@@ -218,7 +218,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x - i, y);
 
-            damagePlayers(x - i, y, (int) powerLeft);
+            damagePlayers(x - i, y, powerLeft);
             powerLeft = damageTile(tile, powerLeft);
             powerLeft = Math.max(0, powerLeft - bomb.getPowerDropoff());
 
@@ -231,7 +231,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y + i);
 
-            damagePlayers(x, y + i, (int) powerUp);
+            damagePlayers(x, y + i, powerUp);
             powerUp = damageTile(tile, powerUp);
             powerUp = Math.max(0, powerUp - bomb.getPowerDropoff());
 
@@ -244,7 +244,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         for (int i = 1; i <= range; i++) {
             Tile tile = walls.getTile(x, y - i);
 
-            damagePlayers(x, y - i, (int) powerDown);
+            damagePlayers(x, y - i, powerDown);
             powerDown = damageTile(tile, powerDown);
             powerDown = Math.max(0, powerDown - bomb.getPowerDropoff());
 
@@ -254,13 +254,14 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         }
     }
 
-    private void damagePlayers(int x, int y, int power) {
+    private void damagePlayers(int x, int y, float power) {
         players.stream().filter(playerEntity ->
             {
                 Vector2 playerPosition = playerEntity.getPosition();
                 return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
             }
-        ).forEach(playerEntity -> playerEntity.subtractHp(power));
+        ).forEach(playerEntity -> playerEntity.takeDamage(power));
+
         players.stream().filter(PlayerEntity::isDead).forEach(playerEntity -> {
             playerEntity.markToRemove();
             playerEntity.dispose();

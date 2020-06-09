@@ -49,10 +49,10 @@ class ServerService(
     override fun onPacket(payload: ControlPacket, service: ClientControlService) {
         when (payload) {
             is ClientRegisterRequest -> onClientRegister(payload, service)
-            is LobbyCreateRequest -> onLobbyCreate(payload, service)
+            is LobbyCreateRequest -> onLobbyCreate(service)
             is LobbyJoinRequest -> onLobbyJoin(payload, service)
             is LobbyLeaveRequest -> onLobbyLeave(service)
-            is GameStartRequest -> onGameStart(payload, service)
+            is GameStartRequest -> onGameStart(service)
             else -> logger.error { "Unsupported packet type ${payload.javaClass.simpleName}" }
         }
     }
@@ -94,7 +94,7 @@ class ServerService(
         }
     }
 
-    private fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
+    private fun onLobbyCreate(service: ClientControlService) {
         service.apply {
             if (lobbies.size < maxLobbyCount) {
                 val lobby = createLobby(client!!)
@@ -137,7 +137,7 @@ class ServerService(
         removeClientFromLobby(service.client)
     }
 
-    private fun onGameStart(request: GameStartRequest, service: ClientControlService) {
+    private fun onGameStart(service: ClientControlService) {
         val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 

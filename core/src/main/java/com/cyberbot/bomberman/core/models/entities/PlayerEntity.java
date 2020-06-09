@@ -52,8 +52,8 @@ public class PlayerEntity extends Entity {
         hp = Math.min(100, hp + value);
     }
 
-    public void subtractHp(int value) {
-        hp = Math.max(0, hp - value);
+    public void takeDamage(float power) {
+        hp = (int) (Math.max(0, hp - power) * inventory.getArmorMultiplier());
     }
 
     public PlayerEntity(World world, PlayerDef def, long id) {

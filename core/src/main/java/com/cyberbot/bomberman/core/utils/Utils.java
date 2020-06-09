@@ -38,18 +38,6 @@ public final class Utils {
         return null;
     }
 
-    public static boolean isSequenceNext(int sequence, int previous) {
-        return isSequenceNext(sequence, previous, Integer.MAX_VALUE / 100);
-    }
-
-    public static boolean isSequenceNext(int sequence, int previous, int maxDrop) {
-        if (Math.abs(sequence - previous) < maxDrop) {
-            return sequence >= previous;
-        } else {
-            return sequence <= previous;
-        }
-    }
-
     public static String generateLobbyId(int length) {
         return RandomStringUtils.randomNumeric(length);
     }

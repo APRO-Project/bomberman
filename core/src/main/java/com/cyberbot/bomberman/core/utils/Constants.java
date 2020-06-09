@@ -24,7 +24,7 @@ public final class Constants {
     /**
      * How many times per second a snapshot is sent over the network.
      */
-    public static final int TICK_RATE = 20;
+    public static final int TICK_RATE = 60;
 
     public static final int LOBBY_ID_LENGTH = 5;
 }
