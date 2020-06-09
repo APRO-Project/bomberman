@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public final class InventoryView extends Table {
-    // TODO: Merge InventoryButton and InventoryItemButton together
 
     private static final List<ItemType> ITEMS;
     private static final List<ItemType> EFFECTS;
+    private static final int MAX_SLOTS = 5;
 
     static {
         ITEMS = Arrays.asList(
@@ -34,23 +34,23 @@ public final class InventoryView extends Table {
     }
 
     private final InventoryButton[] effectButtons;
-    private final InventoryItemButton[] itemButtons;
-    private final ButtonGroup<ImageButton> itemButtonGroup;
+    private final InventoryButton[] itemButtons;
+    private final ButtonGroup<Button> itemButtonGroup;
     private int currentItem;
 
     private PlayerEntity playerEntity;
 
     public InventoryView(Skin skin) {
-        effectButtons = new InventoryButton[5];
-        itemButtons = new InventoryItemButton[5];
+        effectButtons = new InventoryButton[MAX_SLOTS];
+        itemButtons = new InventoryButton[MAX_SLOTS];
 
         this.playerEntity = null;
 
         init(skin);
 
         itemButtonGroup = new ButtonGroup<>();
-        for (int i = 0; i < 5; ++i) {
-            itemButtonGroup.add(itemButtons[i].button);
+        for (int i = 0; i < MAX_SLOTS; ++i) {
+            itemButtonGroup.add(itemButtons[i].getButton());
         }
         itemButtonGroup.setMaxCheckCount(1);
         itemButtonGroup.setMinCheckCount(0);
@@ -65,12 +65,17 @@ public final class InventoryView extends Table {
         Table items = new Table();
         NinePatch separator = new NinePatch(Atlas.getSkinAtlas().findRegion("separator"));
 
-        for (int i = 0; i < 5; ++i) {
-            effectButtons[i] = new InventoryButton(null);
-            itemButtons[i] = new InventoryItemButton(null, skin);
+        for (int i = 0; i < MAX_SLOTS; ++i) {
+            effectButtons[i] = new InventoryButton(null, skin);
+            itemButtons[i] = new InventoryButton(null, skin);
 
-            effects.add(effectButtons[i].getMainWidget()).padBottom(PPM / 2).row();
-            items.add(itemButtons[i].getMainWidget()).padBottom(PPM / 2).row();
+            float pad = PPM / 2;
+            if(i == MAX_SLOTS - 1) {
+                pad = 0;
+            }
+
+            effects.add(effectButtons[i].getMainWidget()).padBottom(pad).row();
+            items.add(itemButtons[i].getMainWidget()).padBottom(pad).row();
         }
 
         add(inventoryLabel)
@@ -83,7 +88,6 @@ public final class InventoryView extends Table {
             .fillY()
             .minWidth(2)
             .prefWidth(2);
-
         add(items).expandX();
     }
 
@@ -113,18 +117,23 @@ public final class InventoryView extends Table {
                 if (slot != -1) {
                     effectButtons[slot].type = stack.getItemType();
                     effectButtons[slot].updateDrawable();
+                    effectButtons[slot].setQuantity(stack.getQuantity());
                     change = true;
                 }
-            } else if (correspondingButton.isPresent() && stack.getQuantity() == 0) {
-                correspondingButton.get().makeEmpty();
-                correspondingButton.get().updateDrawable();
-                change = true;
+            } else if (correspondingButton.isPresent()) {
+                if (stack.getQuantity() != 0) {
+                    correspondingButton.get().setQuantity(stack.getQuantity());
+                } else {
+                    correspondingButton.get().makeEmpty();
+                    correspondingButton.get().updateDrawable();
+                    change = true;
+                }
             }
         }
 
         // Items
         for (ItemStack stack : itemStacks) {
-            final Optional<InventoryItemButton> correspondingButton = Arrays.stream(itemButtons)
+            final Optional<InventoryButton> correspondingButton = Arrays.stream(itemButtons)
                 .filter(btn -> btn.type == stack.getItemType())
                 .findFirst();
 
@@ -145,23 +154,24 @@ public final class InventoryView extends Table {
     }
 
     private void rearrangeButtons() {
-        final List<ItemType> partitionedEffects = Arrays.stream(effectButtons)
+        final List<ImmutablePair<ItemType, Integer>> partitionedEffects = Arrays.stream(effectButtons)
             .collect(Collectors.partitioningBy(InventoryButton::isEmpty))
-            .values().stream()
-            .flatMap(List::stream)
-            .map(btn -> btn.type)
-            .collect(Collectors.toList());
-
-        final List<ImmutablePair<ItemType, Integer>> partitionedItems = Arrays.stream(itemButtons)
-            .collect(Collectors.partitioningBy(InventoryItemButton::isEmpty))
             .values().stream()
             .flatMap(List::stream)
             .map(btn -> new ImmutablePair<>(btn.type, btn.getQuantity()))
             .collect(Collectors.toList());
 
-        for (int i = 0; i < effectButtons.length; ++i) {
-            effectButtons[i].type = partitionedEffects.get(i);
+        final List<ImmutablePair<ItemType, Integer>> partitionedItems = Arrays.stream(itemButtons)
+            .collect(Collectors.partitioningBy(InventoryButton::isEmpty))
+            .values().stream()
+            .flatMap(List::stream)
+            .map(btn -> new ImmutablePair<>(btn.type, btn.getQuantity()))
+            .collect(Collectors.toList());
+
+        for (int i = 0; i < MAX_SLOTS; ++i) {
+            effectButtons[i].type = partitionedEffects.get(i).getKey();
             effectButtons[i].updateDrawable();
+            effectButtons[i].setQuantity(partitionedEffects.get(i).getValue());
 
             itemButtons[i].type = partitionedItems.get(i).getKey();
             itemButtons[i].setQuantity(partitionedItems.get(i).getValue());
@@ -209,19 +219,19 @@ public final class InventoryView extends Table {
         }
 
         // Check current item
-        itemButtons[currentItem].button.setChecked(true);
+        itemButtons[currentItem].getButton().setChecked(true);
     }
 
     private void updateCurrentItem() {
         int updatedCurrentItem = -1;
 
-        for (int i = 0; i < 5; ++i) {
-            if (itemButtons[i].button.isChecked()) {
+        for (int i = 0; i < MAX_SLOTS; ++i) {
+            if (itemButtons[i].getButton().isChecked()) {
                 if (itemButtons[i].isEmpty()) {
-                    itemButtons[i].button.setChecked(false);
+                    itemButtons[i].getButton().setChecked(false);
                 } else {
                     updatedCurrentItem = i;
-                    itemButtons[i].button.setChecked(true);
+                    itemButtons[i].getButton().setChecked(true);
                 }
             }
         }
