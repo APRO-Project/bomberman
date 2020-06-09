@@ -6,6 +6,7 @@ import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
 import com.cyberbot.bomberman.server.session.Session
 import com.cyberbot.bomberman.server.session.SessionService
+import com.cyberbot.bomberman.server.session.SessionStateListener
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -19,7 +20,7 @@ class ServerService(
     private val lobbyIdLength: Int = 5,
     private val maxPlayersPerLobby: Int = 4,
     private val maxPlayerNickLength: Int = 20
-) : ClientController, Runnable, Logging {
+) : ClientController, Runnable, Logging, SessionStateListener {
     private val sessions = HashMap<String, SessionService>()
     private val clientHandlers = HashMap<Client, ClientControlService>()
     private val registeredClients = ArrayList<Client>() // TODO: Load registered client from file
@@ -61,6 +62,16 @@ class ServerService(
         logger.info { "Client disconnected: ${service.client?.id}" }
         clientHandlers.remove(service.client)
         removeClientFromLobby(service.client)
+    }
+
+    override fun onSessionStarted(session: SessionService) {
+        // TODO: Send control packets to all clients present in the session
+        logger.info { "Started game on session ${session.port}" }
+    }
+
+    override fun onSessionFinished(session: SessionService) {
+        logger.info { "Finished game on session ${session.port}" }
+        sessions.values.remove(session)
     }
 
     private fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
@@ -142,6 +153,7 @@ class ServerService(
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
         val session = SessionService()
+        session.listeners.add(this)
         sessions[lobbyId] = session
 
         logger.info { "Staring game on port ${session.port} with ${lobby.clients.size} clients" }

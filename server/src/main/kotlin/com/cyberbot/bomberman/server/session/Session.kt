@@ -96,10 +96,11 @@ class Session(private val socket: GameSocket) {
         scheduleTickUpdates()
     }
 
-    private fun pauseGame() {
+    private fun stopGame() {
         check(gameStarted) { "The game has not yet been started" }
         simulationService.shutdown()
         tickService.shutdown()
+        socket.gameStopped()
     }
 
     private fun scheduleSimulationUpdates() {
@@ -133,6 +134,11 @@ class Session(private val socket: GameSocket) {
         worldUpdateLock.withLock {
             world.step(delta, 6, 2)
             worldUpdatedCondition.signalAll()
+        }
+
+        clientSessions.values.removeIf { it.isPlayerDead() }
+        if (clientSessions.isEmpty()) {
+            stopGame()
         }
 
         for (session in clientSessions.values) {

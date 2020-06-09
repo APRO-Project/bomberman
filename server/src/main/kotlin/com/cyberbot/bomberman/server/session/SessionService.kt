@@ -13,6 +13,7 @@ class SessionService(port: Int = 0, private val bufferSize: Int = 4096) : GameSo
     val port: Int
     private val socket: DatagramSocket = DatagramSocket(port)
     private val remainingClients = HashMap<Long, PlayerData>()
+    val listeners = ArrayList<SessionStateListener>()
 
     init {
         this.port = socket.localPort
@@ -49,7 +50,7 @@ class SessionService(port: Int = 0, private val bufferSize: Int = 4096) : GameSo
 
                     if (remainingClients.size == 0) {
                         session.startGame()
-                        logger.info { "Starting game on session $port" }
+                        listeners.forEach { it.onSessionStarted(this) }
                     }
                 }
 
@@ -68,5 +69,10 @@ class SessionService(port: Int = 0, private val bufferSize: Int = 4096) : GameSo
         check(running) { "Attempting to send a packet when the service is not running" }
 
         socket.send(packet)
+    }
+
+    override fun gameStopped() {
+        running = false
+        listeners.forEach { it.onSessionFinished(this) }
     }
 }
