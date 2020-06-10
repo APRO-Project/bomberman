@@ -6,11 +6,12 @@ import java.util.Map;
 public enum ItemType {
     // Usable items
     SMALL_BOMB(0),
+    MEDIUM_BOMB(1),
 
     // Collectible items
-    UPGRADE_MOVEMENT_SPEED(1),
-    UPGRADE_REFILL_SPEED(2),
-    UPGRADE_ARMOR(3);
+    UPGRADE_MOVEMENT_SPEED(100),
+    UPGRADE_REFILL_SPEED(102),
+    UPGRADE_ARMOR(103);
 
     private final int value;
     private static final Map<Integer, ItemType> map = new HashMap<>();

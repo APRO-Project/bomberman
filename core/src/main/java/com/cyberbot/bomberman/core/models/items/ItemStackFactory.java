@@ -15,6 +15,8 @@ public class ItemStackFactory {
         switch (itemType) {
             case SMALL_BOMB:
                 return new RefilingItemStack(itemType, 3, false);
+            case MEDIUM_BOMB:
+                return new RefilingItemStack(itemType, 8);
             case UPGRADE_MOVEMENT_SPEED:
             case UPGRADE_REFILL_SPEED:
             case UPGRADE_ARMOR:

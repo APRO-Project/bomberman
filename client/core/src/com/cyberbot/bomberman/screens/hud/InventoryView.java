@@ -18,20 +18,13 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public final class InventoryView extends Table {
 
-    private static final List<ItemType> ITEMS;
-    private static final List<ItemType> EFFECTS;
-    private static final int MAX_SLOTS = 5;
+    private static final List<ItemType> ITEMS =
+        Arrays.asList(ItemType.SMALL_BOMB, ItemType.MEDIUM_BOMB);
 
-    static {
-        ITEMS = Arrays.asList(
-            ItemType.SMALL_BOMB
-        );
-        EFFECTS = Arrays.asList(
-            ItemType.UPGRADE_ARMOR,
-            ItemType.UPGRADE_MOVEMENT_SPEED,
-            ItemType.UPGRADE_REFILL_SPEED
-        );
-    }
+    private static final List<ItemType> EFFECTS =
+        Arrays.asList(ItemType.UPGRADE_ARMOR, ItemType.UPGRADE_MOVEMENT_SPEED, ItemType.UPGRADE_REFILL_SPEED);
+
+    private static final int MAX_SLOTS = 5;
 
     private final InventoryButton[] effectButtons;
     private final InventoryButton[] itemButtons;
@@ -70,7 +63,7 @@ public final class InventoryView extends Table {
             itemButtons[i] = new InventoryButton(null, skin);
 
             float pad = PPM / 2;
-            if(i == MAX_SLOTS - 1) {
+            if (i == MAX_SLOTS - 1) {
                 pad = 0;
             }
 
