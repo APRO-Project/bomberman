@@ -43,7 +43,9 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private final SnapshotQueue snapshotQueue;
     private final PlayerStateQueue playerStateQueue;
 
-    private final PlayerEntity localPlayer;
+    private PlayerEntity localPlayer;
+    private boolean playerAlive;
+    private final HashMap<Long, Boolean> playersAlive;
 
     private final List<WorldChangeListener> listeners;
 
@@ -68,6 +70,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     private PlayerData playerToInterpEnd;
     private float replayInterpFraction;
+
     public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData) {
         this(world, map, tickRate, playerData, tickRate * 4);
     }
@@ -93,14 +96,18 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         this.snapshotLength = 0;
         this.playerToInterpStart = null;
         this.playerToInterpEnd = null;
+        this.playerAlive = true;
+        this.playersAlive = new HashMap<>();
     }
 
     @Override
     public void update(float delta) {
         world.step(delta, 6, 2);
-        playerActionController.update(delta);
 
-        localPlayer.updateFromEnvironment(map);
+        if (playerAlive) {
+            playerActionController.update(delta);
+            localPlayer.updateFromEnvironment(map);
+        }
 
         // Update all entities
         entities.forEach((key, entity) -> entity.update(delta));
@@ -300,13 +307,26 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             throw new ConcurrentModificationException("Cannot apply snapshot while world is locked");
         }
 
-        // FIXME: Czek for nul egzepszyn
-
-        PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
-        localPlayer.setHp(playerData.getHp());
-
+        if (playerAlive) {
+            applySnapshotToPlayer(snapshot);
+        }
         applySnapshotToEntities(snapshot);
         applySnapshotToWalls(snapshot);
+    }
+
+    private void applySnapshotToPlayer(GameSnapshot snapshot) {
+        PlayerData playerData = (PlayerData) snapshot.getEntity(localPlayer.getId());
+        if (playerData == null) {
+            playerAlive = false;
+            listeners.forEach(it -> it.onPlayerDied(localPlayer));
+            return;
+        }
+
+        localPlayer.setHp(playerData.getHp());
+        if (playerAlive && localPlayer.isDead()) {
+            listeners.forEach(it -> it.onPlayerDied(localPlayer));
+            playerAlive = false;
+        }
     }
 
     private void applySnapshotToEntities(GameSnapshot snapshot) {
@@ -331,8 +351,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         createdEntities.forEach(it -> entities.put(it.getId(), it));
 
         // Notify any listeners about changes
-        listeners.forEach(l -> removed.forEach(l::onEntityRemoved));
-        listeners.forEach(l -> createdEntities.forEach(l::onEntityAdded));
+        removed.forEach(this::onEntityRemoved);
+        createdEntities.forEach(this::onEntityAdded);
+
+        updated.stream()
+            .map(EntityDataPair::getEntity)
+            .filter(it -> it instanceof PlayerEntity && playersAlive.get(it.getId()) && ((PlayerEntity) it).isDead())
+            .forEach(it -> onPlayerDied((PlayerEntity) it));
     }
 
     private void applySnapshotToWalls(GameSnapshot snapshot) {
@@ -352,6 +377,19 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             walls.put(it.hashCode(), it);
             map.addWall(it);
         });
+    }
+
+    private void onEntityAdded(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityAdded(entity));
+    }
+
+    private void onEntityRemoved(Entity entity) {
+        listeners.forEach(listener -> listener.onEntityRemoved(entity));
+    }
+
+    private void onPlayerDied(PlayerEntity entity) {
+        playersAlive.put(entity.getId(), false);
+        listeners.forEach(listener -> listener.onPlayerDied(entity));
     }
 
     private List<Entity> getRemovedEntities(GameSnapshot snapshot) {
@@ -401,7 +439,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         PlayerState localState = playerStateQueue.removeUntil(sequence);
 
         // Do not attempt to validate player while it's position is still being interpolated from a previous replay
-        if (localState != null && playerToInterpEnd == null) {
+        if (playerAlive && localState != null && playerToInterpEnd == null) {
             validatePlayerPosition(localState, packet.getSnapshot());
         }
 
