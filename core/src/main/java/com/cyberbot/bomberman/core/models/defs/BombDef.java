@@ -17,8 +17,8 @@ public class BombDef {
 
     public BombDef(float power, float powerDropOff, float range,
                    float detonationTime, int playerTextureVariant, ItemType bombItemType) {
-        if (bombItemType != ItemType.SMALL_BOMB && bombItemType != ItemType.MEDIUM_BOMB) {
-            throw new IllegalArgumentException("Invalid bomb item type");
+        if (!bombItemType.isBomb()) {
+            throw new IllegalArgumentException("Item is not of bomb type: " + bombItemType);
         }
 
         this.power = power;

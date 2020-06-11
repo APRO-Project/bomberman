@@ -25,6 +25,10 @@ public class BombEntity extends Entity {
     public BombEntity(World world, BombDef def, long id) {
         super(world, id);
 
+        if (!def.bombItemType.isBomb()) {
+            throw new IllegalArgumentException("Item is not of bomb type: " + def.bombItemType);
+        }
+
         this.power = def.power;
         this.range = def.range;
         this.detonationTime = def.detonationTime;

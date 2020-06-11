@@ -26,11 +26,15 @@ public enum ItemType {
         }
     }
 
-    public static ItemType valueOf(int pageType) {
-        return map.get(pageType);
-    }
-
     public int getValue() {
         return value;
+    }
+
+    public boolean isBomb() {
+        return this == SMALL_BOMB || this == MEDIUM_BOMB;
+    }
+
+    public static ItemType valueOf(int pageType) {
+        return map.get(pageType);
     }
 }

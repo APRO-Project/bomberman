@@ -65,12 +65,4 @@ public final class InputController {
 
         actionListeners.forEach(it -> it.onActions(actions));
     }
-
-    private void handleItem() {
-
-    }
-
-    private void handleMove() {
-
-    }
 }

@@ -12,6 +12,10 @@ public class BombData extends EntityData<BombEntity> {
 
     public BombData(long id, Vector2 position, int playerTextureVariant, ItemType bombItemType) {
         super(id, position);
+        if (!bombItemType.isBomb()) {
+            throw new IllegalArgumentException("Item is not of bomb type: " + bombItemType);
+        }
+
         this.playerTextureVariant = playerTextureVariant;
         this.bombItemType = bombItemType;
     }
