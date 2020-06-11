@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
+import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.core.models.net.data.BombData;
 
 /**
@@ -15,21 +16,28 @@ public class BombEntity extends Entity {
     private final float powerDropoff;
     private final float range;
     private final float detonationTime;
-    private final int textureVariant;
+    private final int playerTextureVariant;
+    private final ItemType bombItemType;
 
     private float timeLeft;
     private boolean blown;
 
     public BombEntity(World world, BombDef def, long id) {
         super(world, id);
-        power = def.power;
-        range = def.range;
-        detonationTime = def.detonationTime;
 
+        if (!def.bombItemType.isBomb()) {
+            throw new IllegalArgumentException("Item is not of bomb type: " + def.bombItemType);
+        }
+
+        this.power = def.power;
+        this.range = def.range;
+        this.detonationTime = def.detonationTime;
         this.timeLeft = def.detonationTime;
-        textureVariant = def.textureVariant;
+        this.playerTextureVariant = def.playerTextureVariant;
+        this.powerDropoff = def.powerDropOff;
+        this.bombItemType = def.bombItemType;
+
         this.blown = false;
-        powerDropoff = def.powerDropOff;
     }
 
     @Override
@@ -72,7 +80,7 @@ public class BombEntity extends Entity {
 
     @Override
     public BombData getData() {
-        return new BombData(id, getPosition(), textureVariant);
+        return new BombData(id, getPosition(), playerTextureVariant, bombItemType);
     }
 
     public float getRange() {
@@ -91,11 +99,15 @@ public class BombEntity extends Entity {
         return blown;
     }
 
-    public int getTextureVariant() {
-        return textureVariant;
+    public int getPlayerTextureVariant() {
+        return playerTextureVariant;
     }
 
     public float getPowerDropoff() {
         return powerDropoff;
+    }
+
+    public ItemType getBombItemType() {
+        return bombItemType;
     }
 }

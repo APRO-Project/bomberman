@@ -22,7 +22,7 @@ import kotlin.collections.HashMap
 import kotlin.concurrent.schedule
 import kotlin.concurrent.withLock
 
-class Session(private val socket: GameSocket, private val gameStopDelay: Long = 5000) {
+class Session(private val socket: GameSocket, private val gameStopDelay: Long = 10_000) {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
     private val gameStateController: GameStateController
     private val world: World = World(Vector2(0F, 0F), false)
@@ -149,13 +149,13 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
             worldUpdatedCondition.signalAll()
         }
 
-        clientSessions.values.removeIf { it.isPlayerDead() }
+        // TODO: Check if only one player remained
         if (!gameFinished && clientSessions.isEmpty()) {
             gameFinished = true
             Timer().schedule(gameStopDelay) { stopGame() }
         }
 
-        clientSessions.map { it.value }.forEach { it.update(delta) }
+        clientSessions.map { it.value }.filter { !it.isPlayerDead() }.forEach { it.update(delta) }
         gameStateController.update(delta)
     }
 

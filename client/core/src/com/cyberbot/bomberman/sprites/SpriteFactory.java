@@ -6,6 +6,7 @@ import com.cyberbot.bomberman.core.models.entities.BombEntity;
 import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
 import com.cyberbot.bomberman.utils.Atlas;
@@ -41,7 +42,14 @@ public class SpriteFactory {
     }
 
     public static Sprite createSprite(BombEntity entity) {
-        return Atlas.getInstance().createSprite("DynamiteStatic");
+        switch (getBombVariant(entity)) {
+            case BombSprite.VARIANT_SMALL_RED:
+                return Atlas.getInstance().createSprite("DynamiteStatic");
+            case BombSprite.VARIANT_MEDIUM_RED:
+                return Atlas.getInstance().createSprite("Player_wrb_idle_right"); // TODO: Replace with valid texture
+        }
+
+        throw new IllegalArgumentException("Invalid texture variant " + entity.getPlayerTextureVariant());
     }
 
     public static Sprite createSprite(PlayerEntity player) {
@@ -52,6 +60,8 @@ public class SpriteFactory {
         switch (collectible.getItemType()) {
             case SMALL_BOMB:
                 return Atlas.getInstance().createSprite("DynamiteStatic");
+            case MEDIUM_BOMB:
+                return Atlas.getInstance().createSprite("Player_wrb_idle_right");
             case UPGRADE_MOVEMENT_SPEED:
                 return Atlas.getInstance().createSprite("ArrowFast");
             case UPGRADE_ARMOR:
@@ -62,10 +72,22 @@ public class SpriteFactory {
 
         }
 
-        throw new UnsupportedOperationException("Unsupported item type");
+        throw new IllegalArgumentException("Unsupported item type");
     }
 
     public static List<TileSprite> createTilesFromMapLayer(TileMapLayer layer) {
         return layer.stream().map(TileSprite::new).collect(Collectors.toList());
+    }
+
+    public static int getBombVariant(BombEntity bombEntity) {
+        ItemType type = bombEntity.getBombItemType();
+        switch (type) {
+            case SMALL_BOMB:
+                return BombSprite.VARIANT_SMALL_RED; // TODO: Check the player texture variant
+            case MEDIUM_BOMB:
+                return BombSprite.VARIANT_MEDIUM_RED; // TODO: Check the player texture variant
+        }
+
+        throw new IllegalArgumentException("Not a bomb item type " + type);
     }
 }

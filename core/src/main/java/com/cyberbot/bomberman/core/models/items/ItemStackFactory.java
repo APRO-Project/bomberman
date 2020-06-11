@@ -11,14 +11,19 @@ public class ItemStackFactory {
      * @return An empty stack.
      * @throws IllegalArgumentException When the item type was not valid.
      */
+    @SuppressWarnings("DuplicateBranchesInSwitch") /* For better clarity */
     public static ItemStack createStack(ItemType itemType) {
         switch (itemType) {
             case SMALL_BOMB:
-                return new RefilingItemStack(itemType, 3);
+                return new RefilingItemStack(itemType, 3, false);
+            case MEDIUM_BOMB:
+                return new RefilingItemStack(itemType, 8);
             case UPGRADE_MOVEMENT_SPEED:
+                return new ItemStack(itemType, 3);
             case UPGRADE_REFILL_SPEED:
+                return new ItemStack(itemType, 4);
             case UPGRADE_ARMOR:
-                return new ItemStack(itemType, 5);
+                return new ItemStack(itemType, 3);
             default:
                 throw new IllegalArgumentException("Invalid item type");
         }

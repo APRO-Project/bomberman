@@ -91,10 +91,18 @@ public class Inventory implements Updatable, Serializable {
 
     @Override
     public void update(float delta) {
+        float deltaWithMultiplier = delta * getRefillSpeedMultiplier();
+
         items.stream()
-            .filter(i -> i instanceof Updatable)
-            // TODO: Remove the refill speed multiplier
-            .forEach(i -> ((Updatable) i).update(delta * getRefillSpeedMultiplier()));
+            .filter(it -> it instanceof RefilingItemStack)
+            .map(it -> (RefilingItemStack) it) /* What the hell?? It IS the instance of RefilingItemStack already */
+            .forEach(it -> {
+                if (it.isAffectedByModifier()) {
+                    it.update(deltaWithMultiplier);
+                } else {
+                    it.update(delta);
+                }
+            });
     }
 
     public float getMovementSpeedMultiplier() {

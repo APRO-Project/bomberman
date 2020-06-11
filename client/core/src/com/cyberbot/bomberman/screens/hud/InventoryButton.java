@@ -55,12 +55,16 @@ public class InventoryButton extends Actor {
             return;
         }
 
+        // TODO: Move texture resolution to sprite factory  for consistency
         switch (type) {
             case UPGRADE_MOVEMENT_SPEED:
                 region.setRegion(Atlas.getInstance().findRegion("ArrowFast"));
                 break;
             case SMALL_BOMB:
                 region.setRegion(Atlas.getInstance().findRegion("DynamiteStatic"));
+                break;
+            case MEDIUM_BOMB:
+                region.setRegion(Atlas.getInstance().findRegion("Player_wrb_idle_right"));
                 break;
             case UPGRADE_ARMOR:
                 region.setRegion(Atlas.getInstance().findRegion("Shield"));
