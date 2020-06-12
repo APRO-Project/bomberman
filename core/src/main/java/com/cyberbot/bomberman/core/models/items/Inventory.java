@@ -4,7 +4,9 @@ import com.cyberbot.bomberman.core.models.Updatable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Contains information about a player's inventory
@@ -13,6 +15,17 @@ import java.util.List;
  */
 public class Inventory implements Updatable, Serializable {
     private final List<ItemStack> items;
+
+    private static final List<ItemType> UPGRADE_TYPES = Arrays.asList(
+        ItemType.UPGRADE_ARMOR,
+        ItemType.UPGRADE_REFILL_SPEED,
+        ItemType.UPGRADE_MOVEMENT_SPEED
+    );
+
+    private static final List<ItemType> USABLE_TYPES = Arrays.asList(
+        ItemType.SMALL_BOMB,
+        ItemType.MEDIUM_BOMB
+    );
 
     /**
      * Creates a new inventory with default stacks initialized.
@@ -145,5 +158,17 @@ public class Inventory implements Updatable, Serializable {
 
     public List<ItemStack> getItems() {
         return items;
+    }
+
+    public List<ItemStack> getUpgradeItems() {
+        return items.stream()
+            .filter(it -> UPGRADE_TYPES.contains(it.type))
+            .collect(Collectors.toList());
+    }
+
+    public List<ItemStack> getUsableItems() {
+        return items.stream()
+            .filter(it -> USABLE_TYPES.contains(it.type))
+            .collect(Collectors.toList());
     }
 }

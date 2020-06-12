@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.cyberbot.bomberman.core.models.items.ItemType;
+import com.cyberbot.bomberman.sprites.GraphicsFactory;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class InventoryButton extends Actor {
@@ -50,37 +51,16 @@ public class InventoryButton extends Actor {
     }
 
     public void updateDrawable() {
-        if(type == null) {
+        if (type == null) {
             region.setRegion(Atlas.getSkinAtlas().findRegion("placeholder"));
-            return;
-        }
-
-        // TODO: Move texture resolution to sprite factory  for consistency
-        switch (type) {
-            case UPGRADE_MOVEMENT_SPEED:
-                region.setRegion(Atlas.getInstance().findRegion("ArrowFast"));
-                break;
-            case SMALL_BOMB:
-                region.setRegion(Atlas.getInstance().findRegion("DynamiteStatic"));
-                break;
-            case MEDIUM_BOMB:
-                region.setRegion(Atlas.getInstance().findRegion("Player_wrb_idle_right"));
-                break;
-            case UPGRADE_ARMOR:
-                region.setRegion(Atlas.getInstance().findRegion("Shield"));
-                break;
-            case UPGRADE_REFILL_SPEED:
-                region.setRegion(Atlas.getInstance().findRegion("Player_bbb_idle_back"));
-                break;
-            default:
-                region.setRegion(Atlas.getSkinAtlas().findRegion("placeholder"));
-                break;
+        } else {
+            region.setRegion(GraphicsFactory.getCollectibleTextureRegion(type));
         }
     }
 
     public void setQuantity(int updatedQuantity) {
         quantity = updatedQuantity;
-        if(!isEmpty())
+        if (!isEmpty())
             labelQuantity.setText(String.valueOf(quantity));
     }
 
@@ -96,10 +76,6 @@ public class InventoryButton extends Actor {
 
     public boolean isEmpty() {
         return type == null;
-    }
-
-    public Actor getMainWidget() {
-        return button;
     }
 
     public Button getButton() {
