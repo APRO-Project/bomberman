@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.cyberbot.bomberman.core.models.entities.BombEntity;
 import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
@@ -11,13 +12,23 @@ import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
 import com.cyberbot.bomberman.utils.Atlas;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Factory for {@link Sprite} and {@link EntitySprite} objects.
  */
-public class SpriteFactory {
+public class GraphicsFactory {
+
+    private static final HashMap<ItemType, String> collectibleTexturePaths = new HashMap<ItemType, String>() {{
+        put(ItemType.SMALL_BOMB, "DynamiteStatic");
+        put(ItemType.MEDIUM_BOMB, "Player_wrb_idle_right");
+        put(ItemType.UPGRADE_ARMOR,"Shield");
+        put(ItemType.UPGRADE_MOVEMENT_SPEED,"ArrowFast");
+        put(ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back");
+    }};
+
     /**
      * Creates an {@link EntitySprite} matching the provided entity.
      *
@@ -57,22 +68,21 @@ public class SpriteFactory {
     }
 
     public static Sprite createSprite(CollectibleEntity collectible) {
-        switch (collectible.getItemType()) {
-            case SMALL_BOMB:
-                return Atlas.getInstance().createSprite("DynamiteStatic");
-            case MEDIUM_BOMB:
-                return Atlas.getInstance().createSprite("Player_wrb_idle_right");
-            case UPGRADE_MOVEMENT_SPEED:
-                return Atlas.getInstance().createSprite("ArrowFast");
-            case UPGRADE_ARMOR:
-                return Atlas.getInstance().createSprite("Shield");
-            case UPGRADE_REFILL_SPEED:
-                // TODO: Replace when texture gets added
-                return Atlas.getInstance().createSprite("Player_bbb_idle_back");
-
+        String texturePath = collectibleTexturePaths.get(collectible.getItemType());
+        if(texturePath == null) {
+            throw new IllegalArgumentException("Unsupported item type");
         }
 
-        throw new IllegalArgumentException("Unsupported item type");
+        return Atlas.getInstance().createSprite(texturePath);
+    }
+
+    public static TextureRegion getCollectibleTextureRegion(ItemType type) {
+        String texturePath = collectibleTexturePaths.get(type);
+        if(texturePath == null) {
+            throw new IllegalArgumentException("Given item type is not a collectible type or is not yet supported");
+        }
+
+        return Atlas.getInstance().findRegion(texturePath);
     }
 
     public static List<TileSprite> createTilesFromMapLayer(TileMapLayer layer) {

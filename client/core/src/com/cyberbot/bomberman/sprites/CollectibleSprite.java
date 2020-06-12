@@ -12,7 +12,7 @@ public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
 
     public CollectibleSprite(CollectibleEntity entity) {
         super(entity);
-        sprite.set(SpriteFactory.createSprite(entity));
+        sprite.set(GraphicsFactory.createSprite(entity));
         sprite.setScale(0.75f);
 
         animationStage = 0f;

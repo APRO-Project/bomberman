@@ -12,7 +12,7 @@ public class TileSprite implements Drawable {
 
     public TileSprite(Tile tile) {
         this.tile = tile;
-        this.sprite = SpriteFactory.createSprite(tile);
+        this.sprite = GraphicsFactory.createSprite(tile);
 
         Vector2 position = tile.getPositionRaw();
         this.sprite.setPosition(position.x - sprite.getWidth() / 2, position.y - sprite.getHeight() / 2);
