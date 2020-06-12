@@ -60,8 +60,8 @@ public final class InventoryView extends Table {
                 pad = 0;
             }
 
-            effects.add(effectButtons[i].getMainWidget()).padBottom(pad).row();
-            items.add(itemButtons[i].getMainWidget()).padBottom(pad).row();
+            effects.add(effectButtons[i].getButton()).padBottom(pad).row();
+            items.add(itemButtons[i].getButton()).padBottom(pad).row();
         }
 
         add(inventoryLabel)
