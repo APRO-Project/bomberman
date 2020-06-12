@@ -12,8 +12,8 @@ import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
 import com.cyberbot.bomberman.utils.Atlas;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -21,13 +21,13 @@ import java.util.stream.Collectors;
  */
 public class GraphicsFactory {
 
-    private static final HashMap<ItemType, String> collectibleTexturePaths = new HashMap<ItemType, String>() {{
-        put(ItemType.SMALL_BOMB, "DynamiteStatic");
-        put(ItemType.MEDIUM_BOMB, "Player_wrb_idle_right");
-        put(ItemType.UPGRADE_ARMOR,"Shield");
-        put(ItemType.UPGRADE_MOVEMENT_SPEED,"ArrowFast");
-        put(ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back");
-    }};
+    private static final Map<ItemType, String> collectibleTexturePaths = Map.of(
+        ItemType.SMALL_BOMB, "DynamiteStatic",
+        ItemType.MEDIUM_BOMB, "Player_wrb_idle_right",
+        ItemType.UPGRADE_ARMOR,"Shield",
+        ItemType.UPGRADE_MOVEMENT_SPEED,"ArrowFast",
+        ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back"
+    );
 
     /**
      * Creates an {@link EntitySprite} matching the provided entity.
