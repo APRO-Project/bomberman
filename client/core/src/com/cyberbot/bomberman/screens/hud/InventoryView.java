@@ -8,7 +8,6 @@ import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.utils.Atlas;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +16,6 @@ import java.util.stream.Collectors;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public final class InventoryView extends Table {
-
-    private static final List<ItemType> ITEMS =
-        Arrays.asList(ItemType.SMALL_BOMB, ItemType.MEDIUM_BOMB);
-
-    private static final List<ItemType> EFFECTS =
-        Arrays.asList(ItemType.UPGRADE_ARMOR, ItemType.UPGRADE_MOVEMENT_SPEED, ItemType.UPGRADE_REFILL_SPEED);
 
     private static final int MAX_SLOTS = 5;
 
@@ -62,7 +55,7 @@ public final class InventoryView extends Table {
             effectButtons[i] = new InventoryButton(null, skin);
             itemButtons[i] = new InventoryButton(null, skin);
 
-            float pad = PPM / 2;
+            float pad = PPM / 4;
             if (i == MAX_SLOTS - 1) {
                 pad = 0;
             }
@@ -91,21 +84,15 @@ public final class InventoryView extends Table {
     private boolean scanForInventoryChanges() {
         boolean change = false;
 
-        final ArrayList<ItemStack> effectStacks = playerEntity.getInventory().getItems().stream()
-            .filter(i -> EFFECTS.contains(i.getItemType()))
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        final ArrayList<ItemStack> itemStacks = playerEntity.getInventory().getItems().stream()
-            .filter(i -> ITEMS.contains(i.getItemType()))
-            .collect(Collectors.toCollection(ArrayList::new));
-
         // Effects
-        for (ItemStack stack : effectStacks) {
+        for (ItemStack stack : playerEntity.getInventory().getUpgradeItems()) {
             final Optional<InventoryButton> correspondingButton = Arrays.stream(effectButtons)
                 .filter(btn -> btn.type == stack.getItemType())
                 .findFirst();
 
-            if (!correspondingButton.isPresent() && stack.getQuantity() != 0) {
+            if (correspondingButton.isPresent()) {
+                correspondingButton.get().setQuantity(stack.getQuantity());
+            } else {
                 final int slot = getNextEmptyEffectSlot();
                 if (slot != -1) {
                     effectButtons[slot].type = stack.getItemType();
@@ -113,19 +100,11 @@ public final class InventoryView extends Table {
                     effectButtons[slot].setQuantity(stack.getQuantity());
                     change = true;
                 }
-            } else if (correspondingButton.isPresent()) {
-                if (stack.getQuantity() != 0) {
-                    correspondingButton.get().setQuantity(stack.getQuantity());
-                } else {
-                    correspondingButton.get().makeEmpty();
-                    correspondingButton.get().updateDrawable();
-                    change = true;
-                }
             }
         }
 
         // Items
-        for (ItemStack stack : itemStacks) {
+        for (ItemStack stack : playerEntity.getInventory().getUsableItems()) {
             final Optional<InventoryButton> correspondingButton = Arrays.stream(itemButtons)
                 .filter(btn -> btn.type == stack.getItemType())
                 .findFirst();
