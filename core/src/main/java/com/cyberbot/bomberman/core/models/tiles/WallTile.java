@@ -52,10 +52,6 @@ public class WallTile extends PhysicalTile {
         return durability == 0;
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
-
     /**
      * Properties of the wall tile type.
      */
