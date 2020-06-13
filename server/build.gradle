@@ -19,6 +19,17 @@ application {
     mainClassName = javaMainClass
 }
 
+task dist(type: Jar) {
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
 dependencies {
     implementation project(":core")
     implementation 'org.apache.logging.log4j:log4j-api:2.13.2'

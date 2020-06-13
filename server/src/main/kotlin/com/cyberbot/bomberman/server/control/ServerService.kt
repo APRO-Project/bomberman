@@ -201,9 +201,9 @@ class ServerService(
             .map { clientHandlers[it] }
             .forEach { it?.sendPacket(lobbyUpdate) }
 
-        val owner = lobby.clients.first { it.id == lobby.ownerId }
+        val owner = lobby.clients.firstOrNull { it.id == lobby.ownerId }
 
-        clientHandlers[owner]!!.sendPacket(LobbyUpdate(strippedLobby, true))
+        clientHandlers[owner]?.sendPacket(LobbyUpdate(strippedLobby, true))
     }
 
     private fun createLobby(owner: Client): Lobby {
