@@ -9,34 +9,38 @@ import com.badlogic.gdx.utils.Align;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class PlayerListView extends Table {
 
-    private final ImmutablePair<String, Long>[] players;
-    private final ImmutablePair<Label, Label>[] labels;
+    private final List<ImmutablePair<String, Long>> players;
+    private final List<ImmutablePair<Label, Label>> labels;
 
     private static final int MAX_PLAYERS = 3;
 
     public PlayerListView(Skin skin) {
-        // FIXME: Use something better than arrays - immutable list from apache commons or guava
-        players = new ImmutablePair[MAX_PLAYERS];
-        labels = new ImmutablePair[MAX_PLAYERS];
+        players = new ArrayList<>(MAX_PLAYERS);
+        labels = new ArrayList<>(MAX_PLAYERS);
 
         Label otherPlayersLabel = new Label("Other players:", skin);
         otherPlayersLabel.setAlignment(Align.center);
         add(otherPlayersLabel).padBottom(5).colspan(2).row();
 
-        for(int i = 0; i < 3; ++i) {
-            labels[i] = new ImmutablePair<>(new Label(null, skin), new Label(null, skin));
-            add(labels[i].left).padRight(5);
-            add(labels[i].right).row();
+        for(int i = 0; i < MAX_PLAYERS; ++i) {
+            labels.add(new ImmutablePair<>(new Label(null, skin), new Label(null, skin)));
+            add(labels.get(i).left).padRight(5);
+            add(labels.get(i).right).row();
+
+            players.add(null);
         }
     }
 
     public void addPlayer(String name, long id) {
         int emptySlotIndex = -1;
 
-        for(int i = 0; i < players.length; ++i) {
-            if(players[i] == null) {
+        for(int i = 0; i < MAX_PLAYERS; ++i) {
+            if(players.get(i) == null) {
                 emptySlotIndex = i;
                 break;
             }
@@ -47,17 +51,17 @@ public final class PlayerListView extends Table {
             return;
         }
 
-        players[emptySlotIndex] = new ImmutablePair<>(name, id);
+        players.set(emptySlotIndex, new ImmutablePair<>(name, id));
 
-        labels[emptySlotIndex].left.setText((emptySlotIndex + 1) + ".");
-        labels[emptySlotIndex].right.setText(name);
+        labels.get(emptySlotIndex).left.setText((emptySlotIndex + 1) + ".");
+        labels.get(emptySlotIndex).right.setText(name);
     }
 
     public void onPlayerDeath(PlayerEntity playerEntity) {
         int nameIndex = -1;
 
-        for(int i = 0; i < players.length; ++i) {
-            if(players[i].right == playerEntity.getId()) {
+        for(int i = 0; i < MAX_PLAYERS; ++i) {
+            if(players.get(i).right == playerEntity.getId()) {
                 nameIndex = i;
                 break;
             }
@@ -68,7 +72,7 @@ public final class PlayerListView extends Table {
             return;
         }
 
-        labels[nameIndex].left.setColor(Color.DARK_GRAY);
-        labels[nameIndex].right.setColor(Color.DARK_GRAY);
+        labels.get(nameIndex).left.setColor(Color.DARK_GRAY);
+        labels.get(nameIndex).right.setColor(Color.DARK_GRAY);
     }
 }
