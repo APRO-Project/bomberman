@@ -26,9 +26,18 @@ import java.util.concurrent.locks.ReentrantLock;
 import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
 import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
 
+/**
+ * The main orchestrator for a networked gameplay. It schedules input polling and snapshot creation.
+ * The actual world simulation, interpolation, rollback on other world related actions are handled
+ * by a corresponding {@link LocalWorldController}.
+ * <p>
+ * The {@link #update(float)} method can be called with arbitrary period.
+ * <p>
+ * If the next snapshot creation falls in the middle of world simulation
+ * the snapshot thread will wait for the simulation to finish.
+ */
 public class NetworkedGameplayController implements Updatable, Drawable, Disposable {
     private final TextureController textureController;
-    private final InputController inputController;
 
     private final LocalWorldController worldController;
     private final TileMap map;
@@ -38,25 +47,24 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
     private final ScheduledExecutorService snapshotService;
     private final ScheduledExecutorService inputPollService;
 
-    private final World world;
-
     private final ReentrantLock worldUpdateLock;
     private final Condition worldUpdatedCondition;
 
-    public NetworkedGameplayController(PlayerData player, String mapPath,
+    public NetworkedGameplayController(PlayerData localPlayer, String mapPath,
                                        SocketAddress connection, GameHud hud)
         throws MapLoadException {
         KeyBinds binds = new KeyBinds(); // TODO: Load from preferences
 
-        world = new World(new Vector2(0, 0), false);
+        World world = new World(new Vector2(0, 0), false);
         map = TileMapFactory.createTileMap(world, mapPath);
         textureController = new TextureController(map);
 
-        worldController = new LocalWorldController(world, map, TICK_RATE, player);
+        // TODO: Maybe allow variable tick rate, sim rate via server's JSON configuration
+        worldController = new LocalWorldController(world, map, TICK_RATE, SIM_RATE, localPlayer);
         worldController.addListener(textureController, true);
         worldController.addListener(hud, true);
 
-        inputController = new InputController(binds, hud);
+        InputController inputController = new InputController(binds, hud);
         inputController.addActionController(worldController);
 
         netService = new NetService(connection, worldController);
@@ -100,10 +108,6 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         inputPollService.shutdown();
     }
 
-    public World getWorld() {
-        return world;
-    }
-
     private void createAndSendSnapshot() {
         try {
             try {
@@ -114,8 +118,12 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
             }
 
             netService.sendPlayerSnapshot(worldController.createSnapshot());
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            // Exceptions thrown in the ScheduledExecutorService are caught
+            // and returned in a Future only when the executor service is stopped.
+            // This is the simplest way to prevent the service from halting and
+            // getting any debugging information from the exceptions
+            e.printStackTrace();
         }
     }
 

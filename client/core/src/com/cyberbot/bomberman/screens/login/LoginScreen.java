@@ -13,7 +13,7 @@ public class LoginScreen extends AbstractScreen {
     private final SpriteBatch batch;
     private final Viewport viewport;
 
-    LoginLayout loginLayout;
+    private final LoginLayout loginLayout;
 
     public LoginScreen(LoginInteraction delegate) {
         batch = new SpriteBatch();

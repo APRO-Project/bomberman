@@ -11,7 +11,7 @@ import com.cyberbot.bomberman.core.models.net.data.PhysicalTileData;
  * An abstract base class for tiles that should contain a Box2D body.
  */
 public abstract class PhysicalTile extends Tile implements Disposable {
-    protected Body body;
+    protected final Body body;
 
     public PhysicalTile(World world, String textureName, int x, int y) {
         super(textureName, x, y);

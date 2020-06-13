@@ -17,6 +17,7 @@ public final class PlayerListView extends Table {
     private static final int MAX_PLAYERS = 3;
 
     public PlayerListView(Skin skin) {
+        // FIXME: Use something better than arrays - immutable list from apache commons or guava
         players = new ImmutablePair[MAX_PLAYERS];
         labels = new ImmutablePair[MAX_PLAYERS];
 
