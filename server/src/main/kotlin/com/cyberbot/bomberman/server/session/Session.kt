@@ -127,6 +127,10 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
                 update((t0 - lastUpdate) / 1000f)
                 lastUpdate = t0
             } catch (e: Exception) {
+                // Exceptions thrown in the ScheduledExecutorService are caught
+                // and returned in a Future only when the executor service is stopped.
+                // This is the simplest way to prevent the service from halting and
+                // getting any debugging information from the exceptions
                 e.printStackTrace()
             }
         }
@@ -137,6 +141,10 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
             try {
                 tick()
             } catch (e: Exception) {
+                // Exceptions thrown in the ScheduledExecutorService are caught
+                // and returned in a Future only when the executor service is stopped.
+                // This is the simplest way to prevent the service from halting and
+                // getting any debugging information from the exceptions
                 e.printStackTrace()
             }
         }

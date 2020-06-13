@@ -30,6 +30,7 @@ public enum ItemType {
         return value;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isBomb() {
         return this == SMALL_BOMB || this == MEDIUM_BOMB;
     }

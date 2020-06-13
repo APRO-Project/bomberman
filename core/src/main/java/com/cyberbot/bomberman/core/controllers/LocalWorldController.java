@@ -16,6 +16,7 @@ import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket;
 import com.cyberbot.bomberman.core.models.net.snapshots.GameSnapshot;
+import com.cyberbot.bomberman.core.models.net.snapshots.PlayerSnapshot;
 import com.cyberbot.bomberman.core.models.tiles.PhysicalTile;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -24,13 +25,33 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
-
+/**
+ * This class is the hearth of the hybrid world simulation. It handles:
+ * <ul>
+ *     <li>Local player movement simulation - to achieve the best on screen response,
+ *     the local player's movement is simulated locally and on the server.</li>
+ *
+ *     <li>World snapshot interpolation - the interpolation delay of {@value INTERPOLATION_DELAY}
+ *     has been determined to be optimal in terms of packet loss compensation and perceived delay.</li>
+ *
+ *     <li>Local player replay and interpolation - in case the local player and it's
+ *     representation on the server gets out of sync, the player has to be moved to where
+ *     the server perceived the player at the time of the snapshot.
+ *     Then all user actions have to be replied on a simulated player and interpolated between
+ *     it's current state and the state resulting from the simulation, which should result
+ *     in the same state as the server will perceive after receiving the current {@link PlayerSnapshot}.</li>
+ *
+ *     <li>World delta - used to communicate any changes to the corresponding
+ *     {@link WorldChangeListener} and {@link TileMap.ChangeListener}.</li>
+ * </ul>
+ */
 public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener, ActionListener {
+    private final static int INTERPOLATION_DELAY = 2;
+    private final static float REPLY_INTERP_TIME = 0.05f;
+    private final static float MAX_PLAYER_OFFSET = 0.5f;
+
     private final int tickRate;
-    private final int interpolationDelay = 2;
-    private final float replyInterTime = 0.05f;
-    private final float maxPlayerOffset = 0.5f;
+    private final int simRate;
 
     private final World world;
     private final TileMap map;
@@ -43,7 +64,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private final SnapshotQueue snapshotQueue;
     private final PlayerStateQueue playerStateQueue;
 
-    private PlayerEntity localPlayer;
+    private final PlayerEntity localPlayer;
     private boolean playerAlive;
     private final HashMap<Long, Boolean> playersAlive;
 
@@ -71,12 +92,13 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private PlayerData playerToInterpEnd;
     private float replayInterpFraction;
 
-    public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData) {
-        this(world, map, tickRate, playerData, tickRate * 4);
+    public LocalWorldController(World world, TileMap map, int tickRate, int simRate, PlayerData playerData) {
+        this(world, map, tickRate, simRate, playerData, tickRate * 4);
     }
 
-    public LocalWorldController(World world, TileMap map, int tickRate, PlayerData playerData, int bufferSize) {
+    public LocalWorldController(World world, TileMap map, int tickRate, int simRate, PlayerData playerData, int bufferSize) {
         this.tickRate = tickRate;
+        this.simRate = simRate;
         this.world = world;
         this.map = map;
         this.localPlayer = playerData.createEntity(world);
@@ -115,10 +137,12 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         // Remove any entities marked for removal
         entities.entrySet().removeIf(it -> it.getValue().isMarkedToRemove());
 
+        // Only validate every packet once
         if (newestPacket != null) {
             validateWorld(newestPacket);
         }
 
+        // Interpolate after reply
         if (playerToInterpStart != null) {
             interpolateReply(delta);
         }
@@ -185,6 +209,9 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     private void interpolate(float delta) {
         interpFraction += delta * tickRate;
         boolean snapshotChanged = false;
+
+        // If the snapshot receive rate is higher then the simulation rate,
+        // there's a chance we need to skip a couple snapshots.
         while (interpFraction > snapshotLength) {
             interpFraction -= snapshotLength;
 
@@ -212,7 +239,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
 
     private void interpolateReply(float delta) {
         localPlayer.updateFromData(playerToInterpStart, playerToInterpEnd, replayInterpFraction);
-        replayInterpFraction = Math.min(1, replayInterpFraction + delta / replyInterTime);
+        replayInterpFraction = Math.min(1, replayInterpFraction + delta / REPLY_INTERP_TIME);
 
         if (replayInterpFraction == 1) {
             playerToInterpStart = null;
@@ -229,7 +256,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             }
         }
 
-        if (gameSnapshots.size() < interpolationDelay) {
+        if (gameSnapshots.size() < INTERPOLATION_DELAY) {
             return false;
         }
 
@@ -237,7 +264,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         nextPacket = gameSnapshots.remove();
         snapshotLength = nextPacket.getSequence() - currentPacket.getSequence();
 
-        snapshotLength = Math.max(Math.min(snapshotLength, interpolationDelay), 0);
+        snapshotLength = Math.max(Math.min(snapshotLength, INTERPOLATION_DELAY), 0);
 
         return true;
     }
@@ -265,7 +292,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         playerStateQueue.clear();
         for (PlayerSnapshotPacket packet : snapshotQueue) {
             for (List<Action> actions : packet.getSnapshot().actions) {
-                float delta = 1f / SIM_RATE;
+                float delta = 1f / simRate;
                 movementController.onActions(actions);
                 movementController.update(delta);
                 simulatedPlayer.updateFromEnvironment(map);
@@ -310,6 +337,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         if (playerAlive) {
             applySnapshotToPlayer(snapshot);
         }
+
         applySnapshotToEntities(snapshot);
         applySnapshotToWalls(snapshot);
     }
@@ -380,6 +408,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     private void onEntityAdded(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            playersAlive.put(entity.getId(), ((PlayerEntity) entity).isAlive());
+        }
+
         listeners.forEach(listener -> listener.onEntityAdded(entity));
     }
 
@@ -454,7 +486,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
             Vector2 remotePosition = remotePlayer.getPosition().toVector2();
             float delta = new Vector2(remotePosition).sub(localState.position).len();
             float velocityModifier = Math.max(2.5f, localState.velocity.len()) / PlayerEntity.MAX_VELOCITY;
-            boolean replay = delta > maxPlayerOffset * velocityModifier;
+            boolean replay = delta > MAX_PLAYER_OFFSET * velocityModifier;
 
             if (replay) {
                 playerToInterpStart = localPlayer.getData();

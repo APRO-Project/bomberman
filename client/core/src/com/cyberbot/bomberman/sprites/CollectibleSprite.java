@@ -3,6 +3,8 @@ package com.cyberbot.bomberman.sprites;
 import com.badlogic.gdx.math.Vector2;
 import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
 
+import static com.cyberbot.bomberman.core.utils.Constants.ANIMATION_SPEED;
+
 public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
     private static final float ANIMATION_DURATION = 1f;
     private static final float ANIMATION_OFFSET = 0.1f;
@@ -25,7 +27,7 @@ public class CollectibleSprite extends EntitySprite<CollectibleEntity> {
     }
 
     public void animateBobbing(float delta) {
-        animationStage = (animationStage + animationDirection * (delta / ANIMATION_DURATION));
+        animationStage = (animationStage + animationDirection * (delta * ANIMATION_SPEED / ANIMATION_DURATION));
         if (animationStage > 1) {
             animationStage = 2 - animationStage;
             animationDirection = -1;

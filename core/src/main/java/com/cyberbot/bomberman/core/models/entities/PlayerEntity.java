@@ -16,10 +16,8 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
     public static final float MAX_VELOCITY = 5;
-    public static final float MAX_VELOCITY_BASE = MAX_VELOCITY * PPM;
+    public static final float MAX_VELOCITY_RAW = MAX_VELOCITY * PPM;
     public static final float DRAG_BASE = 60f;
-
-    private static final float ANIMATION_DURATION = 0.2f;
 
     private Fixture fixture;
     private Inventory inventory;
@@ -28,12 +26,6 @@ public class PlayerEntity extends Entity {
     private float dragMultiplier;
     private float maxSpeedMultiplier;
 
-    private PlayerState currentState;
-    private PlayerState previousState;
-
-    private LookingDirection verticalDirection;
-    private LookingDirection horizontalDirection;
-
     private int hp;
 
     public int getHp() {
@@ -41,7 +33,7 @@ public class PlayerEntity extends Entity {
     }
 
     public void setHp(int hp) {
-        if(hp < 0 || hp > 100) {
+        if (hp < 0 || hp > 100) {
             throw new IllegalArgumentException("HP value must be between 0 and 100");
         }
 
@@ -59,10 +51,6 @@ public class PlayerEntity extends Entity {
     public PlayerEntity(World world, PlayerDef def, long id) {
         super(world, id);
 
-        currentState = PlayerState.STANDING;
-        previousState = PlayerState.STANDING;
-        verticalDirection = LookingDirection.RIGHT;
-        horizontalDirection = null;
         inventory = def.inventory;
         dragMultiplier = def.dragModifier;
         maxSpeedMultiplier = def.maxSpeedModifier;
@@ -106,29 +94,6 @@ public class PlayerEntity extends Entity {
         this.inventory = inventory;
     }
 
-    private PlayerState getState() {
-        if (getVelocityRaw().x == 0 && getVelocityRaw().y == 0)
-            return PlayerState.STANDING;
-
-        if (getVelocityRaw().x != 0 && verticalDirection != null)
-            return PlayerState.MOVING_SIDE;
-
-        if (horizontalDirection == LookingDirection.UP)
-            return PlayerState.MOVING_BACK;
-        else
-            return PlayerState.MOVING_FRONT;
-    }
-
-    public void setLookingDirection(LookingDirection direction) {
-        if (direction == LookingDirection.UP || direction == LookingDirection.DOWN) {
-            horizontalDirection = direction;
-            verticalDirection = null;
-        } else {
-            horizontalDirection = null;
-            verticalDirection = direction;
-        }
-    }
-
     public void applyForce(Vector2 force) {
         body.applyForceToCenter(force.x / PPM, force.y / PPM, true);
     }
@@ -162,6 +127,10 @@ public class PlayerEntity extends Entity {
         return hp == 0;
     }
 
+    public boolean isAlive() {
+        return hp > 0;
+    }
+
     @Override
     public void createBody(World world) {
         BodyDef def = new BodyDef();
@@ -188,19 +157,5 @@ public class PlayerEntity extends Entity {
     @Override
     public PlayerData getData() {
         return new PlayerData(id, getPosition(), inventory, textureVariant, hp);
-    }
-
-    public enum PlayerState {
-        STANDING,
-        MOVING_BACK,
-        MOVING_FRONT,
-        MOVING_SIDE
-    }
-
-    public enum LookingDirection {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
     }
 }

@@ -15,7 +15,6 @@ import java.util.List;
  * </ul>
  */
 public class TileMap implements Disposable {
-
     private final TileMapLayer baseLayer;
     private final TileMapLayer floorLayer;
     private final TileMapLayer wallsLayer;

@@ -134,8 +134,8 @@ public class LobbyLayout extends Stage {
         ui.add(lobbyId).width(tableWidth).height(playerLabelHeight).row();
     }
 
-    public void addPlayer(String playername, int number) {
-        playerLabels[number].setText(playername);
+    public void addPlayer(String playerName, int number) {
+        playerLabels[number].setText(playerName);
     }
 
     public void removePlayer(int number) {
