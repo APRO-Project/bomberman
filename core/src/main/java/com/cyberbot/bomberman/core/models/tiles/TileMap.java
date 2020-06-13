@@ -15,15 +15,10 @@ import java.util.List;
  * </ul>
  */
 public class TileMap implements Disposable {
-    private static final String TAG = TileMap.class.getSimpleName();
 
-    private static final String LAYER_BASE = "base";
-    private static final String LAYER_FLOOR = "floor";
-    private static final String LAYER_WALLS = "walls";
-
-    private TileMapLayer baseLayer;
-    private TileMapLayer floorLayer;
-    private TileMapLayer wallsLayer;
+    private final TileMapLayer baseLayer;
+    private final TileMapLayer floorLayer;
+    private final TileMapLayer wallsLayer;
 
     private final List<ChangeListener> listeners;
 
