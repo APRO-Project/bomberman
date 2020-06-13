@@ -16,8 +16,7 @@ public class MenuScreen extends AbstractScreen {
     private final SpriteBatch batch;
     private final Viewport viewport;
 
-
-    MenuOptions menuOptions;
+    private final MenuOptions menuOptions;
 
     public MenuScreen(MenuInteraction delegate) {
         batch = new SpriteBatch();

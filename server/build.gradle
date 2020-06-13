@@ -4,7 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
-sourceCompatibility = 1.8
+sourceCompatibility = 13
 repositories {
     mavenCentral()
 }

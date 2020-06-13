@@ -21,13 +21,6 @@ object SerializationUtils {
         return type + o.toByteArray()
     }
 
-    fun deserializeString(buf: ByteArray, offset: Int): Pair<String, Int> {
-        val nameLength = buf[offset]
-        val name = String(buf.copyOfRange(offset + 1, offset + 1 + nameLength))
-
-        return Pair(name, nameLength + 1)
-    }
-
     private fun getPayloadType(o: Serializable): PayloadType {
         return when (o) {
             is PlayerSnapshotPacket -> PayloadType.PLAYER_SNAPSHOT
@@ -37,11 +30,4 @@ object SerializationUtils {
             )
         }
     }
-}
-
-fun String.toBytes(): ByteArray {
-    val str = this.toByteArray()
-    val length = ByteArray(1) { str.size.toByte() }
-
-    return length + str
 }

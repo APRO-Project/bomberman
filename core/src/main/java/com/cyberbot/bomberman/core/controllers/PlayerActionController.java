@@ -68,7 +68,7 @@ public final class PlayerActionController implements ActionListener, Updatable {
     }
 
     private void move(int direction) {
-        float maxVelocity = PlayerEntity.MAX_VELOCITY_BASE * player.getMaxSpeedMultiplier();
+        float maxVelocity = PlayerEntity.MAX_VELOCITY_RAW * player.getMaxSpeedMultiplier();
         float drag = PlayerEntity.DRAG_BASE * player.getDragMultiplier();
 
         Vector2 velocity = player.getVelocityRaw();

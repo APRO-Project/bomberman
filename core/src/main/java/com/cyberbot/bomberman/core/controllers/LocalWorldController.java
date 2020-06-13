@@ -408,6 +408,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
     }
 
     private void onEntityAdded(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            playersAlive.put(entity.getId(), ((PlayerEntity) entity).isAlive());
+        }
+
         listeners.forEach(listener -> listener.onEntityAdded(entity));
     }
 

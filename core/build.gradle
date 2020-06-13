@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
-sourceCompatibility = 1.8
+sourceCompatibility = 13
 group 'com.cyberbot.bomberman.core'
 
 repositories {
