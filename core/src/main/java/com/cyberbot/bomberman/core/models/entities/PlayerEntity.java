@@ -13,7 +13,7 @@ import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
-    public static final float MAX_VELOCITY = 5;
+    public static final float MAX_VELOCITY = 2.5f;
     public static final float MAX_VELOCITY_RAW = MAX_VELOCITY * PPM;
     public static final float DRAG_BASE = 60f;
     public static final int BOX2D_GROUP_INDEX = -1;
