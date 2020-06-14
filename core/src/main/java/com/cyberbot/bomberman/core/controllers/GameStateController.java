@@ -304,6 +304,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
                 case MEDIUM_BOMB:
                 case NUKE:
                     inventory.incrementMaxQuantity(itemType, true);
+                    break;
                 default:
                     inventory.addItem(itemType);
             }
