@@ -13,21 +13,21 @@ ArrowFast
   index: -1
 Bomb
   rotate: false
-  xy: 132, 29
+  xy: 158, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 1
 Bomb
   rotate: false
-  xy: 158, 55
+  xy: 184, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 2
 Bomb
   rotate: false
-  xy: 184, 81
+  xy: 132, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -41,7 +41,7 @@ BombStatic
   index: -1
 Boom
   rotate: false
-  xy: 54, 159
+  xy: 54, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -73,17 +73,17 @@ Dynamite
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
-  index: 1
-Dynamite
-  rotate: false
-  xy: 54, 107
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
   index: 2
 Dynamite
   rotate: false
   xy: 80, 133
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: 1
+Dynamite
+  rotate: false
+  xy: 158, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -97,21 +97,28 @@ DynamiteStatic
   index: -1
 Floor
   rotate: false
-  xy: 184, 107
+  xy: 106, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
-Ice
+Fryzjer
   rotate: false
   xy: 158, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
+Ice
+  rotate: false
+  xy: 184, 107
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
 Ice1
   rotate: false
-  xy: 2, 54
+  xy: 54, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -125,7 +132,7 @@ Ice2
   index: -1
 Ice3
   rotate: false
-  xy: 54, 81
+  xy: 106, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -139,28 +146,28 @@ Ice4
   index: -1
 Ice5
   rotate: false
-  xy: 106, 159
+  xy: 132, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Ice6
   rotate: false
-  xy: 132, 185
+  xy: 2, 28
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Ice7
   rotate: false
-  xy: 2, 28
+  xy: 28, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Ice8
   rotate: false
-  xy: 28, 55
+  xy: 54, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -195,14 +202,14 @@ Lava3
   index: -1
 Lava4
   rotate: false
-  xy: 158, 185
+  xy: 106, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Lava5
   rotate: false
-  xy: 184, 185
+  xy: 2, 2
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -216,7 +223,7 @@ Lava6
   index: -1
 Lava7
   rotate: false
-  xy: 54, 55
+  xy: 54, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -237,14 +244,14 @@ Nuke
   index: 3
 Nuke
   rotate: false
-  xy: 106, 55
+  xy: 80, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 2
 Nuke
   rotate: false
-  xy: 106, 3
+  xy: 132, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -258,35 +265,35 @@ NukeStatic
   index: -1
 Player_bbb_idle_back
   rotate: false
-  xy: 80, 29
+  xy: 54, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_front
   rotate: false
-  xy: 132, 133
+  xy: 106, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_left
   rotate: false
-  xy: 132, 3
+  xy: 158, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_right
   rotate: false
-  xy: 54, 29
+  xy: 28, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_brw_idle_back
   rotate: false
-  xy: 106, 185
+  xy: 2, 54
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -300,14 +307,14 @@ Player_brw_idle_front
   index: -1
 Player_brw_idle_left
   rotate: false
-  xy: 106, 107
+  xy: 132, 133
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_brw_idle_right
   rotate: false
-  xy: 80, 185
+  xy: 28, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -342,7 +349,7 @@ Player_wbw_idle_right
   index: -1
 Player_wrb_idle_back
   rotate: false
-  xy: 132, 81
+  xy: 106, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -356,14 +363,14 @@ Player_wrb_idle_front
   index: -1
 Player_wrb_idle_left
   rotate: false
-  xy: 158, 29
+  xy: 184, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_wrb_idle_right
   rotate: false
-  xy: 28, 3
+  xy: 184, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -377,7 +384,7 @@ Shield
   index: -1
 Wall1
   rotate: false
-  xy: 28, 159
+  xy: 158, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -391,7 +398,7 @@ Wall2
   index: -1
 Wall3
   rotate: false
-  xy: 158, 107
+  xy: 132, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -405,14 +412,14 @@ Wall4
   index: -1
 Wall5
   rotate: false
-  xy: 2, 2
+  xy: 54, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Wall6
   rotate: false
-  xy: 54, 3
+  xy: 80, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0

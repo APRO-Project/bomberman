@@ -166,7 +166,6 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
             worldUpdatedCondition.signalAll()
         }
 
-        // TODO: Check if only one player remained
         if (leaderboard.size >= clientSessions.size - 1) {
             simulationService.shutdown()
             gameFinished = true
