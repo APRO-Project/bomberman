@@ -2,10 +2,7 @@ package com.cyberbot.bomberman.sprites;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.cyberbot.bomberman.core.models.entities.BombEntity;
-import com.cyberbot.bomberman.core.models.entities.CollectibleEntity;
-import com.cyberbot.bomberman.core.models.entities.Entity;
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.entities.*;
 import com.cyberbot.bomberman.core.models.items.ItemType;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMapLayer;
@@ -45,9 +42,11 @@ public class GraphicsFactory {
             return new BombSprite((BombEntity) entity);
         } else if (entity instanceof CollectibleEntity) {
             return new CollectibleSprite((CollectibleEntity) entity);
+        } else if (entity instanceof ExplosionEntity) {
+            return new ExplosionSprite((ExplosionEntity) entity);
         }
 
-        return null;
+        throw new RuntimeException("Entity type not registered: " + entity.getClass().getSimpleName());
     }
 
     public static Sprite createSprite(Tile tile) {
@@ -70,6 +69,10 @@ public class GraphicsFactory {
     public static Sprite createSprite(PlayerEntity player) {
         return Atlas.getInstance()
             .createSprite("Player_" + playerVariants.get(player.getTextureVariant()) + "_idle_front");
+    }
+
+    public static Sprite getExplosionSprite() {
+        return Atlas.getInstance().createSprite("Boom");
     }
 
     public static TextureRegion getPlayerTextureVariant(PlayerEntity player) {
