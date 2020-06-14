@@ -39,6 +39,8 @@ class LobbyUpdate(val lobby: Lobby = Lobby(), val isOwner: Boolean? = null) : Co
 
 class GameStart(val port: Int? = null, val playerInit: PlayerData? = null, val lobby: Lobby = Lobby()) : ControlPacket()
 
+class GameEnd(val leaderboard: LinkedHashSet<Client> = LinkedHashSet()) : ControlPacket()
+
 class ErrorResponse(val error: String? = null) : ControlPacket()
 
 fun GsonBuilder.registerControlPacketAdapter(): GsonBuilder {
@@ -58,6 +60,7 @@ fun GsonBuilder.registerControlPacketAdapter(): GsonBuilder {
 
     adapter.registerSubtype(LobbyUpdate::class.java, "lobby_update")
     adapter.registerSubtype(GameStart::class.java, "game_start")
+    adapter.registerSubtype(GameEnd::class.java, "game_end")
 
     adapter.registerSubtype(ErrorResponse::class.java, "error")
 

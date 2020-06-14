@@ -16,6 +16,8 @@ class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSiz
     var sequence: Int = -1
         private set
 
+    val id by lazy { playerEntity.id }
+
     private var errors = 0
 
     fun onError() {
@@ -30,10 +32,6 @@ class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSiz
         actionController.addListener(listener)
     }
 
-    fun isPlayerDead(): Boolean {
-        return playerEntity.isDead
-    }
-
     override fun update(delta: Float) {
         if (packetQueue.isEmpty()) return
 
@@ -43,8 +41,11 @@ class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSiz
             pair = packetQueue.poll() ?: return
         }
 
-        actionController.onActions(pair.second.poll())
-        actionController.update(delta)
+        val actions = pair.second.poll()
+        if (playerEntity.isAlive) {
+            actionController.onActions(actions)
+            actionController.update(delta)
+        }
     }
 
     override fun onNewSnapshot(packet: PlayerSnapshotPacket) {

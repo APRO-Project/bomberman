@@ -21,4 +21,6 @@ interface ClientControlListener {
     fun onError(payload: ErrorResponse)
 
     fun onRegisterResponse(payload: ClientRegisterResponse)
+
+    fun onGameEnd(payload: GameEnd)
 }

@@ -7,5 +7,5 @@ interface GameSocket {
     @Throws(IOException::class)
     fun send(packet: DatagramPacket)
 
-    fun gameStopped()
+    fun gameStopped(leaderboard: LinkedHashSet<Long>)
 }
