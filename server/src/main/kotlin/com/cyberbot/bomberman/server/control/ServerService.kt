@@ -164,7 +164,8 @@ class ServerService(
 
         logger.info { "Staring game on port ${session.port} with ${lobby.clients.size} clients" }
 
-        lobby.clients.forEachIndexed { i, c ->
+        // Bartek genius - id's are random, so sorting by id yields random spawn
+        lobby.clients.sortedBy { it.id }.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
             val data = PlayerData(id, Session.getPlayerSpawnPosition(i), i)
 
