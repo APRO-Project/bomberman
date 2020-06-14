@@ -53,6 +53,15 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         // Update all entities
         entityStream().forEach(entity -> entity.update(delta));
 
+        // Update players
+        players.forEach(player -> {
+            if (player.isDead()) {
+                player.markToRemove();
+            } else {
+                player.updateFromEnvironment(map);
+            }
+        });
+
         // Handle bomb explosion
         bombs.stream().filter(BombEntity::isBlown).forEach(this::onBombExploded);
 
@@ -67,9 +76,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         // Remove any entities that have been marked to be removed
         Stream.of(players, collectibles, bombs, explosions)
             .forEach(list -> list.removeIf(Entity::isMarkedToRemove));
-
-        // Update players
-        players.forEach(player -> player.updateFromEnvironment(map));
     }
 
     @Override
@@ -312,10 +318,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         } else if (other instanceof ExplosionEntity) {
             // TODO: Better damage handling
             ((ExplosionEntity) other).damagePlayer(player);
-
-            if (player.isDead()) {
-                player.markToRemove();
-            }
         }
     }
 }
