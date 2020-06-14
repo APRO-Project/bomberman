@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom
 class ServerService(
     private val port: Int,
     private val maxLobbyCount: Int = 5,
-    private val lobbyIdLength: Int = 5,
+    private val lobbyIdLength: Int = 4,
     private val maxPlayersPerLobby: Int = 4,
     private val maxPlayerNickLength: Int = 20
 ) : ClientController, Runnable, Logging, SessionStateListener {
@@ -164,7 +164,8 @@ class ServerService(
 
         logger.info { "Staring game on port ${session.port} with ${lobby.clients.size} clients" }
 
-        lobby.clients.forEachIndexed { i, c ->
+        // Bartek genius - id's are random, so sorting by id yields random spawn
+        lobby.clients.sortedBy { it.id }.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
             val data = PlayerData(id, Session.getPlayerSpawnPosition(i), i)
 

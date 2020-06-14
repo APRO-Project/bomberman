@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.cyberbot.bomberman.core.utils.Utils;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class LoginLayout extends Stage {
@@ -57,6 +58,7 @@ public class LoginLayout extends Stage {
 
         nicknameField = new TextField("", skin);
         nicknameField.setMessageText("Nick");
+        nicknameField.setText(Utils.generatePlayerNick());
         nicknameField.setAlignment(1);
         nicknameField.setMaxLength(12);
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.utils.Atlas;
 
@@ -63,7 +64,7 @@ public class FinishLayout extends Stage {
         for (int i = 0; i < 4; i++) {
             Label label = new Label("", skin2);
             label.setWidth(tableWidth);
-            label.setAlignment(1);
+            label.setAlignment(Align.left);
             label.setFontScale(1);
             label.setWrap(false);
             playerLabels[i] = label;
@@ -72,17 +73,9 @@ public class FinishLayout extends Stage {
         }
         ui.add().height(spaceHeight).row();
 
-        Table ui3 = new Table();
-        ui3.setDebug(false);
-
-        ui3.setPosition(worldWidth - tableWidth, 1);
-        ui3.setWidth(tableWidth);
-        ui3.setHeight(worldHeight);
-        addActor(ui3);
-
         TextButton leaveFinishButton = new TextButton("Leave", skin2);
         leaveFinishButton.getLabel().setFontScale(0.85f);
-        setupButton(ui3, tableWidth, leaveFinishButton);
+        setupButton(ui, tableWidth, leaveFinishButton);
         leaveFinishButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -99,7 +92,7 @@ public class FinishLayout extends Stage {
 
     public void updateScoreTable(List<String> scoreTable) {
         for (int i = 0; i < scoreTable.size(); i++) {
-            playerLabels[i].setText((i+1) + scoreTable.get(i));
+            playerLabels[i].setText((i + 1) + ". " + scoreTable.get(i));
         }
         for (int i = 3; i > scoreTable.size() - 1; i--) {
             playerLabels[i].setText("");
