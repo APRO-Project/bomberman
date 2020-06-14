@@ -6,15 +6,23 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.net.data.ExplosionData;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ExplosionEntity extends Entity {
     public static float DO_NOT_DECAY = -1;
+    private final float power;
+    private final float decayTime;
     private float decayTimeLeft;
     private boolean decayed;
+    private Set<PlayerEntity> damagedPlayers = new HashSet<>();
 
-    public ExplosionEntity(World world, long id, float decayTime) {
+    public ExplosionEntity(World world, long id, float power, float decayTime) {
         super(world, id);
 
+        this.power = power;
         this.decayed = false;
+        this.decayTime = decayTime;
         this.decayTimeLeft = decayTime;
     }
 
@@ -53,5 +61,18 @@ public class ExplosionEntity extends Entity {
 
     public boolean isDecayed() {
         return decayed;
+    }
+
+    public void damagePlayer(PlayerEntity player) {
+        if (damagedPlayers.contains(player)) {
+            return;
+        }
+
+        player.takeDamage(getPower());
+        damagedPlayers.add(player);
+    }
+
+    private float getPower() {
+        return power * (decayTimeLeft / decayTime);
     }
 }
