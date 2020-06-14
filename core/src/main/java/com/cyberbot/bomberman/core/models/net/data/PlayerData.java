@@ -12,7 +12,12 @@ public class PlayerData extends EntityData<PlayerEntity> {
     private final Inventory inventory;
     private final int hp;
 
-    public PlayerData(long id, Vector2 position, Inventory inventory, int textureVariant, PlayerEntity.FacingDirection facingDirection, int hp) {
+    public PlayerData(long id, Vector2 position, int textureVariant) {
+        this(id, position, new Inventory(), textureVariant, PlayerEntity.FacingDirection.FRONT, 100);
+    }
+
+    public PlayerData(long id, Vector2 position, Inventory inventory, int textureVariant,
+                      PlayerEntity.FacingDirection facingDirection, int hp) {
         super(id, position);
         this.textureVariant = textureVariant;
         this.inventory = inventory;

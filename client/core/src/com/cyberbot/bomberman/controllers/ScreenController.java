@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.util.stream.Collectors;
 
 public final class ScreenController implements MenuInteraction, LobbyInteraction,
     LoginInteraction, ClientControlListener {
@@ -186,6 +187,13 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
                 showError("Failed to start game");
             }
         });
+    }
+
+    @Override
+    public void onGameEnd(@NotNull GameEnd payload) {
+        // TODO: Display end game screen with leaderboard
+        String leaderboard = payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.joining());
+        Gdx.app.log("ControlService", leaderboard);
     }
 
     @Override

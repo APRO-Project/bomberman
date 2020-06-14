@@ -16,6 +16,8 @@ class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSiz
     var sequence: Int = -1
         private set
 
+    val id by lazy { playerEntity.id }
+
     private var errors = 0
 
     fun onError() {

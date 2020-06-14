@@ -71,8 +71,8 @@ class SessionService(port: Int = 0, private val bufferSize: Int = 4096) : GameSo
         socket.send(packet)
     }
 
-    override fun gameStopped() {
+    override fun gameStopped(leaderboard: LinkedHashSet<Long>) {
         running = false
-        listeners.forEach { it.onSessionFinished(this) }
+        listeners.forEach { it.onSessionFinished(this, leaderboard) }
     }
 }

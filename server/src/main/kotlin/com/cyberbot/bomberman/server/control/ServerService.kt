@@ -1,7 +1,5 @@
 package com.cyberbot.bomberman.server.control
 
-import com.cyberbot.bomberman.core.models.entities.PlayerEntity
-import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
@@ -70,8 +68,10 @@ class ServerService(
         logger.info { "Started game on session ${session.port}" }
     }
 
-    override fun onSessionFinished(session: SessionService) {
+    override fun onSessionFinished(session: SessionService, leaderboard: LinkedHashSet<Long>) {
         logger.info { "Finished game on session ${session.port}" }
+
+        sendLeaderboard(leaderboard)
         sessions.values.remove(session)
     }
 
@@ -153,6 +153,11 @@ class ServerService(
         val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
+        if (lobby.clients.size < 2) {
+            service.sendPacket(ErrorResponse("At least 2 players are required to start the game"))
+            return
+        }
+
         val session = SessionService()
         session.listeners.add(this)
         sessions[lobbyId] = session
@@ -161,7 +166,7 @@ class ServerService(
 
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
-            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i, PlayerEntity.FacingDirection.FRONT, 100)
+            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), i)
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
@@ -205,6 +210,13 @@ class ServerService(
         val owner = lobby.clients.firstOrNull { it.id == lobby.ownerId }
 
         clientHandlers[owner]?.sendPacket(LobbyUpdate(strippedLobby, true))
+    }
+
+    private fun sendLeaderboard(leaderboardSet: LinkedHashSet<Long>) {
+        val clients = leaderboardSet.mapNotNull { clientHandlers.keys.firstOrNull { client -> it == client.id } }
+        val leaderboard = LinkedHashSet(clients)
+
+        leaderboard.map { clientHandlers[it] }.forEach { it?.sendPacket(GameEnd(leaderboard)) }
     }
 
     private fun createLobby(owner: Client): Lobby {

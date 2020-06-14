@@ -3,6 +3,8 @@ package com.cyberbot.bomberman.server.session
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.cyberbot.bomberman.core.controllers.GameStateController
+import com.cyberbot.bomberman.core.controllers.WorldChangeListener
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity
 import com.cyberbot.bomberman.core.models.net.SerializationUtils
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.GameSnapshotPacket
@@ -11,8 +13,6 @@ import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
 import com.cyberbot.bomberman.core.utils.scheduleAtFixedRate
 import com.cyberbot.bomberman.server.models.ClientConnection
-import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.DatagramPacket
 import java.util.*
@@ -20,10 +20,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.schedule
 import kotlin.concurrent.withLock
 
-class Session(private val socket: GameSocket, private val gameStopDelay: Long = 10_000) {
+class Session(private val socket: GameSocket, private val gameStopDelay: Long = 10_000) : WorldChangeListener {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
     private val gameStateController: GameStateController
     private val world: World = World(Vector2(0F, 0F), false)
@@ -31,6 +32,7 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
     private val tickService = ScheduledThreadPoolExecutor(1)
     private var lastUpdate = System.currentTimeMillis()
     private val worldUpdateLock = ReentrantLock()
+    private val leaderboard = LinkedHashSet<Long>()
 
     private val worldUpdatedCondition = worldUpdateLock.newCondition()
 
@@ -40,9 +42,14 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
         private set
 
     init {
-        val mapPath = File("map/bomberman_main.tmx")
-        val map = TileMapFactory.createTileMap(world, mapPath.path)
+        val mapPath = "map/bomberman_main.tmx"
+        val map = TileMapFactory.createTileMap(world, mapPath)
         gameStateController = GameStateController(world, map)
+        gameStateController.addListener(this)
+    }
+
+    override fun onPlayerDied(playerEntity: PlayerEntity?) {
+        leaderboard.add(playerEntity!!.id)
     }
 
     fun onSnapshot(connection: ClientConnection, packet: PlayerSnapshotPacket): Boolean {
@@ -110,16 +117,14 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
     private fun stopGame() {
         check(gameStarted) { "The game has not yet been started" }
 
-        simulationService.shutdown()
         tickService.shutdown()
-
-        simulationService.awaitTermination(500, TimeUnit.MILLISECONDS)
         tickService.awaitTermination(500, TimeUnit.MILLISECONDS)
+        simulationService.awaitTermination(500, TimeUnit.MILLISECONDS)
 
         gameStateController.dispose()
         world.dispose()
 
-        socket.gameStopped()
+        socket.gameStopped(LinkedHashSet(leaderboard.reversed()))
     }
 
     private fun scheduleSimulationUpdates() {
@@ -159,12 +164,16 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
         }
 
         // TODO: Check if only one player remained
-        if (!gameFinished && clientSessions.isEmpty()) {
+        if (leaderboard.size >= clientSessions.size - 1) {
+            simulationService.shutdown()
             gameFinished = true
             Timer().schedule(gameStopDelay) { stopGame() }
+
+            // Add remaining players to the leaderboard in ambiguous order
+            leaderboard.addAll(clientSessions.values.map { it.id })
         }
 
-        clientSessions.map { it.value }.filter { !it.isPlayerDead() }.forEach { it.update(delta) }
+        clientSessions.values.filter { !it.isPlayerDead() }.forEach { it.update(delta) }
         gameStateController.update(delta)
     }
 
