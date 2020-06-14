@@ -112,7 +112,9 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         try {
             try {
                 worldUpdateLock.lock();
-                worldUpdatedCondition.await();
+                while (worldController.isWorldLocked()) {
+                    worldUpdatedCondition.await();
+                }
             } finally {
                 worldUpdateLock.unlock();
             }
