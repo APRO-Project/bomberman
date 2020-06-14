@@ -1,7 +1,8 @@
 package com.cyberbot.bomberman.core.controllers;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.defs.BombDef;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
  * The main gameplay controller.
  * Handles all contact detection, player actions, entity behaviour.
  */
-public final class GameStateController implements Disposable, Updatable, PlayerActionController.Listener, ContactListener {
+public final class GameStateController implements Disposable, Updatable, PlayerActionController.Listener, Box2DContactListener {
     private final World world;
 
     private final TileMap map;
@@ -31,6 +32,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     private final List<BombEntity> bombs;
     private final List<PlayerEntity> players;
     private final List<CollectibleEntity> collectibles;
+    private final List<ExplosionEntity> explosions;
 
     private final List<WorldChangeListener> listeners;
 
@@ -40,6 +42,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         this.players = new ArrayList<>();
         this.bombs = new ArrayList<>();
         this.collectibles = new ArrayList<>();
+        this.explosions = new ArrayList<>();
         this.listeners = new ArrayList<>();
 
         world.setContactListener(this);
@@ -51,11 +54,10 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         entityStream().forEach(entity -> entity.update(delta));
 
         // Handle bomb explosion
-        bombs.forEach(bomb -> {
-            if (bomb.isBlown()) {
-                onBombExploded(bomb);
-            }
-        });
+        bombs.stream().filter(BombEntity::isBlown).forEach(this::onBombExploded);
+
+        // Handle explosion decay
+        explosions.stream().filter(ExplosionEntity::isDecayed).forEach(Entity::markToRemove);
 
         // Dispose any entities that have not yet been disposed and are marked for removal
         entityStream()
@@ -63,7 +65,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             .forEach(this::onEntityRemoved);
 
         // Remove any entities that have been marked to be removed
-        Stream.of(players, collectibles, bombs)
+        Stream.of(players, collectibles, bombs, explosions)
             .forEach(list -> list.removeIf(Entity::isMarkedToRemove));
 
         // Update players
@@ -148,7 +150,8 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             player = (PlayerEntity) b;
             other = (Entity) a;
         } else {
-            throw new RuntimeException("Contact detected between non-player entities");
+            return;
+            // throw new RuntimeException("Contact detected between non-player entities");
         }
 
         if (other instanceof PlayerEntity) {
@@ -158,23 +161,8 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         handleContact(player, other);
     }
 
-    @Override
-    public void endContact(Contact contact) {
-        // Unused
-    }
-
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-        // Unused
-    }
-
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-        // Unused
-    }
-
     private Stream<Entity> entityStream() {
-        return Stream.of(players, collectibles, bombs).flatMap(Collection::stream);
+        return Stream.of(players, collectibles, bombs, explosions).flatMap(Collection::stream);
     }
 
     private void onEntityAdded(Entity entity) {
@@ -186,14 +174,15 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         listeners.forEach(listener -> listener.onEntityRemoved(entity));
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private void onBombExploded(BombEntity bomb) {
         bomb.markToRemove();
 
-        float bombRange = bomb.getRange();
-        int range = (int) bombRange;
-        Vector2 position = bomb.getPosition();
-        int x = (int) position.x;
-        int y = (int) position.y;
+        final float bombRange = bomb.getRange();
+        final int range = (int) bombRange;
+        final Vector2 position = bomb.getPosition();
+        final int x = (int) position.x;
+        final int y = (int) position.y;
 
         float bombPower = bomb.getPower();
         float powerRight = bombPower;
@@ -203,14 +192,15 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         TileMapLayer walls = map.getWalls();
 
-        damagePlayers(x, y, (bombPower * 2));
+        addExplosion(x, y, 2 * bombPower);
 
         // Right
         for (int i = 1; i <= range; i++) {
-            Tile tile = walls.getTile(x + i, y);
+            int x1 = x + i;
+            Tile tile = walls.getTile(x1, y);
 
-            damagePlayers(x + i, y, powerRight);
             powerRight = damageTile(tile, powerRight);
+            addExplosion(x1, y, powerRight);
             powerRight = Math.max(0, powerRight - bomb.getPowerDropoff());
 
             if (powerRight == 0) {
@@ -220,10 +210,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Left
         for (int i = 1; i <= range; i++) {
-            Tile tile = walls.getTile(x - i, y);
+            int x1 = x - i;
+            Tile tile = walls.getTile(x1, y);
 
-            damagePlayers(x - i, y, powerLeft);
             powerLeft = damageTile(tile, powerLeft);
+            addExplosion(x1, y, powerLeft);
             powerLeft = Math.max(0, powerLeft - bomb.getPowerDropoff());
 
             if (powerLeft == 0) {
@@ -233,10 +224,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Up
         for (int i = 1; i <= range; i++) {
-            Tile tile = walls.getTile(x, y + i);
+            int y1 = y + i;
+            Tile tile = walls.getTile(x, y1);
 
-            damagePlayers(x, y + i, powerUp);
             powerUp = damageTile(tile, powerUp);
+            addExplosion(x, y1, powerUp);
             powerUp = Math.max(0, powerUp - bomb.getPowerDropoff());
 
             if (powerUp == 0) {
@@ -246,30 +238,17 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Down
         for (int i = 1; i <= range; i++) {
-            Tile tile = walls.getTile(x, y - i);
+            int y1 = y - i;
+            Tile tile = walls.getTile(x, y1);
 
-            damagePlayers(x, y - i, powerDown);
             powerDown = damageTile(tile, powerDown);
+            addExplosion(x, y1, powerDown);
             powerDown = Math.max(0, powerDown - bomb.getPowerDropoff());
 
             if (powerDown == 0) {
                 break;
             }
         }
-    }
-
-    private void damagePlayers(int x, int y, float power) {
-        players.stream().filter(playerEntity ->
-            {
-                Vector2 playerPosition = playerEntity.getPosition();
-                return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
-            }
-        ).forEach(playerEntity -> {
-            playerEntity.takeDamage(power);
-            if (playerEntity.isDead()) {
-                playerEntity.markToRemove();
-            }
-        });
     }
 
     /**
@@ -305,6 +284,16 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         onEntityAdded(collectible);
     }
 
+    private void addExplosion(int x, int y, float power) {
+        if (map.getWalls().getTile(x, y) != null) {
+            return;
+        }
+
+        ExplosionEntity explosion = new ExplosionEntity(world, generateEntityId(), power, 1);
+        explosion.setPosition(new Vector2(x + 0.5f, y + 0.5f));
+        explosions.add(explosion);
+    }
+
     private void handleContact(PlayerEntity player, Entity other) {
         if (other instanceof CollectibleEntity) {
             ItemType itemType = ((CollectibleEntity) other).getItemType();
@@ -320,6 +309,13 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             }
 
             other.markToRemove();
+        } else if (other instanceof ExplosionEntity) {
+            // TODO: Better damage handling
+            ((ExplosionEntity) other).damagePlayer(player);
+
+            if (player.isDead()) {
+                player.markToRemove();
+            }
         }
     }
 }
