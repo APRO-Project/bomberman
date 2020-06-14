@@ -25,7 +25,7 @@ import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.schedule
 import kotlin.concurrent.withLock
 
-class Session(private val socket: GameSocket, private val gameStopDelay: Long = 10_000) : WorldChangeListener {
+class Session(private val socket: GameSocket, private val gameStopDelay: Long = 100) : WorldChangeListener {
     private val clientSessions = HashMap<ClientConnection, PlayerSession>()
     private val gameStateController: GameStateController
     private val world: World = World(Vector2(0F, 0F), false)

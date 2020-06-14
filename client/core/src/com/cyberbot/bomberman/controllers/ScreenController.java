@@ -195,16 +195,16 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void onGameEnd(@NotNull GameEnd payload) {
-        //FIXME even does not activate
-        setScreen(finish);
-        String leaderboard = payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.joining());
-        finish.updateFinish(payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.toList()));
-        Gdx.app.log("ControlService", leaderboard);
+        Gdx.app.postRunnable(() -> {
+            setScreen(finish);
+            finish.updateFinish(payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.toList()));
+        });
     }
 
     @Override
     public void onError(@NotNull ErrorResponse payload) {
         Gdx.app.log("ControlService", payload.getError());
+        showError(payload.getError());
     }
 
     private void showError(String message) {

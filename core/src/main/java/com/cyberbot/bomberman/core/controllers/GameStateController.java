@@ -57,14 +57,14 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             }
         });
 
-        // Remove any entities that have been marked to be removed
-        Stream.of(players, collectibles, bombs)
-            .forEach(list -> list.removeIf(Entity::isMarkedToRemove));
-
         // Dispose any entities that have not yet been disposed and are marked for removal
         entityStream()
             .filter(Predicate.not(Entity::isRemoved).and(Entity::isMarkedToRemove))
             .forEach(this::onEntityRemoved);
+
+        // Remove any entities that have been marked to be removed
+        Stream.of(players, collectibles, bombs)
+            .forEach(list -> list.removeIf(Entity::isMarkedToRemove));
 
         // Update players
         players.forEach(player -> player.updateFromEnvironment(map));
