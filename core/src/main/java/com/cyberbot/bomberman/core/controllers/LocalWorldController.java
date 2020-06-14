@@ -122,6 +122,10 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         this.playersAlive = new HashMap<>();
     }
 
+    public boolean isWorldLocked() {
+        return world.isLocked();
+    }
+
     @Override
     public void update(float delta) {
         world.step(delta, 6, 2);

@@ -74,7 +74,9 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
 
     private fun tick() {
         worldUpdateLock.withLock {
-            worldUpdatedCondition.await()
+            while(world.isLocked) {
+                worldUpdatedCondition.await()
+            }
         }
 
         for ((session, packet) in getUpdatePackets()) {
@@ -150,7 +152,6 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
         }
     }
 
-    @Synchronized
     private fun update(delta: Float) {
         worldUpdateLock.withLock {
             world.step(delta, 6, 2)
