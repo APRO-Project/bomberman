@@ -1,5 +1,6 @@
 package com.cyberbot.bomberman.controllers;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -7,6 +8,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.cyberbot.bomberman.core.controllers.LocalWorldController;
 import com.cyberbot.bomberman.core.models.Updatable;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.core.models.items.Upgrade;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.MapLoadException;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -15,6 +17,7 @@ import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.models.KeyBinds;
 import com.cyberbot.bomberman.net.NetService;
 import com.cyberbot.bomberman.screens.hud.GameHud;
+import com.cyberbot.bomberman.utils.Atlas;
 
 import java.net.SocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,8 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.cyberbot.bomberman.core.utils.Constants.SIM_RATE;
-import static com.cyberbot.bomberman.core.utils.Constants.TICK_RATE;
+import static com.cyberbot.bomberman.core.utils.Constants.*;
 
 /**
  * The main orchestrator for a networked gameplay. It schedules input polling and snapshot creation.
@@ -49,6 +51,8 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
 
     private final ReentrantLock worldUpdateLock;
     private final Condition worldUpdatedCondition;
+
+    private final Sprite frozenTint;
 
     public NetworkedGameplayController(PlayerData localPlayer, String mapPath,
                                        SocketAddress connection, GameHud hud)
@@ -80,6 +84,10 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         inputPollService = new ScheduledThreadPoolExecutor(1);
         inputPollService.scheduleAtFixedRate(inputController::poll,
             0, 1_000_000 / SIM_RATE, TimeUnit.MICROSECONDS);
+
+        frozenTint = new Sprite(Atlas.getInstance().findRegion("FrozenTint"));
+        frozenTint.setBounds(0, 0, 15 * PPM, 15 * PPM);
+        frozenTint.setSize(15 * PPM, 15 * PPM);
     }
 
     @Override
@@ -93,11 +101,19 @@ public class NetworkedGameplayController implements Updatable, Drawable, Disposa
         }
 
         textureController.update(delta);
+
+        if (worldController.getLocalPlayer().isFrozen()) {
+            frozenTint.setAlpha(worldController.getLocalPlayer().getFreezeTimeLeft() / Upgrade.FREEZER_DURATION);
+        }
     }
 
     @Override
     public void draw(SpriteBatch batch) {
         textureController.draw(batch);
+
+        if (worldController.getLocalPlayer().isFrozen()) {
+            frozenTint.draw(batch);
+        }
     }
 
     @Override
