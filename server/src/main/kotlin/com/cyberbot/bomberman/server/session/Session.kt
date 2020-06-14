@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.cyberbot.bomberman.core.controllers.GameStateController
 import com.cyberbot.bomberman.core.controllers.WorldChangeListener
+import com.cyberbot.bomberman.core.models.entities.Entity
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity
 import com.cyberbot.bomberman.core.models.net.SerializationUtils
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
@@ -48,8 +49,10 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
         gameStateController.addListener(this)
     }
 
-    override fun onPlayerDied(playerEntity: PlayerEntity?) {
-        leaderboard.add(playerEntity!!.id)
+    override fun onEntityRemoved(entity: Entity?) {
+        if (entity is PlayerEntity) {
+            leaderboard.add(entity.id)
+        }
     }
 
     fun onSnapshot(connection: ClientConnection, packet: PlayerSnapshotPacket): Boolean {
@@ -173,7 +176,7 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
             leaderboard.addAll(clientSessions.values.map { it.id })
         }
 
-        clientSessions.values.filter { !it.isPlayerDead() }.forEach { it.update(delta) }
+        clientSessions.values.forEach { it.update(delta) }
         gameStateController.update(delta)
     }
 

@@ -68,10 +68,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
 
         // Update players
         players.forEach(player -> player.updateFromEnvironment(map));
-
-        players.stream()
-            .filter(Predicate.not(PlayerEntity::isRemoved).and(PlayerEntity::isDead))
-            .forEach(this::onPlayerDied);
     }
 
     @Override
@@ -190,11 +186,6 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         listeners.forEach(listener -> listener.onEntityRemoved(entity));
     }
 
-    private void onPlayerDied(PlayerEntity entity) {
-        entity.dispose();
-        listeners.forEach(listener -> listener.onPlayerDied(entity));
-    }
-
     private void onBombExploded(BombEntity bomb) {
         bomb.markToRemove();
 
@@ -273,7 +264,12 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
                 Vector2 playerPosition = playerEntity.getPosition();
                 return (Math.floor(playerPosition.x) == x && Math.floor(playerPosition.y) == y);
             }
-        ).forEach(playerEntity -> playerEntity.takeDamage(power));
+        ).forEach(playerEntity -> {
+            playerEntity.takeDamage(power);
+            if (playerEntity.isDead()) {
+                playerEntity.markToRemove();
+            }
+        });
     }
 
     /**

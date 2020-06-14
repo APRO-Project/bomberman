@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
+import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
 import com.cyberbot.bomberman.utils.Atlas;
 
@@ -127,7 +128,9 @@ public class GameHud extends Stage implements WorldChangeListener {
     }
 
     @Override
-    public void onPlayerDied(PlayerEntity playerEntity) {
-        playerListView.onPlayerDeath(playerEntity);
+    public void onEntityRemoved(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            playerListView.onPlayerDeath((PlayerEntity) entity); // Cast away to hell
+        }
     }
 }

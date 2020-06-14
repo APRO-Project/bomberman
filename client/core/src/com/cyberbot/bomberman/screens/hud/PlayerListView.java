@@ -61,6 +61,7 @@ public final class PlayerListView extends Table {
         int nameIndex = -1;
 
         for(int i = 0; i < MAX_PLAYERS; ++i) {
+            // FIXME: nul ptr excptionn whan local plyer is kill
             if(players.get(i).right == playerEntity.getId()) {
                 nameIndex = i;
                 break;
@@ -72,6 +73,7 @@ public final class PlayerListView extends Table {
             return;
         }
 
+        // FIXME: Dark grey to much dark, no see player name on background
         labels.get(nameIndex).left.setColor(Color.DARK_GRAY);
         labels.get(nameIndex).right.setColor(Color.DARK_GRAY);
     }
