@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.FloorTile;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
@@ -25,6 +26,10 @@ public class PlayerEntity extends Entity {
 
     private float dragMultiplier;
     private float maxSpeedMultiplier;
+
+    public enum FacingDirection {BACK, FRONT, LEFT, RIGHT}
+
+    public FacingDirection facingDirection;
 
     private int hp;
 
@@ -156,6 +161,16 @@ public class PlayerEntity extends Entity {
 
     @Override
     public PlayerData getData() {
-        return new PlayerData(id, getPosition(), inventory, textureVariant, hp);
+        return new PlayerData(id, getPosition(), inventory, textureVariant, facingDirection, hp);
+    }
+
+    @Override
+    public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
+        if (!(d0 instanceof PlayerData) || !(d1 instanceof PlayerData)) {
+            throw new IllegalArgumentException("Not instance of PlayerData");
+        }
+
+        super.updateFromData(d0, d1, fraction);
+        facingDirection = ((PlayerData) d0).getFacingDirection();
     }
 }

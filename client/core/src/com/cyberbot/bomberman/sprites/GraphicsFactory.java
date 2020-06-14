@@ -1,6 +1,5 @@
 package com.cyberbot.bomberman.sprites;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.cyberbot.bomberman.core.models.entities.BombEntity;
@@ -28,6 +27,8 @@ public class GraphicsFactory {
         ItemType.UPGRADE_MOVEMENT_SPEED,"ArrowFast",
         ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back"
     );
+
+    public static final List<String> playerVariants = List.of("bbb", "brw", "wbw", "wrb");
 
     /**
      * Creates an {@link EntitySprite} matching the provided entity.
@@ -64,7 +65,30 @@ public class GraphicsFactory {
     }
 
     public static Sprite createSprite(PlayerEntity player) {
-        return new Sprite(new Texture("./textures/player.png"));
+        return Atlas.getInstance()
+            .createSprite("Player_" + playerVariants.get(player.getTextureVariant()) + "_idle_front");
+//        return new Sprite(new Texture("./textures/player.png"));
+    }
+
+    public static TextureRegion getPlayerTextureVariant(PlayerEntity player) {
+        String texturePath = "Player_" + playerVariants.get(player.getTextureVariant()) + "_idle_";
+
+        switch (player.facingDirection) {
+            case RIGHT:
+                texturePath += "right";
+                break;
+            case LEFT:
+                texturePath += "left";
+                break;
+            case BACK:
+                texturePath += "back";
+                break;
+            case FRONT:
+                texturePath += "front";
+                break;
+        }
+
+        return Atlas.getInstance().findRegion(texturePath);
     }
 
     public static Sprite createSprite(CollectibleEntity collectible) {
