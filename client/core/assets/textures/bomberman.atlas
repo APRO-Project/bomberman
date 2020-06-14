@@ -6,56 +6,56 @@ filter: Nearest,Nearest
 repeat: none
 ArrowFast
   rotate: false
-  xy: 80, 3
+  xy: 132, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Bomb
   rotate: false
-  xy: 132, 29
+  xy: 132, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 1
 Bomb
   rotate: false
-  xy: 158, 55
+  xy: 158, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 2
 Bomb
   rotate: false
-  xy: 184, 81
+  xy: 184, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 3
 BombStatic
   rotate: false
-  xy: 132, 107
+  xy: 184, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Boom
   rotate: false
-  xy: 54, 159
+  xy: 54, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Box1
   rotate: false
-  xy: 106, 29
+  xy: 158, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Box2
   rotate: false
-  xy: 132, 55
+  xy: 184, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -95,16 +95,37 @@ DynamiteStatic
   orig: 24, 24
   offset: 0, 0
   index: -1
+FastBoom
+  rotate: false
+  xy: 28, 3
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
 Floor
   rotate: false
-  xy: 184, 107
+  xy: 158, 55
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+FrozenTint
+  rotate: false
+  xy: 184, 133
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+Fryzjer
+  rotate: false
+  xy: 106, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Ice
   rotate: false
-  xy: 158, 81
+  xy: 132, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -118,7 +139,7 @@ Ice1
   index: -1
 Ice2
   rotate: false
-  xy: 184, 159
+  xy: 106, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -202,7 +223,7 @@ Lava4
   index: -1
 Lava5
   rotate: false
-  xy: 184, 185
+  xy: 2, 2
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -216,7 +237,7 @@ Lava6
   index: -1
 Lava7
   rotate: false
-  xy: 54, 55
+  xy: 106, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -230,63 +251,63 @@ Lava8
   index: -1
 Nuke
   rotate: false
-  xy: 80, 55
+  xy: 132, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 3
 Nuke
   rotate: false
-  xy: 106, 55
+  xy: 158, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 2
 Nuke
   rotate: false
-  xy: 106, 3
+  xy: 184, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: 1
 NukeStatic
   rotate: false
-  xy: 106, 81
+  xy: 158, 133
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_back
   rotate: false
-  xy: 80, 29
+  xy: 132, 81
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_front
   rotate: false
-  xy: 132, 133
+  xy: 106, 107
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_left
   rotate: false
-  xy: 132, 3
+  xy: 158, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_bbb_idle_right
   rotate: false
-  xy: 54, 29
+  xy: 80, 55
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_brw_idle_back
   rotate: false
-  xy: 106, 185
+  xy: 184, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -300,21 +321,21 @@ Player_brw_idle_front
   index: -1
 Player_brw_idle_left
   rotate: false
-  xy: 106, 107
+  xy: 158, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_brw_idle_right
   rotate: false
-  xy: 80, 185
+  xy: 106, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_wbw_idle_back
   rotate: false
-  xy: 158, 159
+  xy: 184, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -328,7 +349,7 @@ Player_wbw_idle_front
   index: -1
 Player_wbw_idle_left
   rotate: false
-  xy: 184, 133
+  xy: 106, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -342,35 +363,35 @@ Player_wbw_idle_right
   index: -1
 Player_wrb_idle_back
   rotate: false
-  xy: 132, 81
+  xy: 80, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_wrb_idle_front
   rotate: false
-  xy: 158, 133
+  xy: 80, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_wrb_idle_left
   rotate: false
-  xy: 158, 29
+  xy: 132, 133
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Player_wrb_idle_right
   rotate: false
-  xy: 28, 3
+  xy: 54, 29
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Shield
   rotate: false
-  xy: 2, 106
+  xy: 54, 3
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -391,7 +412,7 @@ Wall2
   index: -1
 Wall3
   rotate: false
-  xy: 158, 107
+  xy: 2, 106
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -405,14 +426,14 @@ Wall4
   index: -1
 Wall5
   rotate: false
-  xy: 2, 2
+  xy: 54, 159
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 Wall6
   rotate: false
-  xy: 54, 3
+  xy: 80, 185
   size: 24, 24
   orig: 24, 24
   offset: 0, 0

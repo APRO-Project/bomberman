@@ -25,7 +25,8 @@ public class Inventory implements Updatable, Serializable {
     private static final List<ItemType> USABLE_TYPES = Arrays.asList(
         ItemType.SMALL_BOMB,
         ItemType.MEDIUM_BOMB,
-        ItemType.NUKE
+        ItemType.NUKE,
+        ItemType.FREEZER
     );
 
     /**

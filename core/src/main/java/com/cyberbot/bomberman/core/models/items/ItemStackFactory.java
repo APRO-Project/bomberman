@@ -20,6 +20,8 @@ public class ItemStackFactory {
                 return new RefilingItemStack(itemType, 0, 5, true);
             case NUKE:
                 return new RefilingItemStack(itemType, 0, 15, true);
+            case FREEZER:
+                return new ItemStack(itemType);
             case UPGRADE_MOVEMENT_SPEED:
                 return new ItemStack(itemType, 3);
             case UPGRADE_REFILL_SPEED:

@@ -8,6 +8,7 @@ public enum ItemType {
     SMALL_BOMB(0),
     MEDIUM_BOMB(1),
     NUKE(2),
+    FREEZER(3),
 
     // Collectible items
     UPGRADE_MOVEMENT_SPEED(100),
