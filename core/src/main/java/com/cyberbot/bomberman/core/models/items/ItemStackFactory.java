@@ -18,6 +18,8 @@ public class ItemStackFactory {
                 return new RefilingItemStack(itemType, 3, false);
             case MEDIUM_BOMB:
                 return new RefilingItemStack(itemType, 0, 8, true);
+            case NUKE:
+                return new RefilingItemStack(itemType, 0, 20, true);
             case UPGRADE_MOVEMENT_SPEED:
                 return new ItemStack(itemType, 3);
             case UPGRADE_REFILL_SPEED:

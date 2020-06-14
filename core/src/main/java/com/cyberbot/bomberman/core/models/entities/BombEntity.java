@@ -16,7 +16,6 @@ public class BombEntity extends Entity {
     private final float powerDropoff;
     private final float range;
     private final float detonationTime;
-    private final int playerTextureVariant;
     private final ItemType bombItemType;
 
     private float timeLeft;
@@ -33,7 +32,6 @@ public class BombEntity extends Entity {
         this.range = def.range;
         this.detonationTime = def.detonationTime;
         this.timeLeft = def.detonationTime;
-        this.playerTextureVariant = def.playerTextureVariant;
         this.powerDropoff = def.powerDropOff;
         this.bombItemType = def.bombItemType;
 
@@ -80,7 +78,7 @@ public class BombEntity extends Entity {
 
     @Override
     public BombData getData() {
-        return new BombData(id, getPosition(), playerTextureVariant, bombItemType, detonationTime);
+        return new BombData(id, getPosition(), bombItemType, detonationTime);
     }
 
     public float getRange() {
@@ -97,10 +95,6 @@ public class BombEntity extends Entity {
 
     public boolean isBlown() {
         return blown;
-    }
-
-    public int getPlayerTextureVariant() {
-        return playerTextureVariant;
     }
 
     public float getPowerDropoff() {
