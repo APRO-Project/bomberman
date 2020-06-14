@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.items.Upgrade;
 import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.FloorTile;
@@ -25,6 +26,9 @@ public class PlayerEntity extends Entity {
     private float dragMultiplier;
     private float maxSpeedMultiplier;
 
+    private boolean frozen;
+    private float freezeTimeLeft;
+
     public FacingDirection facingDirection;
 
     private int hp;
@@ -37,6 +41,9 @@ public class PlayerEntity extends Entity {
         maxSpeedMultiplier = def.maxSpeedModifier;
         textureVariant = def.textureVariant;
         hp = def.hp;
+
+        frozen = false;
+        freezeTimeLeft = 0;
     }
 
     @Override
@@ -63,11 +70,19 @@ public class PlayerEntity extends Entity {
     public void update(float delta) {
         super.update(delta);
         inventory.update(delta);
+
+        if (frozen) {
+            freezeTimeLeft -= delta;
+            if (freezeTimeLeft <= 0) {
+                frozen = false;
+                freezeTimeLeft = 0;
+            }
+        }
     }
 
     @Override
     public PlayerData getData() {
-        return new PlayerData(id, getPosition(), inventory, textureVariant, facingDirection, hp);
+        return new PlayerData(id, getPosition(), inventory, textureVariant, facingDirection, freezeTimeLeft, frozen, hp);
     }
 
     @Override
@@ -78,6 +93,8 @@ public class PlayerEntity extends Entity {
 
         super.updateFromData(d0, d1, fraction);
         facingDirection = ((PlayerData) d0).getFacingDirection();
+        freezeTimeLeft = ((PlayerData) d0).getFreezeTimeLeft();
+        frozen = ((PlayerData) d0).isFrozen();
     }
 
     public int getHp() {
@@ -96,11 +113,38 @@ public class PlayerEntity extends Entity {
         hp = Math.min(100, hp + value);
     }
 
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public float getFreezeTimeLeft() {
+        return freezeTimeLeft;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
+    public void setFreezeTimeLeft(float freezeTimeLeft) {
+        this.freezeTimeLeft = freezeTimeLeft;
+    }
+
+    public void freeze() {
+        frozen = true;
+        freezeTimeLeft = Upgrade.FREEZER_DURATION;
+    }
+
     public void takeDamage(float power) {
         hp = (int) (Math.max(0, hp - power) * inventory.getArmorMultiplier());
     }
 
     public void updateFromEnvironment(TileMap map) {
+        if(frozen) {
+            maxSpeedMultiplier = 0;
+            dragMultiplier = 1000;
+            return;
+        }
+
         Vector2 position = getPosition();
         int x = (int) Math.floor(position.x);
         int y = (int) Math.floor(position.y);

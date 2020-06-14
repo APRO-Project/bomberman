@@ -24,7 +24,7 @@ public class GraphicsFactory {
         ItemType.SMALL_BOMB, "DynamiteStatic",
         ItemType.MEDIUM_BOMB, "BombStatic",
         ItemType.NUKE, "NukeStatic",
-        ItemType.FREEZER, "Player_wbw_idle_back",  // TODO: Change to appropriate texture
+        ItemType.FREEZER, "Fryzjer",
         ItemType.UPGRADE_ARMOR, "Shield",
         ItemType.UPGRADE_MOVEMENT_SPEED, "ArrowFast",
         ItemType.UPGRADE_REFILL_SPEED, "CDR"

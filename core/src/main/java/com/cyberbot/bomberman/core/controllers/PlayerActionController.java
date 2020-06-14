@@ -69,6 +69,10 @@ public final class PlayerActionController implements ActionListener, Updatable {
                 listeners.forEach(l -> l.onBombPlaced(def, player));
                 break;
             }
+            case FREEZER: {
+                listeners.forEach(l -> l.onFreezerApplied(player));
+                break;
+            }
         }
     }
 
@@ -119,5 +123,6 @@ public final class PlayerActionController implements ActionListener, Updatable {
 
     public interface Listener {
         void onBombPlaced(BombDef bombDef, PlayerEntity executor);
+        void onFreezerApplied(PlayerEntity executor);
     }
 }

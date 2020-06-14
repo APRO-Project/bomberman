@@ -130,6 +130,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     @Override
+    public void onFreezerApplied(PlayerEntity executor) {
+        players.stream().filter(p -> !p.equals(executor)).forEach(PlayerEntity::freeze);
+    }
+
+    @Override
     public void beginContact(Contact contact) {
         Object a = contact.getFixtureA().getBody().getUserData();
         Object b = contact.getFixtureB().getBody().getUserData();

@@ -129,8 +129,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         world.step(delta, 6, 2);
 
         if (playerAlive) {
-            playerActionController.update(delta);
             localPlayer.updateFromEnvironment(map);
+            playerActionController.update(delta);
         }
 
         // Update all entities
@@ -353,6 +353,8 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         }
 
         localPlayer.setHp(playerData.getHp());
+        localPlayer.setFrozen(playerData.isFrozen());
+        localPlayer.setFreezeTimeLeft(playerData.getFreezeTimeLeft());
     }
 
     private void applySnapshotToEntities(GameSnapshot snapshot) {
