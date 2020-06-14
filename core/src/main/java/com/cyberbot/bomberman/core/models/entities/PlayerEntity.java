@@ -25,31 +25,9 @@ public class PlayerEntity extends Entity {
     private float dragMultiplier;
     private float maxSpeedMultiplier;
 
-    public enum FacingDirection {BACK, FRONT, LEFT, RIGHT}
-
     public FacingDirection facingDirection;
 
     private int hp;
-
-    public int getHp() {
-        return hp;
-    }
-
-    public void setHp(int hp) {
-        if (hp < 0 || hp > 100) {
-            throw new IllegalArgumentException("HP value must be between 0 and 100");
-        }
-
-        this.hp = hp;
-    }
-
-    public void addHp(int value) {
-        hp = Math.min(100, hp + value);
-    }
-
-    public void takeDamage(float power) {
-        hp = (int) (Math.max(0, hp - power) * inventory.getArmorMultiplier());
-    }
 
     public PlayerEntity(World world, PlayerDef def, long id) {
         super(world, id);
@@ -100,6 +78,26 @@ public class PlayerEntity extends Entity {
 
         super.updateFromData(d0, d1, fraction);
         facingDirection = ((PlayerData) d0).getFacingDirection();
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        if (hp < 0 || hp > 100) {
+            throw new IllegalArgumentException("HP value must be between 0 and 100");
+        }
+
+        this.hp = hp;
+    }
+
+    public void addHp(int value) {
+        hp = Math.min(100, hp + value);
+    }
+
+    public void takeDamage(float power) {
+        hp = (int) (Math.max(0, hp - power) * inventory.getArmorMultiplier());
     }
 
     public void updateFromEnvironment(TileMap map) {
@@ -175,4 +173,7 @@ public class PlayerEntity extends Entity {
         return hp > 0;
     }
 
+    public enum FacingDirection {
+        BACK, FRONT, LEFT, RIGHT
+    }
 }
