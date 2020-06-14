@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.screens.hud;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.actions.ColorAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -29,6 +30,8 @@ public final class PlayerListView extends Table {
 
         for(int i = 0; i < MAX_PLAYERS; ++i) {
             labels.add(new ImmutablePair<>(new Label(null, skin), new Label(null, skin)));
+            labels.get(i).right.setColor(Color.OLIVE);
+
             add(labels.get(i).left).padRight(5);
             add(labels.get(i).right).row();
 
@@ -61,8 +64,7 @@ public final class PlayerListView extends Table {
         int nameIndex = -1;
 
         for(int i = 0; i < MAX_PLAYERS; ++i) {
-            // FIXME: nul ptr excptionn whan local plyer is kill
-            if(players.get(i).right == playerEntity.getId()) {
+            if(players.get(i) != null && players.get(i).right == playerEntity.getId()) {
                 nameIndex = i;
                 break;
             }
@@ -73,8 +75,10 @@ public final class PlayerListView extends Table {
             return;
         }
 
-        // FIXME: Dark grey to much dark, no see player name on background
-        labels.get(nameIndex).left.setColor(Color.DARK_GRAY);
-        labels.get(nameIndex).right.setColor(Color.DARK_GRAY);
+        ColorAction action = new ColorAction();
+        action.setEndColor(Color.FIREBRICK);
+        action.setDuration(3);
+
+        labels.get(nameIndex).right.addAction(action);
     }
 }
