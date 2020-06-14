@@ -12,7 +12,7 @@ public class ExplosionData extends EntityData<ExplosionEntity> {
 
     @Override
     public ExplosionEntity createEntity(World world) {
-        ExplosionEntity explosionEntity = new ExplosionEntity(world, id);
+        ExplosionEntity explosionEntity = new ExplosionEntity(world, id, ExplosionEntity.DO_NOT_DECAY);
         explosionEntity.setPosition(position.toVector2());
         return explosionEntity;
     }

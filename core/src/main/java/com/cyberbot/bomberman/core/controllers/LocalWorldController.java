@@ -137,6 +137,7 @@ public class LocalWorldController implements Updatable, Disposable, GameSnapshot
         entities.forEach((key, entity) -> entity.update(delta));
 
         // Remove any entities marked for removal
+        entities.values().stream().filter(Entity::isMarkedToRemove).forEach(this::onEntityRemoved);
         entities.entrySet().removeIf(it -> it.getValue().isMarkedToRemove());
 
         // Only validate every packet once

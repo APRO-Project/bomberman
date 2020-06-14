@@ -53,11 +53,10 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
         entityStream().forEach(entity -> entity.update(delta));
 
         // Handle bomb explosion
-        bombs.forEach(bomb -> {
-            if (bomb.isBlown()) {
-                onBombExploded(bomb);
-            }
-        });
+        bombs.stream().filter(BombEntity::isBlown).forEach(this::onBombExploded);
+
+        // Handle explosion decay
+        explosions.stream().filter(ExplosionEntity::isDecayed).forEach(Entity::markToRemove);
 
         // Dispose any entities that have not yet been disposed and are marked for removal
         entityStream()
@@ -327,7 +326,7 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
             return;
         }
 
-        ExplosionEntity explosion = new ExplosionEntity(world, generateEntityId());
+        ExplosionEntity explosion = new ExplosionEntity(world, generateEntityId(), 1);
         explosion.setPosition(new Vector2(x + 0.5f, y + 0.5f));
         explosions.add(explosion);
     }

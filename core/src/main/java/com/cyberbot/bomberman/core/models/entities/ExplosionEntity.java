@@ -7,13 +7,15 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.cyberbot.bomberman.core.models.net.data.ExplosionData;
 
 public class ExplosionEntity extends Entity {
-
-    private static final float DECAY_TIME = 1.5f;
+    public static float DO_NOT_DECAY = -1;
     private float decayTimeLeft;
+    private boolean decayed;
 
-    public ExplosionEntity(World world, long id) {
+    public ExplosionEntity(World world, long id, float decayTime) {
         super(world, id);
-        decayTimeLeft = 0;
+
+        this.decayed = false;
+        this.decayTimeLeft = decayTime;
     }
 
     @Override
@@ -38,14 +40,18 @@ public class ExplosionEntity extends Entity {
     public void update(float delta) {
         super.update(delta);
 
-        decayTimeLeft += delta;
-        if (decayTimeLeft >= DECAY_TIME) {
-            markToRemove();
+        decayTimeLeft = Math.max(0, decayTimeLeft - delta);
+        if (decayTimeLeft == 0) {
+            decayed = true;
         }
     }
 
     @Override
     public ExplosionData getData() {
         return new ExplosionData(id, getPosition());
+    }
+
+    public boolean isDecayed() {
+        return decayed;
     }
 }
