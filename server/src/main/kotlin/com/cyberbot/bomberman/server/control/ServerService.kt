@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom
 class ServerService(
     private val port: Int,
     private val maxLobbyCount: Int = 5,
-    private val lobbyIdLength: Int = 5,
+    private val lobbyIdLength: Int = 4,
     private val maxPlayersPerLobby: Int = 4,
     private val maxPlayerNickLength: Int = 20
 ) : ClientController, Runnable, Logging, SessionStateListener {
