@@ -58,13 +58,13 @@ public class GraphicsFactory {
         switch (getBombVariant(entity)) {
             case BombSprite.VARIANT_SMALL_RED:
                 return Atlas.getInstance().createSprite("DynamiteStatic");
-            case BombSprite.VARIANT_MEDIUM_RED:
+            case BombSprite.VARIANT_BLACK:
                 return Atlas.getInstance().createSprite("BombStatic");
             case BombSprite.VARIANT_NUKE:
                 return Atlas.getInstance().createSprite("NukeStatic");
         }
 
-        throw new IllegalArgumentException("Invalid texture variant " + entity.getPlayerTextureVariant());
+        throw new IllegalArgumentException("Invalid texture variant " + getBombVariant(entity));
     }
 
     public static Sprite createSprite(PlayerEntity player) {
@@ -121,7 +121,7 @@ public class GraphicsFactory {
             case SMALL_BOMB:
                 return BombSprite.VARIANT_SMALL_RED;
             case MEDIUM_BOMB:
-                return BombSprite.VARIANT_MEDIUM_RED;
+                return BombSprite.VARIANT_BLACK;
             case NUKE:
                 return BombSprite.VARIANT_NUKE;
         }
