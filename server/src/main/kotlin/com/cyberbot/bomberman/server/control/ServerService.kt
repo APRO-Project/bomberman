@@ -1,5 +1,6 @@
 package com.cyberbot.bomberman.server.control
 
+import com.cyberbot.bomberman.core.models.entities.PlayerEntity
 import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
@@ -160,7 +161,7 @@ class ServerService(
 
         lobby.clients.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
-            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i, 100)
+            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i, PlayerEntity.FacingDirection.FRONT, 100)
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby

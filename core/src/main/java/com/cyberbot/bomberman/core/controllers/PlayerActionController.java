@@ -81,15 +81,19 @@ public final class PlayerActionController implements ActionListener, Updatable {
 
         if ((direction & MoveAction.LEFT) > 0) {
             desiredVelocityX -= maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.LEFT;
         }
         if ((direction & MoveAction.RIGHT) > 0) {
             desiredVelocityX += maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.RIGHT;
         }
         if ((direction & MoveAction.UP) > 0) {
             desiredVelocityY += maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.BACK;
         }
         if ((direction & MoveAction.DOWN) > 0) {
             desiredVelocityY -= maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.FRONT;
         }
 
         float velocityChangeX = desiredVelocityX - velocity.x;

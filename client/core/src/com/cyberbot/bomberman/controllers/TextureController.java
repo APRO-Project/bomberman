@@ -45,7 +45,6 @@ public final class TextureController implements Drawable, Updatable, WorldChange
     public void update(float delta) {
         entities.forEach(sprite -> sprite.update(delta));
     }
-// FIXME: remove this fixme along with this line
 
     @Override
     public void onWallAdded(Tile tile) {
