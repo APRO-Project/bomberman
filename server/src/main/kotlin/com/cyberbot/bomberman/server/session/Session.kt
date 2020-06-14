@@ -11,6 +11,7 @@ import com.cyberbot.bomberman.core.models.tiles.loader.TileMapFactory
 import com.cyberbot.bomberman.core.utils.Constants
 import com.cyberbot.bomberman.core.utils.scheduleAtFixedRate
 import com.cyberbot.bomberman.server.models.ClientConnection
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.DatagramPacket
@@ -39,8 +40,7 @@ class Session(private val socket: GameSocket, private val gameStopDelay: Long = 
         private set
 
     init {
-        val mapPath = Thread.currentThread().contextClassLoader.getResource("map/bomberman_main.tmx")
-            ?: throw FileNotFoundException("Map file not found")
+        val mapPath = File("map/bomberman_main.tmx")
         val map = TileMapFactory.createTileMap(world, mapPath.path)
         gameStateController = GameStateController(world, map)
     }
