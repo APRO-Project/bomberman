@@ -123,4 +123,22 @@ public class GraphicsFactory {
 
         throw new IllegalArgumentException("Not a bomb item type " + type);
     }
+
+    public static TextureRegion getBombTextureVariant(BombEntity bombEntity) {
+        String bombTexturePath = "";
+
+        switch (bombEntity.getBombItemType()) {
+            case SMALL_BOMB:
+                bombTexturePath = "Dynamite";
+                break;
+            case MEDIUM_BOMB:
+                // TODO: Change this when the proper texture will be available
+                bombTexturePath = "Dynamite";
+                break;
+        }
+
+        // Texture index begins at 1, hence 4 - value
+        final int bombTextureIndex = Math.min(4 - Math.round(bombEntity.getLeftFraction() * 3), 3);
+        return Atlas.getInstance().findRegion(bombTexturePath, bombTextureIndex);
+    }
 }

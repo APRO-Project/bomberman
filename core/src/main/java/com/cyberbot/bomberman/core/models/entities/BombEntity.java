@@ -80,7 +80,7 @@ public class BombEntity extends Entity {
 
     @Override
     public BombData getData() {
-        return new BombData(id, getPosition(), playerTextureVariant, bombItemType);
+        return new BombData(id, getPosition(), playerTextureVariant, bombItemType, detonationTime);
     }
 
     public float getRange() {

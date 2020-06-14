@@ -10,4 +10,10 @@ public class BombSprite extends EntitySprite<BombEntity> {
         super(entity);
         this.sprite.set(GraphicsFactory.createSprite(entity));
     }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        sprite.setRegion(GraphicsFactory.getBombTextureVariant(entity));
+    }
 }
