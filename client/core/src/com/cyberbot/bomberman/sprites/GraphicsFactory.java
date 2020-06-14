@@ -22,10 +22,11 @@ public class GraphicsFactory {
 
     private static final Map<ItemType, String> collectibleTexturePaths = Map.of(
         ItemType.SMALL_BOMB, "DynamiteStatic",
-        ItemType.MEDIUM_BOMB, "Player_wrb_idle_right",
-        ItemType.UPGRADE_ARMOR,"Shield",
-        ItemType.UPGRADE_MOVEMENT_SPEED,"ArrowFast",
-        ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back"
+        ItemType.MEDIUM_BOMB, "BombStatic",
+        ItemType.NUKE, "NukeStatic",
+        ItemType.UPGRADE_ARMOR, "Shield",
+        ItemType.UPGRADE_MOVEMENT_SPEED, "ArrowFast",
+        ItemType.UPGRADE_REFILL_SPEED, "CDR"
     );
 
     private static final List<String> playerVariants = List.of("bbb", "brw", "wbw", "wrb");
@@ -58,7 +59,9 @@ public class GraphicsFactory {
             case BombSprite.VARIANT_SMALL_RED:
                 return Atlas.getInstance().createSprite("DynamiteStatic");
             case BombSprite.VARIANT_MEDIUM_RED:
-                return Atlas.getInstance().createSprite("Player_wrb_idle_right"); // TODO: Replace with valid texture
+                return Atlas.getInstance().createSprite("BombStatic");
+            case BombSprite.VARIANT_NUKE:
+                return Atlas.getInstance().createSprite("NukeStatic");
         }
 
         throw new IllegalArgumentException("Invalid texture variant " + entity.getPlayerTextureVariant());
@@ -92,7 +95,7 @@ public class GraphicsFactory {
 
     public static Sprite createSprite(CollectibleEntity collectible) {
         String texturePath = collectibleTexturePaths.get(collectible.getItemType());
-        if(texturePath == null) {
+        if (texturePath == null) {
             throw new IllegalArgumentException("Unsupported item type");
         }
 
@@ -101,7 +104,7 @@ public class GraphicsFactory {
 
     public static TextureRegion getCollectibleTextureRegion(ItemType type) {
         String texturePath = collectibleTexturePaths.get(type);
-        if(texturePath == null) {
+        if (texturePath == null) {
             throw new IllegalArgumentException("Given item type is not a collectible type or is not yet supported");
         }
 
@@ -116,9 +119,11 @@ public class GraphicsFactory {
         ItemType type = bombEntity.getBombItemType();
         switch (type) {
             case SMALL_BOMB:
-                return BombSprite.VARIANT_SMALL_RED; // TODO: Check the player texture variant
+                return BombSprite.VARIANT_SMALL_RED;
             case MEDIUM_BOMB:
-                return BombSprite.VARIANT_MEDIUM_RED; // TODO: Check the player texture variant
+                return BombSprite.VARIANT_MEDIUM_RED;
+            case NUKE:
+                return BombSprite.VARIANT_NUKE;
         }
 
         throw new IllegalArgumentException("Not a bomb item type " + type);
@@ -132,8 +137,10 @@ public class GraphicsFactory {
                 bombTexturePath = "Dynamite";
                 break;
             case MEDIUM_BOMB:
-                // TODO: Change this when the proper texture will be available
-                bombTexturePath = "Dynamite";
+                bombTexturePath = "Bomb";
+                break;
+            case NUKE:
+                bombTexturePath = "Nuke";
                 break;
         }
 

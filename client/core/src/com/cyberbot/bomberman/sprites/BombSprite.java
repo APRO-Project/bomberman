@@ -5,6 +5,7 @@ import com.cyberbot.bomberman.core.models.entities.BombEntity;
 public class BombSprite extends EntitySprite<BombEntity> {
     public static final int VARIANT_SMALL_RED = 0;
     public static final int VARIANT_MEDIUM_RED = 10;
+    public static final int VARIANT_NUKE = 100;
 
     public BombSprite(BombEntity entity) {
         super(entity);

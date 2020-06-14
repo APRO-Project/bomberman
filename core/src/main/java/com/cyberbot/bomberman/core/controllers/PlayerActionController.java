@@ -64,6 +64,11 @@ public final class PlayerActionController implements ActionListener, Updatable {
                 listeners.forEach(l -> l.onBombPlaced(def, player));
                 break;
             }
+            case NUKE: {
+                BombDef def = new BombDef(100, 7, 4, player.getTextureVariant(), itemType);
+                listeners.forEach(l -> l.onBombPlaced(def, player));
+                break;
+            }
         }
     }
 

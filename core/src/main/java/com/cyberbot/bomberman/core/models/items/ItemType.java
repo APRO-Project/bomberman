@@ -7,6 +7,7 @@ public enum ItemType {
     // Usable items
     SMALL_BOMB(0),
     MEDIUM_BOMB(1),
+    NUKE(2),
 
     // Collectible items
     UPGRADE_MOVEMENT_SPEED(100),
@@ -32,7 +33,7 @@ public enum ItemType {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isBomb() {
-        return this == SMALL_BOMB || this == MEDIUM_BOMB;
+        return this == SMALL_BOMB || this == MEDIUM_BOMB || this == NUKE;
     }
 
     public static ItemType valueOf(int pageType) {
