@@ -9,6 +9,8 @@ import com.cyberbot.bomberman.net.ClientControlListener;
 import com.cyberbot.bomberman.net.ControlService;
 import com.cyberbot.bomberman.screens.AbstractScreen;
 import com.cyberbot.bomberman.screens.GameScreen;
+import com.cyberbot.bomberman.screens.finish.FinishInteraction;
+import com.cyberbot.bomberman.screens.finish.FinishScreen;
 import com.cyberbot.bomberman.screens.lobby.LobbyInteraction;
 import com.cyberbot.bomberman.screens.lobby.LobbyScreen;
 import com.cyberbot.bomberman.screens.login.LoginInteraction;
@@ -22,11 +24,12 @@ import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 
 public final class ScreenController implements MenuInteraction, LobbyInteraction,
-    LoginInteraction, ClientControlListener {
+    LoginInteraction, FinishInteraction, ClientControlListener {
     private final Game game;
     private final LobbyScreen lobby;
     private final MenuScreen menu;
     private final LoginScreen login;
+    private final FinishScreen finish;
     private InetSocketAddress serverAddress;
     private ControlService controlService;
     private final int defaultPort;
@@ -50,6 +53,7 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
         this.menu = new MenuScreen(this);
         this.lobby = new LobbyScreen(this);
         this.login = new LoginScreen(this);
+        this.finish = new FinishScreen(this);
 
         setScreen(login);
     }
@@ -204,5 +208,10 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
     private void setScreen(AbstractScreen screen) {
         currentScreen = screen;
         game.setScreen(screen);
+    }
+
+    @Override
+    public void leaveFinish() {
+        setScreen(menu);
     }
 }
