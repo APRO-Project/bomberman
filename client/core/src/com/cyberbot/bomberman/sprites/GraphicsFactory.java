@@ -28,7 +28,7 @@ public class GraphicsFactory {
         ItemType.UPGRADE_REFILL_SPEED,"Player_bbb_idle_back"
     );
 
-    public static final List<String> playerVariants = List.of("bbb", "brw", "wbw", "wrb");
+    private static final List<String> playerVariants = List.of("bbb", "brw", "wbw", "wrb");
 
     /**
      * Creates an {@link EntitySprite} matching the provided entity.
@@ -67,7 +67,6 @@ public class GraphicsFactory {
     public static Sprite createSprite(PlayerEntity player) {
         return Atlas.getInstance()
             .createSprite("Player_" + playerVariants.get(player.getTextureVariant()) + "_idle_front");
-//        return new Sprite(new Texture("./textures/player.png"));
     }
 
     public static TextureRegion getPlayerTextureVariant(PlayerEntity player) {

@@ -4,8 +4,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.cyberbot.bomberman.core.models.entities.PlayerEntity;
+import com.cyberbot.bomberman.sprites.GraphicsFactory;
 import com.cyberbot.bomberman.utils.Atlas;
 
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
@@ -38,7 +40,7 @@ public final class LocalPlayerView extends Table {
 
     public void setPlayerEntity(PlayerEntity entity) {
         healthBar.setPlayerEntity(entity);
-        // TODO: Get player avatar from player entity
+        playerAvatar.setDrawable(new TextureRegionDrawable(GraphicsFactory.getPlayerTextureVariant(entity)));
     }
 
     public void setPlayerName(String name) {
