@@ -195,8 +195,10 @@ public final class ScreenController implements MenuInteraction, LobbyInteraction
 
     @Override
     public void onGameEnd(@NotNull GameEnd payload) {
-        // TODO: Display end game screen with leaderboard
+        //FIXME
+        setScreen(finish);
         String leaderboard = payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.joining());
+        finish.updateFinish(payload.getLeaderboard().stream().map(Client::getNick).collect(Collectors.toList()));
         Gdx.app.log("ControlService", leaderboard);
     }
 
