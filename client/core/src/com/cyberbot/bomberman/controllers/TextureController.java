@@ -3,7 +3,6 @@ package com.cyberbot.bomberman.controllers;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.entities.BombEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
@@ -59,12 +58,7 @@ public final class TextureController implements Drawable, Updatable, WorldChange
     @Override
     public void onEntityAdded(Entity entity) {
         EntitySprite<?> sprite = GraphicsFactory.createEntitySprite(entity);
-        if (entity instanceof BombEntity) {
-            // Add at the begging to draw under the previous entities (ex. players)
-            entities.add(0, sprite);
-        } else {
-            entities.add(sprite);
-        }
+        entities.add(0, sprite);
     }
 
     @Override
