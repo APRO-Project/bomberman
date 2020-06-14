@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public class LocalWorldController implements Updatable, Disposable, GameSnapshotListener, ActionListener {
     private final static int INTERPOLATION_DELAY = 2;
     private final static float REPLY_INTERP_TIME = 0.05f;
-    private final static float MAX_PLAYER_OFFSET = 0.5f;
+    private final static float MAX_PLAYER_OFFSET = 0.3f;
 
     private final int tickRate;
     private final int simRate;

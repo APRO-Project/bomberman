@@ -55,17 +55,17 @@ public final class PlayerActionController implements ActionListener, Updatable {
 
         switch (itemType) {
             case SMALL_BOMB: {
-                BombDef def = new BombDef(10, 2, 3, itemType);
+                BombDef def = new BombDef(10, 3, 2, itemType);
                 listeners.forEach(l -> l.onBombPlaced(def, player));
                 break;
             }
             case MEDIUM_BOMB: {
-                BombDef def = new BombDef(25, 4, 4, itemType);
+                BombDef def = new BombDef(25, 5, 3, itemType);
                 listeners.forEach(l -> l.onBombPlaced(def, player));
                 break;
             }
             case NUKE: {
-                BombDef def = new BombDef(100, 10, 8, 6, itemType);
+                BombDef def = new BombDef(100, 10, 7, 4, itemType);
                 listeners.forEach(l -> l.onBombPlaced(def, player));
                 break;
             }
