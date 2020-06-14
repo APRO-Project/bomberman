@@ -15,11 +15,11 @@ public class ItemStackFactory {
     public static ItemStack createStack(ItemType itemType) {
         switch (itemType) {
             case SMALL_BOMB:
-                return new RefilingItemStack(itemType, 3, false);
+                return new RefilingItemStack(itemType, 2, false);
             case MEDIUM_BOMB:
-                return new RefilingItemStack(itemType, 0, 8, true);
+                return new RefilingItemStack(itemType, 0, 5, true);
             case NUKE:
-                return new RefilingItemStack(itemType, 0, 25, true);
+                return new RefilingItemStack(itemType, 0, 15, true);
             case UPGRADE_MOVEMENT_SPEED:
                 return new ItemStack(itemType, 3);
             case UPGRADE_REFILL_SPEED:
