@@ -55,16 +55,16 @@ public class GraphicsFactory {
     }
 
     public static Sprite createSprite(BombEntity entity) {
-        switch (getBombVariant(entity)) {
-            case BombSprite.VARIANT_SMALL_RED:
+        switch (entity.getBombItemType()) {
+            case SMALL_BOMB:
                 return Atlas.getInstance().createSprite("DynamiteStatic");
-            case BombSprite.VARIANT_BLACK:
+            case MEDIUM_BOMB:
                 return Atlas.getInstance().createSprite("BombStatic");
-            case BombSprite.VARIANT_NUKE:
+            case NUKE:
                 return Atlas.getInstance().createSprite("NukeStatic");
         }
 
-        throw new IllegalArgumentException("Invalid texture variant " + getBombVariant(entity));
+        throw new IllegalArgumentException("Invalid bomb item type:  " + entity.getBombItemType());
     }
 
     public static Sprite createSprite(PlayerEntity player) {
@@ -113,20 +113,6 @@ public class GraphicsFactory {
 
     public static List<TileSprite> createTilesFromMapLayer(TileMapLayer layer) {
         return layer.stream().map(TileSprite::new).collect(Collectors.toList());
-    }
-
-    public static int getBombVariant(BombEntity bombEntity) {
-        ItemType type = bombEntity.getBombItemType();
-        switch (type) {
-            case SMALL_BOMB:
-                return BombSprite.VARIANT_SMALL_RED;
-            case MEDIUM_BOMB:
-                return BombSprite.VARIANT_BLACK;
-            case NUKE:
-                return BombSprite.VARIANT_NUKE;
-        }
-
-        throw new IllegalArgumentException("Not a bomb item type " + type);
     }
 
     public static TextureRegion getBombTextureVariant(BombEntity bombEntity) {

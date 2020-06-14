@@ -9,8 +9,7 @@ public class BombDef {
     public final float detonationTime;
     public final ItemType bombItemType;
 
-    public BombDef(float power, float range,
-                   float detonationTime, int playerTextureVariant, ItemType bombItemType) {
+    public BombDef(float power, float range, float detonationTime, ItemType bombItemType) {
         this(power, power / range, range, detonationTime, bombItemType);
     }
 
