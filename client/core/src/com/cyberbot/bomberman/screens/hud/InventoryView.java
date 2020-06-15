@@ -162,6 +162,7 @@ public final class InventoryView extends Table {
 
             itemButtons[i].type = partitionedItems.get(i).getKey();
             itemButtons[i].setQuantity(partitionedItems.get(i).getValue());
+            itemButtons[i].updateDrawable();
         }
     }
 
@@ -210,6 +211,10 @@ public final class InventoryView extends Table {
     }
 
     private void updateCurrentItem() {
+        if(currentItem != -1 && itemButtons[currentItem].getButton().isChecked()) {
+            return;
+        }
+
         int updatedCurrentItem = -1;
 
         for (int i = 0; i < MAX_SLOTS; ++i) {
@@ -218,7 +223,6 @@ public final class InventoryView extends Table {
                     itemButtons[i].getButton().setChecked(false);
                 } else {
                     updatedCurrentItem = i;
-                    itemButtons[i].getButton().setChecked(true);
                 }
             }
         }

@@ -36,7 +36,7 @@ public class ExplosionEntity extends Entity {
         body = world.createBody(def);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.5f, 0.5f);
+        shape.setAsBox(0.4f, 0.4f);
 
         Fixture fixture = body.createFixture(shape, 1);
         fixture.setSensor(true);
