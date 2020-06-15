@@ -26,7 +26,8 @@ public class Inventory implements Updatable, Serializable {
         ItemType.SMALL_BOMB,
         ItemType.MEDIUM_BOMB,
         ItemType.NUKE,
-        ItemType.FREEZER
+        ItemType.FREEZER,
+        ItemType.INSTA_BOOM
     );
 
     /**

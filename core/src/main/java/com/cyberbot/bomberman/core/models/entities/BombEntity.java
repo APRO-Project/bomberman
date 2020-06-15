@@ -97,6 +97,10 @@ public class BombEntity extends Entity {
         return blown;
     }
 
+    public void blow() {
+        blown = true;
+    }
+
     public float getPowerDropoff() {
         return powerDropoff;
     }

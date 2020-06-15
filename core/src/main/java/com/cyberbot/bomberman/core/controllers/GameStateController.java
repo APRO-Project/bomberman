@@ -143,6 +143,11 @@ public final class GameStateController implements Disposable, Updatable, PlayerA
     }
 
     @Override
+    public void onInstaBoomApplied() {
+        bombs.forEach(BombEntity::blow);
+    }
+
+    @Override
     public void beginContact(Contact contact) {
         Object a = contact.getFixtureA().getBody().getUserData();
         Object b = contact.getFixtureB().getBody().getUserData();
