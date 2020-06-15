@@ -122,6 +122,21 @@ public final class InventoryView extends Table {
             }
         }
 
+        // Clean empty stacks
+        for (InventoryButton button : itemButtons) {
+            if (button.isEmpty()) {
+                continue;
+            }
+
+            if (playerEntity.getInventory().getUsableItems().stream()
+                .noneMatch(it -> button.type == it.getItemType())) {
+                changeCurrentItem(true);
+                button.makeEmpty();
+                button.updateDrawable();
+                change = true;
+            }
+        }
+
         return change;
     }
 
