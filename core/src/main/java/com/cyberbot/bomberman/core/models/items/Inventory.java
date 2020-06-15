@@ -62,7 +62,12 @@ public class Inventory implements Updatable, Serializable {
             return false;
         }
 
-        return stack.removeItem();
+        boolean removed = stack.removeItem();
+        if (!(stack instanceof RefilingItemStack) && stack.getQuantity() == 0) {
+            items.remove(stack);
+        }
+
+        return removed;
     }
 
     /**
