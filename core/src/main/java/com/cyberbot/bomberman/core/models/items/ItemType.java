@@ -9,6 +9,7 @@ public enum ItemType {
     MEDIUM_BOMB(1),
     NUKE(2),
     FREEZER(3),
+    INSTA_BOOM(4),
 
     // Collectible items
     UPGRADE_MOVEMENT_SPEED(100),
