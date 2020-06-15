@@ -11,6 +11,6 @@ public class KeyBinds {
     public int useItem = Input.Keys.SPACE;
 
     // Inventory view
-    public int switchItemUp = Input.Keys.E;
-    public int switchItemDown = Input.Keys.Q;
+    public int switchItemUp = Input.Keys.Q;
+    public int switchItemDown = Input.Keys.E;
 }
