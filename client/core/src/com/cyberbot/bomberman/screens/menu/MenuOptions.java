@@ -78,6 +78,7 @@ public class MenuOptions extends Stage {
         lobbyIdField = new TextField("", skin);
         lobbyIdField.setMessageText("<Input id to join>");
         lobbyIdField.setAlignment(1);
+        addEnterKeyListener(lobbyIdField);
 
         options.add(lobbyIdField).width(tableWidth).height(buttonHeight).row();
     }
@@ -86,6 +87,14 @@ public class MenuOptions extends Stage {
         table.add(button).width(tableWidth).height(buttonHeight).row();
         float spaceHeight = 2;
         table.add().height(spaceHeight).row();
+    }
+
+    private void addEnterKeyListener(TextField textField){
+        textField.setTextFieldListener((field, c) -> {
+            if (c == '\n' || c == '\r'){
+                delegate.joinLobby(lobbyIdField.getText());
+            }
+        });
     }
 
     public void showError(String msg) {

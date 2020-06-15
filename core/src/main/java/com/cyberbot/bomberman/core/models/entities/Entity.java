@@ -14,6 +14,7 @@ import static com.cyberbot.bomberman.core.utils.Constants.PPM;
  * Abstract base for all game entities that contain a Box2D body.
  */
 public abstract class Entity implements Disposable, Updatable {
+    private boolean removed;
     private boolean remove;
 
     protected final long id;
@@ -34,7 +35,7 @@ public abstract class Entity implements Disposable, Updatable {
 
     @Override
     public void update(float delta) {
-        if (remove) {
+        if (!removed && remove) {
             dispose();
         }
     }
@@ -42,11 +43,17 @@ public abstract class Entity implements Disposable, Updatable {
     /**
      * Destroys the entity's body.
      *
+     * @throws IllegalStateException If this entity has already been removed.
      * @see World#destroyBody(Body)
      */
     @Override
     public void dispose() {
+        if (removed) {
+            throw new IllegalStateException("This entity has already been removed");
+        }
+
         body.getWorld().destroyBody(body);
+        removed = true;
     }
 
     /**
@@ -87,6 +94,10 @@ public abstract class Entity implements Disposable, Updatable {
 
     public boolean isMarkedToRemove() {
         return remove;
+    }
+
+    public boolean isRemoved() {
+        return removed;
     }
 
     /**

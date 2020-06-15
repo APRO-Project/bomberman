@@ -1,12 +1,11 @@
 package com.cyberbot.bomberman.core.models.entities;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import com.cyberbot.bomberman.core.models.defs.PlayerDef;
 import com.cyberbot.bomberman.core.models.items.Inventory;
+import com.cyberbot.bomberman.core.models.items.Upgrade;
+import com.cyberbot.bomberman.core.models.net.data.EntityData;
 import com.cyberbot.bomberman.core.models.net.data.PlayerData;
 import com.cyberbot.bomberman.core.models.tiles.FloorTile;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
@@ -15,11 +14,10 @@ import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import static com.cyberbot.bomberman.core.utils.Constants.PPM;
 
 public class PlayerEntity extends Entity {
-    public static final float MAX_VELOCITY = 5;
-    public static final float MAX_VELOCITY_BASE = MAX_VELOCITY * PPM;
+    public static final float MAX_VELOCITY = 2.5f;
+    public static final float MAX_VELOCITY_RAW = MAX_VELOCITY * PPM;
     public static final float DRAG_BASE = 60f;
-
-    private static final float ANIMATION_DURATION = 0.2f;
+    public static final int BOX2D_GROUP_INDEX = -1;
 
     private Fixture fixture;
     private Inventory inventory;
@@ -28,20 +26,83 @@ public class PlayerEntity extends Entity {
     private float dragMultiplier;
     private float maxSpeedMultiplier;
 
-    private PlayerState currentState;
-    private PlayerState previousState;
+    private boolean frozen;
+    private float freezeTimeLeft;
 
-    private LookingDirection verticalDirection;
-    private LookingDirection horizontalDirection;
+    public FacingDirection facingDirection;
 
     private int hp;
+
+    public PlayerEntity(World world, PlayerDef def, long id) {
+        super(world, id);
+
+        inventory = def.inventory;
+        dragMultiplier = def.dragModifier;
+        maxSpeedMultiplier = def.maxSpeedModifier;
+        textureVariant = def.textureVariant;
+        hp = def.hp;
+
+        frozen = false;
+        freezeTimeLeft = 0;
+    }
+
+    @Override
+    public void createBody(World world) {
+        BodyDef def = new BodyDef();
+        def.type = BodyDef.BodyType.DynamicBody;
+        def.position.set(0, 0);
+        def.fixedRotation = true;
+
+        body = world.createBody(def);
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(0.49f);
+
+        Filter playerFilter = new Filter();
+        playerFilter.groupIndex = BOX2D_GROUP_INDEX;
+        fixture = body.createFixture(shape, 1);
+        fixture.setFilterData(playerFilter);
+        body.setUserData(this);
+        shape.dispose();
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        inventory.update(delta);
+
+        if (frozen) {
+            freezeTimeLeft -= delta;
+            if (freezeTimeLeft <= 0) {
+                frozen = false;
+                freezeTimeLeft = 0;
+            }
+        }
+    }
+
+    @Override
+    public PlayerData getData() {
+        return new PlayerData(id, getPosition(), inventory, textureVariant, facingDirection, freezeTimeLeft, frozen, hp);
+    }
+
+    @Override
+    public void updateFromData(EntityData<?> d0, EntityData<?> d1, float fraction) {
+        if (!(d0 instanceof PlayerData) || !(d1 instanceof PlayerData)) {
+            throw new IllegalArgumentException("Not instance of PlayerData");
+        }
+
+        super.updateFromData(d0, d1, fraction);
+        facingDirection = ((PlayerData) d0).getFacingDirection();
+        freezeTimeLeft = ((PlayerData) d0).getFreezeTimeLeft();
+        frozen = ((PlayerData) d0).isFrozen();
+    }
 
     public int getHp() {
         return hp;
     }
 
     public void setHp(int hp) {
-        if(hp < 0 || hp > 100) {
+        if (hp < 0 || hp > 100) {
             throw new IllegalArgumentException("HP value must be between 0 and 100");
         }
 
@@ -52,25 +113,38 @@ public class PlayerEntity extends Entity {
         hp = Math.min(100, hp + value);
     }
 
-    public void subtractHp(int value) {
-        hp = Math.max(0, hp - value);
+    public boolean isFrozen() {
+        return frozen;
     }
 
-    public PlayerEntity(World world, PlayerDef def, long id) {
-        super(world, id);
+    public float getFreezeTimeLeft() {
+        return freezeTimeLeft;
+    }
 
-        currentState = PlayerState.STANDING;
-        previousState = PlayerState.STANDING;
-        verticalDirection = LookingDirection.RIGHT;
-        horizontalDirection = null;
-        inventory = def.inventory;
-        dragMultiplier = def.dragModifier;
-        maxSpeedMultiplier = def.maxSpeedModifier;
-        textureVariant = def.textureVariant;
-        hp = def.hp;
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
+    public void setFreezeTimeLeft(float freezeTimeLeft) {
+        this.freezeTimeLeft = freezeTimeLeft;
+    }
+
+    public void freeze() {
+        frozen = true;
+        freezeTimeLeft = Upgrade.FREEZER_DURATION;
+    }
+
+    public void takeDamage(float power) {
+        hp = (int) (Math.max(0, hp - power) * inventory.getArmorMultiplier());
     }
 
     public void updateFromEnvironment(TileMap map) {
+        if(frozen) {
+            maxSpeedMultiplier = 0;
+            dragMultiplier = 1000;
+            return;
+        }
+
         Vector2 position = getPosition();
         int x = (int) Math.floor(position.x);
         int y = (int) Math.floor(position.y);
@@ -106,29 +180,6 @@ public class PlayerEntity extends Entity {
         this.inventory = inventory;
     }
 
-    private PlayerState getState() {
-        if (getVelocityRaw().x == 0 && getVelocityRaw().y == 0)
-            return PlayerState.STANDING;
-
-        if (getVelocityRaw().x != 0 && verticalDirection != null)
-            return PlayerState.MOVING_SIDE;
-
-        if (horizontalDirection == LookingDirection.UP)
-            return PlayerState.MOVING_BACK;
-        else
-            return PlayerState.MOVING_FRONT;
-    }
-
-    public void setLookingDirection(LookingDirection direction) {
-        if (direction == LookingDirection.UP || direction == LookingDirection.DOWN) {
-            horizontalDirection = direction;
-            verticalDirection = null;
-        } else {
-            horizontalDirection = null;
-            verticalDirection = direction;
-        }
-    }
-
     public void applyForce(Vector2 force) {
         body.applyForceToCenter(force.x / PPM, force.y / PPM, true);
     }
@@ -162,45 +213,11 @@ public class PlayerEntity extends Entity {
         return hp == 0;
     }
 
-    @Override
-    public void createBody(World world) {
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.DynamicBody;
-        def.position.set(0, 0);
-        def.fixedRotation = true;
-
-        body = world.createBody(def);
-
-        CircleShape shape = new CircleShape();
-        shape.setRadius(0.49f);
-
-        fixture = body.createFixture(shape, 1);
-        body.setUserData(this);
-        shape.dispose();
+    public boolean isAlive() {
+        return hp > 0;
     }
 
-    @Override
-    public void update(float delta) {
-        super.update(delta);
-        inventory.update(delta);
-    }
-
-    @Override
-    public PlayerData getData() {
-        return new PlayerData(id, getPosition(), inventory, textureVariant, hp);
-    }
-
-    public enum PlayerState {
-        STANDING,
-        MOVING_BACK,
-        MOVING_FRONT,
-        MOVING_SIDE
-    }
-
-    public enum LookingDirection {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
+    public enum FacingDirection {
+        BACK, FRONT, LEFT, RIGHT
     }
 }

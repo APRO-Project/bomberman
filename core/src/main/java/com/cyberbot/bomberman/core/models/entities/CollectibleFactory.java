@@ -16,9 +16,13 @@ public class CollectibleFactory {
 
     static {
         ITEM_WEIGHTS.put(ItemType.SMALL_BOMB, 1f);
-        ITEM_WEIGHTS.put(ItemType.UPGRADE_MOVEMENT_SPEED, 1f);
-        ITEM_WEIGHTS.put(ItemType.UPGRADE_REFILL_SPEED, 1f);
-        ITEM_WEIGHTS.put(ItemType.UPGRADE_ARMOR, 1f);
+        ITEM_WEIGHTS.put(ItemType.MEDIUM_BOMB, 0.75f);
+        ITEM_WEIGHTS.put(ItemType.NUKE, 0.5f);
+        ITEM_WEIGHTS.put(ItemType.FREEZER, 0.75f);
+        ITEM_WEIGHTS.put(ItemType.INSTA_BOOM, 0.5f);
+        ITEM_WEIGHTS.put(ItemType.UPGRADE_MOVEMENT_SPEED, 0.75f);
+        ITEM_WEIGHTS.put(ItemType.UPGRADE_REFILL_SPEED, 0.75f);
+        ITEM_WEIGHTS.put(ItemType.UPGRADE_ARMOR, 0.6f);
     }
 
     public static CollectibleEntity createRandom(World world, long id) {

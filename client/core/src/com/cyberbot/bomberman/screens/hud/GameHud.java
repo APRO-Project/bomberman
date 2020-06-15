@@ -128,12 +128,9 @@ public class GameHud extends Stage implements WorldChangeListener {
     }
 
     @Override
-    public void onEntityAdded(Entity entity) { }
-
-    @Override
     public void onEntityRemoved(Entity entity) {
-        if(entity instanceof PlayerEntity && entity.getId() != localPlayerEntity.getId()) {
-            playerListView.onPlayerDeath((PlayerEntity) entity);
+        if (entity instanceof PlayerEntity) {
+            playerListView.onPlayerDeath((PlayerEntity) entity); // Cast away to hell
         }
     }
 }

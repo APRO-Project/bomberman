@@ -11,12 +11,16 @@ public interface WorldChangeListener {
      *
      * @param entity The new entity.
      */
-    void onEntityAdded(Entity entity);
+    default void onEntityAdded(Entity entity) {
+
+    }
 
     /**
      * Called when an {@link Entity} has been removed from the game.
      *
      * @param entity The removed entity.
      */
-    void onEntityRemoved(Entity entity);
+    default void onEntityRemoved(Entity entity) {
+
+    }
 }

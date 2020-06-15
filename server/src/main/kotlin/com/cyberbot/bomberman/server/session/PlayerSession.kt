@@ -9,12 +9,14 @@ import com.cyberbot.bomberman.core.models.net.packets.PlayerSnapshotPacket
 import org.apache.commons.collections4.queue.CircularFifoQueue
 import java.util.*
 
-class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32) :
+class PlayerSession constructor(private val playerEntity: PlayerEntity, queueSize: Int = 32) :
     PlayerSnapshotListener, Updatable {
     private val packetQueue: Queue<Pair<Int, Queue<List<Action>>>> = CircularFifoQueue(queueSize)
     private val actionController: PlayerActionController = PlayerActionController(playerEntity)
     var sequence: Int = -1
         private set
+
+    val id by lazy { playerEntity.id }
 
     private var errors = 0
 
@@ -39,8 +41,11 @@ class PlayerSession constructor(playerEntity: PlayerEntity, queueSize: Int = 32)
             pair = packetQueue.poll() ?: return
         }
 
-        actionController.onActions(pair.second.poll())
-        actionController.update(delta)
+        val actions = pair.second.poll()
+        if (playerEntity.isAlive) {
+            actionController.onActions(actions)
+            actionController.update(delta)
+        }
     }
 
     override fun onNewSnapshot(packet: PlayerSnapshotPacket) {

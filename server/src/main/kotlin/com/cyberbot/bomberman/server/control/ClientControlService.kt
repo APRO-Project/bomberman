@@ -35,16 +35,17 @@ class ClientControlService(private val clientSocket: Socket, private val control
             while (running) {
                 handleJson()
             }
-        } catch (e: IOException) {
-
+        } catch (ignored: SocketException) {
+            // The socket closed, just ignore
         } finally {
             running = false
 
             try {
-                clientSocket.close()
                 reader.close()
                 writer.close()
+                clientSocket.close()
             } catch (ignored: IOException) {
+                // Ignore socket close exception
             }
 
             controller.onClientDisconnected(this)

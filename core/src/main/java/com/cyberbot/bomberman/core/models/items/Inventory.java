@@ -4,7 +4,9 @@ import com.cyberbot.bomberman.core.models.Updatable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Contains information about a player's inventory
@@ -13,6 +15,20 @@ import java.util.List;
  */
 public class Inventory implements Updatable, Serializable {
     private final List<ItemStack> items;
+
+    private static final List<ItemType> UPGRADE_TYPES = Arrays.asList(
+        ItemType.UPGRADE_ARMOR,
+        ItemType.UPGRADE_REFILL_SPEED,
+        ItemType.UPGRADE_MOVEMENT_SPEED
+    );
+
+    private static final List<ItemType> USABLE_TYPES = Arrays.asList(
+        ItemType.SMALL_BOMB,
+        ItemType.MEDIUM_BOMB,
+        ItemType.NUKE,
+        ItemType.FREEZER,
+        ItemType.INSTA_BOOM
+    );
 
     /**
      * Creates a new inventory with default stacks initialized.
@@ -47,7 +63,12 @@ public class Inventory implements Updatable, Serializable {
             return false;
         }
 
-        return stack.removeItem();
+        boolean removed = stack.removeItem();
+        if (!(stack instanceof RefilingItemStack) && stack.getQuantity() == 0) {
+            items.remove(stack);
+        }
+
+        return removed;
     }
 
     /**
@@ -91,10 +112,18 @@ public class Inventory implements Updatable, Serializable {
 
     @Override
     public void update(float delta) {
+        float deltaWithMultiplier = delta * getRefillSpeedMultiplier();
+
         items.stream()
-            .filter(i -> i instanceof Updatable)
-            // TODO: Remove the refill speed multiplier
-            .forEach(i -> ((Updatable) i).update(delta * getRefillSpeedMultiplier()));
+            .filter(it -> it instanceof RefilingItemStack)
+            .map(it -> (RefilingItemStack) it) /* What the hell?? It IS the instance of RefilingItemStack already */
+            .forEach(it -> {
+                if (it.isAffectedByModifier()) {
+                    it.update(deltaWithMultiplier);
+                } else {
+                    it.update(delta);
+                }
+            });
     }
 
     public float getMovementSpeedMultiplier() {
@@ -137,5 +166,17 @@ public class Inventory implements Updatable, Serializable {
 
     public List<ItemStack> getItems() {
         return items;
+    }
+
+    public List<ItemStack> getUpgradeItems() {
+        return items.stream()
+            .filter(it -> UPGRADE_TYPES.contains(it.type))
+            .collect(Collectors.toList());
+    }
+
+    public List<ItemStack> getUsableItems() {
+        return items.stream()
+            .filter(it -> USABLE_TYPES.contains(it.type))
+            .collect(Collectors.toList());
     }
 }

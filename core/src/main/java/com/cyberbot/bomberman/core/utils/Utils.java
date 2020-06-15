@@ -2,6 +2,7 @@ package com.cyberbot.bomberman.core.utils;
 
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -13,6 +14,11 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public final class Utils {
+    public static String[] MALE_NAMES = {"Bob", "James", "John", "Robert", "Michael",
+        "William", "David", "Richard", "Joseph", "Charles", "Thomas", "Bryan"};
+    public static String[] FEMALE_NAMES = {"Alice", "Mary", "Patricia", "Jennifer",
+        "Elizabeth", "Linda", "Barbara", "Susan", "Margaret", "Jessica", "Sarah", "Karen"};
+
     public static byte[] toByteArray(Object o) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             ObjectOutputStream out;
@@ -36,18 +42,6 @@ public final class Utils {
         }
 
         return null;
-    }
-
-    public static boolean isSequenceNext(int sequence, int previous) {
-        return isSequenceNext(sequence, previous, Integer.MAX_VALUE / 100);
-    }
-
-    public static boolean isSequenceNext(int sequence, int previous, int maxDrop) {
-        if (Math.abs(sequence - previous) < maxDrop) {
-            return sequence >= previous;
-        } else {
-            return sequence <= previous;
-        }
     }
 
     public static String generateLobbyId(int length) {
@@ -91,5 +85,14 @@ public final class Utils {
         return Hashing.sha256()
             .hashString(password, StandardCharsets.UTF_8)
             .toString();
+    }
+
+    public static String generatePlayerNick() {
+        String suffix = RandomStringUtils.randomNumeric(RandomUtils.nextInt(2, 4));
+        if (RandomUtils.nextBoolean()) {
+            return MALE_NAMES[RandomUtils.nextInt(0, MALE_NAMES.length)] + suffix;
+        } else {
+            return FEMALE_NAMES[RandomUtils.nextInt(0, FEMALE_NAMES.length)] + suffix;
+        }
     }
 }

@@ -20,9 +20,9 @@ public class HealthBar extends Actor {
 
     private int visiblePlayerHealth;
 
-    private final float HP_PER_SECOND = 100;
-    private final int HEALTH_MEDIUM = 40;
-    private final int HEALTH_LOW = 10;
+    private static final float HP_PER_SECOND = 100;
+    private static final int HEALTH_MEDIUM = 40;
+    private static final int HEALTH_LOW = 10;
 
     private final LinkedList<IntAction> animationQueue;
     private IntAction currentAnimation;

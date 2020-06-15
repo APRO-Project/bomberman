@@ -1,11 +1,11 @@
 package com.cyberbot.bomberman.server.control
 
-import com.cyberbot.bomberman.core.models.items.Inventory
 import com.cyberbot.bomberman.core.models.net.data.PlayerData
 import com.cyberbot.bomberman.core.models.net.packets.*
 import com.cyberbot.bomberman.core.utils.Utils
 import com.cyberbot.bomberman.server.session.Session
 import com.cyberbot.bomberman.server.session.SessionService
+import com.cyberbot.bomberman.server.session.SessionStateListener
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -16,10 +16,10 @@ import java.util.concurrent.ThreadLocalRandom
 class ServerService(
     private val port: Int,
     private val maxLobbyCount: Int = 5,
-    private val lobbyIdLength: Int = 5,
+    private val lobbyIdLength: Int = 4,
     private val maxPlayersPerLobby: Int = 4,
     private val maxPlayerNickLength: Int = 20
-) : ClientController, Runnable, Logging {
+) : ClientController, Runnable, Logging, SessionStateListener {
     private val sessions = HashMap<String, SessionService>()
     private val clientHandlers = HashMap<Client, ClientControlService>()
     private val registeredClients = ArrayList<Client>() // TODO: Load registered client from file
@@ -49,10 +49,10 @@ class ServerService(
     override fun onPacket(payload: ControlPacket, service: ClientControlService) {
         when (payload) {
             is ClientRegisterRequest -> onClientRegister(payload, service)
-            is LobbyCreateRequest -> onLobbyCreate(payload, service)
+            is LobbyCreateRequest -> onLobbyCreate(service)
             is LobbyJoinRequest -> onLobbyJoin(payload, service)
             is LobbyLeaveRequest -> onLobbyLeave(service)
-            is GameStartRequest -> onGameStart(payload, service)
+            is GameStartRequest -> onGameStart(service)
             else -> logger.error { "Unsupported packet type ${payload.javaClass.simpleName}" }
         }
     }
@@ -61,6 +61,18 @@ class ServerService(
         logger.info { "Client disconnected: ${service.client?.id}" }
         clientHandlers.remove(service.client)
         removeClientFromLobby(service.client)
+    }
+
+    override fun onSessionStarted(session: SessionService) {
+        // TODO: Send control packets to all clients present in the session
+        logger.info { "Started game on session ${session.port}" }
+    }
+
+    override fun onSessionFinished(session: SessionService, leaderboard: LinkedHashSet<Long>) {
+        logger.info { "Finished game on session ${session.port}" }
+
+        sendLeaderboard(leaderboard)
+        sessions.values.remove(session)
     }
 
     private fun onClientRegister(request: ClientRegisterRequest, service: ClientControlService) {
@@ -94,7 +106,7 @@ class ServerService(
         }
     }
 
-    private fun onLobbyCreate(request: LobbyCreateRequest, service: ClientControlService) {
+    private fun onLobbyCreate(service: ClientControlService) {
         service.apply {
             if (lobbies.size < maxLobbyCount) {
                 val lobby = createLobby(client!!)
@@ -137,18 +149,25 @@ class ServerService(
         removeClientFromLobby(service.client)
     }
 
-    private fun onGameStart(request: GameStartRequest, service: ClientControlService) {
+    private fun onGameStart(service: ClientControlService) {
         val lobby = lobbies.values.firstOrNull { it.ownerId == service.client!!.id } ?: return
         val lobbyId = lobby.id ?: throw RuntimeException("Lobby in lobbies without id")
 
+        if (lobby.clients.size < 2) {
+            service.sendPacket(ErrorResponse("At least 2 players are required to start the game"))
+            return
+        }
+
         val session = SessionService()
+        session.listeners.add(this)
         sessions[lobbyId] = session
 
         logger.info { "Staring game on port ${session.port} with ${lobby.clients.size} clients" }
 
-        lobby.clients.forEachIndexed { i, c ->
+        // Bartek genius - id's are random, so sorting by id yields random spawn
+        lobby.clients.sortedBy { it.id }.forEachIndexed { i, c ->
             val id = c.id ?: throw RuntimeException("Client without id")
-            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), Inventory(), i, 100)
+            val data = PlayerData(id, Session.getPlayerSpawnPosition(i), i)
 
             session.addClient(c.id!!, data)
             // Clients has to contain a client that's present in a lobby
@@ -189,9 +208,16 @@ class ServerService(
             .map { clientHandlers[it] }
             .forEach { it?.sendPacket(lobbyUpdate) }
 
-        val owner = lobby.clients.first { it.id == lobby.ownerId }
+        val owner = lobby.clients.firstOrNull { it.id == lobby.ownerId }
 
-        clientHandlers[owner]!!.sendPacket(LobbyUpdate(strippedLobby, true))
+        clientHandlers[owner]?.sendPacket(LobbyUpdate(strippedLobby, true))
+    }
+
+    private fun sendLeaderboard(leaderboardSet: LinkedHashSet<Long>) {
+        val clients = leaderboardSet.mapNotNull { clientHandlers.keys.firstOrNull { client -> it == client.id } }
+        val leaderboard = LinkedHashSet(clients)
+
+        leaderboard.map { clientHandlers[it] }.forEach { it?.sendPacket(GameEnd(leaderboard)) }
     }
 
     private fun createLobby(owner: Client): Lobby {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.cyberbot.bomberman.core.utils.Utils;
 import com.cyberbot.bomberman.utils.Atlas;
 
 public class LoginLayout extends Stage {
@@ -57,17 +58,21 @@ public class LoginLayout extends Stage {
 
         nicknameField = new TextField("", skin);
         nicknameField.setMessageText("Nick");
+        nicknameField.setText(Utils.generatePlayerNick());
         nicknameField.setAlignment(1);
         nicknameField.setMaxLength(12);
+        addEnterKeyListener(nicknameField);
 
         passwordField = new TextField("", skin);
         passwordField.setAlignment(1);
         passwordField.setMessageText("Password");
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
+        addEnterKeyListener(passwordField);
 
         ipField = new TextField("127.0.0.1", skin);
         ipField.setAlignment(1);
+        addEnterKeyListener(ipField);
 
         options.add(nicknameField).width(tableWidth).height(buttonHeight).row();
         options.add().height(spaceHeight).row();
@@ -91,6 +96,14 @@ public class LoginLayout extends Stage {
     private void setupButton(Table table, float tableWidth, TextButton button) {
         table.add(button).width(tableWidth).height(buttonHeight).row();
         table.add().height(spaceHeight).row();
+    }
+
+    private void addEnterKeyListener(TextField textField){
+        textField.setTextFieldListener((field, c) -> {
+            if (c == '\n' || c == '\r'){
+                delegate.login(nicknameField.getText(), passwordField.getText(), ipField.getText());
+            }
+        });
     }
 
     public void showError(String msg) {

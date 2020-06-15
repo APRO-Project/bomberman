@@ -10,17 +10,24 @@ public class RefilingItemStack extends ItemStack implements Updatable {
      * One item refilling time in seconds
      */
     private final float refillTime;
+    private final boolean affectedByModifier;
     private float quantityFraction;
 
+    // Mmmm, yes. Java's overloads, maybe add some more?
     public RefilingItemStack(ItemType type, float refillTime) {
-        this(type, 1, refillTime);
+        this(type, refillTime, true);
     }
 
-    public RefilingItemStack(ItemType type, int maxQuantity, float refillTime) {
-        this(type, 0, maxQuantity, refillTime);
+    public RefilingItemStack(ItemType type, float refillTime, boolean affectedByModifier) {
+        this(type, 1, refillTime, affectedByModifier);
     }
 
-    public RefilingItemStack(ItemType type, int quantity, int maxQuantity, float refillTime) {
+    public RefilingItemStack(ItemType type, int maxQuantity, float refillTime, boolean affectedByModifier) {
+        this(type, 0, maxQuantity, refillTime, affectedByModifier);
+    }
+
+    public RefilingItemStack(ItemType type, int quantity, int maxQuantity,
+                             float refillTime, boolean affectedByModifier) {
         super(type, quantity, maxQuantity);
 
         if (refillTime < 0) {
@@ -28,10 +35,7 @@ public class RefilingItemStack extends ItemStack implements Updatable {
         }
 
         this.refillTime = refillTime;
-    }
-
-    public float getRefillFraction() {
-        return quantityFraction;
+        this.affectedByModifier = affectedByModifier;
     }
 
     @Override
@@ -45,5 +49,24 @@ public class RefilingItemStack extends ItemStack implements Updatable {
 
             quantityFraction = Math.min(quantityFraction, 1);
         }
+    }
+
+
+    /**
+     * Returns a float in range 0-1 that represents a progress of the refiling.
+     *
+     * @return a float in range 0-1 that represents a progress of the refiling.
+     */
+    public float getRefillFraction() {
+        return quantityFraction;
+    }
+
+    /**
+     * Whether this item stack's refill time should be affected by any modifiers
+     *
+     * @return <code>true</code> if this item stack's refill time should be affected by any modifiers
+     */
+    public boolean isAffectedByModifier() {
+        return affectedByModifier;
     }
 }

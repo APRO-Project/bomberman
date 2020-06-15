@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * THe base for all actions. Contains an inner enum for more optimal serialization.
+ */
 public abstract class Action implements Serializable {
     private final Type type;
 
@@ -16,15 +19,12 @@ public abstract class Action implements Serializable {
     }
 
     public enum Type {
-        MOVE(0),
-        USE_ITEM(1);
+        // Smell that? That's Java's lack of byte literals.
+        MOVE((byte) 0),
+        USE_ITEM((byte) 1);
 
-        private final int value;
-        private static final Map<Integer, Type> map = new HashMap<>();
-
-        Type(int value) {
-            this.value = value;
-        }
+        private final byte value;
+        private static final Map<Byte, Type> map = new HashMap<>();
 
         static {
             for (Type pageType : Type.values()) {
@@ -32,7 +32,11 @@ public abstract class Action implements Serializable {
             }
         }
 
-        public static Type valueOf(int pageType) {
+        Type(byte value) {
+            this.value = value;
+        }
+
+        public static Type valueOf(byte pageType) {
             return map.get(pageType);
         }
 

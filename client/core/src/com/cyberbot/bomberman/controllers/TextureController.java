@@ -3,13 +3,12 @@ package com.cyberbot.bomberman.controllers;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.cyberbot.bomberman.core.controllers.WorldChangeListener;
 import com.cyberbot.bomberman.core.models.Updatable;
-import com.cyberbot.bomberman.core.models.entities.BombEntity;
 import com.cyberbot.bomberman.core.models.entities.Entity;
 import com.cyberbot.bomberman.core.models.tiles.Tile;
 import com.cyberbot.bomberman.core.models.tiles.TileMap;
 import com.cyberbot.bomberman.models.Drawable;
 import com.cyberbot.bomberman.sprites.EntitySprite;
-import com.cyberbot.bomberman.sprites.SpriteFactory;
+import com.cyberbot.bomberman.sprites.GraphicsFactory;
 import com.cyberbot.bomberman.sprites.TileSprite;
 
 import java.util.ArrayList;
@@ -28,9 +27,9 @@ public final class TextureController implements Drawable, Updatable, WorldChange
     public TextureController(TileMap map) {
         map.addListener(this);
         this.entities = new ArrayList<>();
-        this.base = SpriteFactory.createTilesFromMapLayer(map.getBase());
-        this.floor = SpriteFactory.createTilesFromMapLayer(map.getFloor());
-        this.walls = SpriteFactory.createTilesFromMapLayer(map.getWalls());
+        this.base = GraphicsFactory.createTilesFromMapLayer(map.getBase());
+        this.floor = GraphicsFactory.createTilesFromMapLayer(map.getFloor());
+        this.walls = GraphicsFactory.createTilesFromMapLayer(map.getWalls());
     }
 
     @Override
@@ -46,7 +45,6 @@ public final class TextureController implements Drawable, Updatable, WorldChange
         entities.forEach(sprite -> sprite.update(delta));
     }
 
-
     @Override
     public void onWallAdded(Tile tile) {
         walls.add(new TileSprite(tile));
@@ -59,13 +57,8 @@ public final class TextureController implements Drawable, Updatable, WorldChange
 
     @Override
     public void onEntityAdded(Entity entity) {
-        EntitySprite<?> sprite = SpriteFactory.createEntitySprite(entity);
-        if (entity instanceof BombEntity) {
-            // Add at the begging to draw under the previous entities (ex. players)
-            entities.add(0, sprite);
-        } else {
-            entities.add(sprite);
-        }
+        EntitySprite<?> sprite = GraphicsFactory.createEntitySprite(entity);
+        entities.add(0, sprite);
     }
 
     @Override

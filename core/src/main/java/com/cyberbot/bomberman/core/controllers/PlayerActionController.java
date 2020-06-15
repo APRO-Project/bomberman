@@ -54,15 +54,34 @@ public final class PlayerActionController implements ActionListener, Updatable {
         }
 
         switch (itemType) {
-            case SMALL_BOMB:
-                // TODO: Load a proper texture variant
-                BombDef def = new BombDef(10, 5, 2, 3, player.getTextureVariant());
+            case SMALL_BOMB: {
+                BombDef def = new BombDef(10, 3, 2, itemType);
                 listeners.forEach(l -> l.onBombPlaced(def, player));
+                break;
+            }
+            case MEDIUM_BOMB: {
+                BombDef def = new BombDef(25, 5, 3, itemType);
+                listeners.forEach(l -> l.onBombPlaced(def, player));
+                break;
+            }
+            case NUKE: {
+                BombDef def = new BombDef(100, 10, 7, 4, itemType);
+                listeners.forEach(l -> l.onBombPlaced(def, player));
+                break;
+            }
+            case FREEZER: {
+                listeners.forEach(l -> l.onFreezerApplied(player));
+                break;
+            }
+            case INSTA_BOOM: {
+                listeners.forEach(Listener::onInstaBoomApplied);
+                break;
+            }
         }
     }
 
     private void move(int direction) {
-        float maxVelocity = PlayerEntity.MAX_VELOCITY_BASE * player.getMaxSpeedMultiplier();
+        float maxVelocity = PlayerEntity.MAX_VELOCITY_RAW * player.getMaxSpeedMultiplier();
         float drag = PlayerEntity.DRAG_BASE * player.getDragMultiplier();
 
         Vector2 velocity = player.getVelocityRaw();
@@ -75,15 +94,19 @@ public final class PlayerActionController implements ActionListener, Updatable {
 
         if ((direction & MoveAction.LEFT) > 0) {
             desiredVelocityX -= maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.LEFT;
         }
         if ((direction & MoveAction.RIGHT) > 0) {
             desiredVelocityX += maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.RIGHT;
         }
         if ((direction & MoveAction.UP) > 0) {
             desiredVelocityY += maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.BACK;
         }
         if ((direction & MoveAction.DOWN) > 0) {
             desiredVelocityY -= maxVelocity;
+            player.facingDirection = PlayerEntity.FacingDirection.FRONT;
         }
 
         float velocityChangeX = desiredVelocityX - velocity.x;
@@ -104,5 +127,7 @@ public final class PlayerActionController implements ActionListener, Updatable {
 
     public interface Listener {
         void onBombPlaced(BombDef bombDef, PlayerEntity executor);
+        void onFreezerApplied(PlayerEntity executor);
+        void onInstaBoomApplied();
     }
 }

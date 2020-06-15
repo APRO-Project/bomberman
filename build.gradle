@@ -13,7 +13,7 @@ allprojects {
     }
 
     group 'com.cyberbot.bomberman'
-    version '1.0.0-alpha'
+    version '1.0.0-release'
 
     ext {
         appName = "bomberman"

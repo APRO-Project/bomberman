@@ -73,6 +73,7 @@ class ControlService(private val address: SocketAddress) : Runnable {
                 is LobbyCreateResponse -> listeners.forEach { it.onLobbyCreate(packet) }
                 is LobbyJoinResponse -> listeners.forEach { it.onLobbyJoin(packet) }
                 is GameStart -> listeners.forEach { it.onGameStart(packet) }
+                is GameEnd -> listeners.forEach { it.onGameEnd(packet) }
                 is ErrorResponse -> listeners.forEach { it.onError(packet) }
             }
         } catch (e: JsonSyntaxException) {
