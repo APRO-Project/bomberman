@@ -73,6 +73,10 @@ public final class PlayerActionController implements ActionListener, Updatable {
                 listeners.forEach(l -> l.onFreezerApplied(player));
                 break;
             }
+            case INSTA_BOOM: {
+                listeners.forEach(Listener::onInstaBoomApplied);
+                break;
+            }
         }
     }
 
@@ -124,5 +128,6 @@ public final class PlayerActionController implements ActionListener, Updatable {
     public interface Listener {
         void onBombPlaced(BombDef bombDef, PlayerEntity executor);
         void onFreezerApplied(PlayerEntity executor);
+        void onInstaBoomApplied();
     }
 }

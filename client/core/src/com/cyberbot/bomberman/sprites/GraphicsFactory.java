@@ -22,6 +22,7 @@ public class GraphicsFactory {
         ItemType.MEDIUM_BOMB, "BombStatic",
         ItemType.NUKE, "NukeStatic",
         ItemType.FREEZER, "Fryzjer",
+        ItemType.INSTA_BOOM, "FastBoom",
         ItemType.UPGRADE_ARMOR, "Shield",
         ItemType.UPGRADE_MOVEMENT_SPEED, "ArrowFast",
         ItemType.UPGRADE_REFILL_SPEED, "CDR"
